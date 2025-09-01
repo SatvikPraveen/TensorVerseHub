@@ -1,0 +1,195 @@
+# Location: /examples/docker/docker-compose.yml
+
+version: "3.8"
+
+services:
+  # Development environment with Jupyter Lab
+  tensorverse-dev:
+    build:
+      context: ../..
+      dockerfile: examples/docker/Dockerfile
+      target: development
+    container_name: tensorverse-dev
+    ports:
+      - "8888:8888" # Jupyter Lab
+      - "6006:6006" # TensorBoard
+      - "5000:5000" # Flask API
+    volumes:
+      - ../../notebooks:/app/notebooks
+      - ../../data:/app/data
+      - ../../models:/app/models
+      - ../../logs:/app/logs
+      - jupyter-data:/root/.jupyter
+    environment:
+      - JUPYTER_ENABLE_LAB=yes
+      - TF_CPP_MIN_LOG_LEVEL=1
+      - PYTHONPATH=/app
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    networks:
+      - tensorverse-network
+    restart: unless-stopped
+
+  # TensorBoard service
+  tensorboard:
+    build:
+      context: ../..
+      dockerfile: examples/docker/Dockerfile
+      target: base
+    container_name: tensorverse-tensorboard
+    command: tensorboard --logdir=/app/logs --host=0.0.0.0 --port=6006
+    ports:
+      - "6007:6006" # Different port to avoid conflict
+    volumes:
+      - ../../logs:/app/logs
+    networks:
+      - tensorverse-network
+    depends_on:
+      - tensorverse-dev
+    restart: unless-stopped
+
+  # Model serving API
+  model-server:
+    build:
+      context: ../..
+      dockerfile: examples/docker/Dockerfile
+      target: production
+    container_name: tensorverse-api
+    ports:
+      - "5001:5000" # Different port to avoid conflict
+    volumes:
+      - ../../models:/app/models
+    environment:
+      - MODEL_PATH=/app/models/saved_model
+      - MODEL_TYPE=savedmodel
+      - FLASK_ENV=production
+    networks:
+      - tensorverse-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  # Streamlit demo app
+  streamlit-demo:
+    build:
+      context: ../..
+      dockerfile: examples/docker/Dockerfile
+      target: base
+    container_name: tensorverse-streamlit
+    command: streamlit run examples/serving_examples/streamlit_tensorflow_demo.py --server.address=0.0.0.0 --server.port=8501
+    ports:
+      - "8501:8501"
+    volumes:
+      - ../../models:/app/models
+      - ../../examples:/app/examples
+    environment:
+      - STREAMLIT_SERVER_HEADLESS=true
+      - STREAMLIT_SERVER_FILE_WATCHER_TYPE=none
+    networks:
+      - tensorverse-network
+    restart: unless-stopped
+
+  # Redis for caching (optional)
+  redis:
+    image: redis:7-alpine
+    container_name: tensorverse-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - tensorverse-network
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+
+  # PostgreSQL for experiment tracking (optional)
+  postgres:
+    image: postgres:15-alpine
+    container_name: tensorverse-postgres
+    environment:
+      - POSTGRES_DB=tensorverse
+      - POSTGRES_USER=tensorverse
+      - POSTGRES_PASSWORD=tensorverse123
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - tensorverse-network
+    restart: unless-stopped
+
+  # MLflow tracking server (optional)
+  mlflow:
+    build:
+      context: ../..
+      dockerfile: examples/docker/Dockerfile
+      target: base
+    container_name: tensorverse-mlflow
+    command: >
+      sh -c "pip install mlflow psycopg2-binary &&
+             mlflow server --host 0.0.0.0 --port 5002 
+             --backend-store-uri postgresql://tensorverse:tensorverse123@postgres:5432/tensorverse 
+             --default-artifact-root /app/mlflow-artifacts"
+    ports:
+      - "5002:5002"
+    volumes:
+      - mlflow-artifacts:/app/mlflow-artifacts
+    networks:
+      - tensorverse-network
+    depends_on:
+      - postgres
+    restart: unless-stopped
+
+  # Nginx reverse proxy (optional)
+  nginx:
+    image: nginx:alpine
+    container_name: tensorverse-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - nginx-certs:/etc/nginx/certs
+    networks:
+      - tensorverse-network
+    depends_on:
+      - tensorverse-dev
+      - model-server
+      - streamlit-demo
+    restart: unless-stopped
+
+volumes:
+  jupyter-data:
+    driver: local
+  redis-data:
+    driver: local
+  postgres-data:
+    driver: local
+  mlflow-artifacts:
+    driver: local
+  nginx-certs:
+    driver: local
+
+networks:
+  tensorverse-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
+
+# Additional configurations for different environments
+x-common-variables: &common-variables
+  TF_CPP_MIN_LOG_LEVEL: 1
+  PYTHONPATH: /app
+  CUDA_VISIBLE_DEVICES: 0
+# Development override (use with: docker-compose -f docker-compose.yml -f docker-compose.dev.yml up)
+# Create docker-compose.dev.yml for development-specific settings

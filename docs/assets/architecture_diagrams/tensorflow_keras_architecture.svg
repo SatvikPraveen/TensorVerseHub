@@ -1,0 +1,190 @@
+<svg viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg">
+  <!-- File Location: docs/assets/architecture_diagrams/tensorflow_keras_architecture.svg -->
+  
+  <!-- Background -->
+  <rect width="1200" height="800" fill="#f8f9fa"/>
+  
+  <!-- Title -->
+  <text x="600" y="40" text-anchor="middle" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="#1a1a1a">
+    TensorFlow + tf.keras Architecture Overview
+  </text>
+  
+  <!-- TensorFlow Core Layer -->
+  <rect x="50" y="80" width="1100" height="140" fill="#ff6f00" fill-opacity="0.1" stroke="#ff6f00" stroke-width="2" rx="10"/>
+  <text x="600" y="110" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="#ff6f00">
+    TensorFlow Core (C++)
+  </text>
+  
+  <!-- Core Components -->
+  <rect x="80" y="130" width="180" height="70" fill="#ff6f00" fill-opacity="0.2" stroke="#ff6f00" rx="5"/>
+  <text x="170" y="155" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold">Execution Engine</text>
+  <text x="170" y="175" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">Graph Execution</text>
+  <text x="170" y="190" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">Eager Execution</text>
+  
+  <rect x="280" y="130" width="180" height="70" fill="#ff6f00" fill-opacity="0.2" stroke="#ff6f00" rx="5"/>
+  <text x="370" y="155" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold">Hardware Abstraction</text>
+  <text x="370" y="175" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">CPU/GPU/TPU</text>
+  <text x="370" y="190" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">Distributed</text>
+  
+  <rect x="480" y="130" width="180" height="70" fill="#ff6f00" fill-opacity="0.2" stroke="#ff6f00" rx="5"/>
+  <text x="570" y="155" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold">Memory Management</text>
+  <text x="570" y="175" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">Tensor Operations</text>
+  <text x="570" y="190" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">Gradient Tape</text>
+  
+  <rect x="680" y="130" width="180" height="70" fill="#ff6f00" fill-opacity="0.2" stroke="#ff6f00" rx="5"/>
+  <text x="770" y="155" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold">Optimization</text>
+  <text x="770" y="175" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">XLA Compiler</text>
+  <text x="770" y="190" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">Graph Optimization</text>
+  
+  <rect x="880" y="130" width="180" height="70" fill="#ff6f00" fill-opacity="0.2" stroke="#ff6f00" rx="5"/>
+  <text x="970" y="155" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold">IO & Serialization</text>
+  <text x="970" y="175" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">SavedModel</text>
+  <text x="970" y="190" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">TFRecord</text>
+  
+  <!-- Python API Layer -->
+  <rect x="50" y="250" width="1100" height="120" fill="#4285f4" fill-opacity="0.1" stroke="#4285f4" stroke-width="2" rx="10"/>
+  <text x="600" y="280" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="#4285f4">
+    TensorFlow Python API
+  </text>
+  
+  <rect x="80" y="300" width="160" height="50" fill="#4285f4" fill-opacity="0.2" stroke="#4285f4" rx="5"/>
+  <text x="160" y="325" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold">tf.Tensor</text>
+  <text x="160" y="340" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">Operations</text>
+  
+  <rect x="260" y="300" width="160" height="50" fill="#4285f4" fill-opacity="0.2" stroke="#4285f4" rx="5"/>
+  <text x="340" y="325" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold">tf.function</text>
+  <text x="340" y="340" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">AutoGraph</text>
+  
+  <rect x="440" y="300" width="160" height="50" fill="#4285f4" fill-opacity="0.2" stroke="#4285f4" rx="5"/>
+  <text x="520" y="325" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold">tf.data</text>
+  <text x="520" y="340" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">Data Pipeline</text>
+  
+  <rect x="620" y="300" width="160" height="50" fill="#4285f4" fill-opacity="0.2" stroke="#4285f4" rx="5"/>
+  <text x="700" y="325" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold">tf.distribute</text>
+  <text x="700" y="340" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">Strategy</text>
+  
+  <rect x="800" y="300" width="160" height="50" fill="#4285f4" fill-opacity="0.2" stroke="#4285f4" rx="5"/>
+  <text x="880" y="325" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold">tf.summary</text>
+  <text x="880" y="340" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">TensorBoard</text>
+  
+  <rect x="980" y="300" width="160" height="50" fill="#4285f4" fill-opacity="0.2" stroke="#4285f4" rx="5"/>
+  <text x="1060" y="325" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold">tf.saved_model</text>
+  <text x="1060" y="340" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">Export</text>
+  
+  <!-- Keras High-Level API -->
+  <rect x="50" y="400" width="1100" height="320" fill="#0f9d58" fill-opacity="0.1" stroke="#0f9d58" stroke-width="3" rx="10"/>
+  <text x="600" y="430" text-anchor="middle" font-family="Arial, sans-serif" font-size="20" font-weight="bold" fill="#0f9d58">
+    tf.keras High-Level API
+  </text>
+  
+  <!-- Keras Components -->
+  <!-- Models -->
+  <rect x="80" y="450" width="180" height="120" fill="#0f9d58" fill-opacity="0.2" stroke="#0f9d58" stroke-width="2" rx="5"/>
+  <text x="170" y="475" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold">Models</text>
+  <rect x="90" y="485" width="160" height="25" fill="#0f9d58" fill-opacity="0.3" rx="3"/>
+  <text x="170" y="502" text-anchor="middle" font-family="Arial, sans-serif" font-size="11">Sequential</text>
+  <rect x="90" y="515" width="160" height="25" fill="#0f9d58" fill-opacity="0.3" rx="3"/>
+  <text x="170" y="532" text-anchor="middle" font-family="Arial, sans-serif" font-size="11">Functional API</text>
+  <rect x="90" y="545" width="160" height="20" fill="#0f9d58" fill-opacity="0.3" rx="3"/>
+  <text x="170" y="558" text-anchor="middle" font-family="Arial, sans-serif" font-size="11">Model Subclassing</text>
+  
+  <!-- Layers -->
+  <rect x="280" y="450" width="180" height="120" fill="#0f9d58" fill-opacity="0.2" stroke="#0f9d58" stroke-width="2" rx="5"/>
+  <text x="370" y="475" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold">Layers</text>
+  <rect x="290" y="485" width="160" height="20" fill="#0f9d58" fill-opacity="0.3" rx="3"/>
+  <text x="370" y="498" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">Dense, Conv2D, LSTM</text>
+  <rect x="290" y="510" width="160" height="20" fill="#0f9d58" fill-opacity="0.3" rx="3"/>
+  <text x="370" y="523" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">Attention, Normalization</text>
+  <rect x="290" y="535" width="160" height="20" fill="#0f9d58" fill-opacity="0.3" rx="3"/>
+  <text x="370" y="548" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">Custom Layers</text>
+  
+  <!-- Training -->
+  <rect x="480" y="450" width="180" height="120" fill="#0f9d58" fill-opacity="0.2" stroke="#0f9d58" stroke-width="2" rx="5"/>
+  <text x="570" y="475" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold">Training</text>
+  <rect x="490" y="485" width="160" height="20" fill="#0f9d58" fill-opacity="0.3" rx="3"/>
+  <text x="570" y="498" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">model.fit()</text>
+  <rect x="490" y="510" width="160" height="20" fill="#0f9d58" fill-opacity="0.3" rx="3"/>
+  <text x="570" y="523" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">Custom Training Loops</text>
+  <rect x="490" y="535" width="160" height="20" fill="#0f9d58" fill-opacity="0.3" rx="3"/>
+  <text x="570" y="548" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">Callbacks</text>
+  
+  <!-- Optimization -->
+  <rect x="680" y="450" width="180" height="120" fill="#0f9d58" fill-opacity="0.2" stroke="#0f9d58" stroke-width="2" rx="5"/>
+  <text x="770" y="475" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold">Optimization</text>
+  <rect x="690" y="485" width="160" height="20" fill="#0f9d58" fill-opacity="0.3" rx="3"/>
+  <text x="770" y="498" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">Adam, SGD, RMSprop</text>
+  <rect x="690" y="510" width="160" height="20" fill="#0f9d58" fill-opacity="0.3" rx="3"/>
+  <text x="770" y="523" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">Learning Rate Schedules</text>
+  <rect x="690" y="535" width="160" height="20" fill="#0f9d58" fill-opacity="0.3" rx="3"/>
+  <text x="770" y="548" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">Mixed Precision</text>
+  
+  <!-- Applications -->
+  <rect x="880" y="450" width="260" height="120" fill="#0f9d58" fill-opacity="0.2" stroke="#0f9d58" stroke-width="2" rx="5"/>
+  <text x="1010" y="475" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold">Pre-built Models</text>
+  <rect x="890" y="485" width="120" height="20" fill="#0f9d58" fill-opacity="0.3" rx="3"/>
+  <text x="950" y="498" text-anchor="middle" font-family="Arial, sans-serif" font-size="9">tf.keras.applications</text>
+  <rect x="1020" y="485" width="110" height="20" fill="#0f9d58" fill-opacity="0.3" rx="3"/>
+  <text x="1075" y="498" text-anchor="middle" font-family="Arial, sans-serif" font-size="9">Transfer Learning</text>
+  <rect x="890" y="510" width="120" height="20" fill="#0f9d58" fill-opacity="0.3" rx="3"/>
+  <text x="950" y="523" text-anchor="middle" font-family="Arial, sans-serif" font-size="9">ResNet, VGG, BERT</text>
+  <rect x="1020" y="510" width="110" height="20" fill="#0f9d58" fill-opacity="0.3" rx="3"/>
+  <text x="1075" y="523" text-anchor="middle" font-family="Arial, sans-serif" font-size="9">Fine-tuning</text>
+  
+  <!-- Data Pipeline Integration -->
+  <rect x="80" y="590" width="500" height="100" fill="#ea4335" fill-opacity="0.1" stroke="#ea4335" stroke-width="2" rx="5"/>
+  <text x="330" y="615" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#ea4335">
+    Integrated Data Pipeline
+  </text>
+  <rect x="100" y="630" width="120" height="40" fill="#ea4335" fill-opacity="0.2" rx="3"/>
+  <text x="160" y="650" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">tf.data.Dataset</text>
+  <text x="160" y="662" text-anchor="middle" font-family="Arial, sans-serif" font-size="9">Preprocessing</text>
+  
+  <rect x="240" y="630" width="120" height="40" fill="#ea4335" fill-opacity="0.2" rx="3"/>
+  <text x="300" y="650" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">tf.image/tf.text</text>
+  <text x="300" y="662" text-anchor="middle" font-family="Arial, sans-serif" font-size="9">Built-in Ops</text>
+  
+  <rect x="380" y="630" width="120" height="40" fill="#ea4335" fill-opacity="0.2" rx="3"/>
+  <text x="440" y="650" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">Keras Preprocessing</text>
+  <text x="440" y="662" text-anchor="middle" font-family="Arial, sans-serif" font-size="9">Layers</text>
+  
+  <!-- Deployment -->
+  <rect x="620" y="590" width="520" height="100" fill="#9c27b0" fill-opacity="0.1" stroke="#9c27b0" stroke-width="2" rx="5"/>
+  <text x="880" y="615" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#9c27b0">
+    Deployment & Production
+  </text>
+  <rect x="640" y="630" width="100" height="40" fill="#9c27b0" fill-opacity="0.2" rx="3"/>
+  <text x="690" y="650" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">TensorFlow</text>
+  <text x="690" y="662" text-anchor="middle" font-family="Arial, sans-serif" font-size="9">Serving</text>
+  
+  <rect x="760" y="630" width="100" height="40" fill="#9c27b0" fill-opacity="0.2" rx="3"/>
+  <text x="810" y="650" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">TensorFlow</text>
+  <text x="810" y="662" text-anchor="middle" font-family="Arial, sans-serif" font-size="9">Lite</text>
+  
+  <rect x="880" y="630" width="100" height="40" fill="#9c27b0" fill-opacity="0.2" rx="3"/>
+  <text x="930" y="650" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">TensorFlow</text>
+  <text x="930" y="662" text-anchor="middle" font-family="Arial, sans-serif" font-size="9">JS</text>
+  
+  <rect x="1000" y="630" width="120" height="40" fill="#9c27b0" fill-opacity="0.2" rx="3"/>
+  <text x="1060" y="650" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">Cloud Deployment</text>
+  <text x="1060" y="662" text-anchor="middle" font-family="Arial, sans-serif" font-size="9">Docker/K8s</text>
+  
+  <!-- Connection arrows -->
+  <defs>
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#666"/>
+    </marker>
+  </defs>
+  
+  <!-- Arrows showing data flow -->
+  <path d="M 600 220 L 600 250" stroke="#666" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+  <path d="M 600 370 L 600 400" stroke="#666" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+  
+  <!-- Data flow labels -->
+  <text x="620" y="240" font-family="Arial, sans-serif" font-size="11" fill="#666">Python Bindings</text>
+  <text x="620" y="388" font-family="Arial, sans-serif" font-size="11" fill="#666">High-Level API</text>
+  
+  <!-- Version info -->
+  <text x="1150" y="790" text-anchor="end" font-family="Arial, sans-serif" font-size="10" fill="#999">
+    TensorFlow 2.15+ / tf.keras Integration
+  </text>
+</svg>

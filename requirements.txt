@@ -1,0 +1,62 @@
+# Location: /requirements.txt
+
+# Core TensorFlow and Keras
+tensorflow>=2.15.0
+tf-keras>=2.15.0
+tensorflow-hub>=0.16.0
+tensorflow-text>=2.15.0
+tensorflow-probability>=0.23.0
+tensorflow-model-optimization>=0.8.0
+tensorflow-datasets>=4.9.0
+
+# Data Processing and Visualization  
+numpy>=1.24.0
+pandas>=2.0.0
+matplotlib>=3.7.0
+seaborn>=0.12.0
+pillow>=10.0.0
+opencv-python>=4.8.0
+scikit-learn>=1.3.0
+scikit-image>=0.21.0
+
+# Notebook and Development
+jupyter>=1.0.0
+jupyterlab>=4.0.0
+ipywidgets>=8.0.0
+tqdm>=4.66.0
+
+# Model Export and Optimization
+onnx>=1.15.0
+tf2onnx>=1.16.0
+tensorflowjs>=4.14.0
+
+# Web Framework for Examples
+flask>=3.0.0
+streamlit>=1.28.0
+fastapi>=0.104.0
+uvicorn>=0.24.0
+
+# Deployment and Serving
+docker>=6.1.0
+kubernetes>=28.1.0
+
+# Testing and Quality
+pytest>=7.4.0
+pytest-cov>=4.1.0
+black>=23.9.0
+flake8>=6.1.0
+mypy>=1.6.0
+
+# Documentation
+mkdocs>=1.5.0
+mkdocs-material>=9.4.0
+sphinx>=7.2.0
+
+# Utilities
+pyyaml>=6.0.0
+python-dotenv>=1.0.0
+wandb>=0.16.0
+tensorboard>=2.15.0
+
+# Optional GPU Support
+# tensorflow-gpu>=2.15.0  # Uncomment if using dedicated GPU setup

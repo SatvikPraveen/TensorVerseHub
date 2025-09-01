@@ -1,0 +1,447 @@
+<svg viewBox="0 0 1400 900" xmlns="http://www.w3.org/2000/svg">
+  <!-- File Location: docs/assets/architecture_diagrams/neural_network_architectures.svg -->
+  
+  <!-- Background -->
+  <rect width="1400" height="900" fill="#f8f9fa"/>
+  
+  <!-- Title -->
+  <text x="700" y="40" text-anchor="middle" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="#1a1a1a">
+    Neural Network Architectures with tf.keras
+  </text>
+  
+  <!-- Sequential Model -->
+  <g id="sequential">
+    <rect x="50" y="80" width="200" height="300" fill="#4285f4" fill-opacity="0.1" stroke="#4285f4" stroke-width="2" rx="10"/>
+    <text x="150" y="110" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#4285f4">
+      Sequential Model
+    </text>
+    
+    <!-- Input layer -->
+    <rect x="80" y="130" width="140" height="40" fill="#4285f4" fill-opacity="0.3" stroke="#4285f4" rx="5"/>
+    <text x="150" y="155" text-anchor="middle" font-family="Arial, sans-serif" font-size="12">Input Layer</text>
+    
+    <!-- Hidden layers -->
+    <rect x="80" y="180" width="140" height="40" fill="#4285f4" fill-opacity="0.4" stroke="#4285f4" rx="5"/>
+    <text x="150" y="205" text-anchor="middle" font-family="Arial, sans-serif" font-size="12">Dense(128)</text>
+    
+    <rect x="80" y="230" width="140" height="40" fill="#4285f4" fill-opacity="0.4" stroke="#4285f4" rx="5"/>
+    <text x="150" y="255" text-anchor="middle" font-family="Arial, sans-serif" font-size="12">Dropout(0.3)</text>
+    
+    <rect x="80" y="280" width="140" height="40" fill="#4285f4" fill-opacity="0.4" stroke="#4285f4" rx="5"/>
+    <text x="150" y="305" text-anchor="middle" font-family="Arial, sans-serif" font-size="12">Dense(64)</text>
+    
+    <!-- Output layer -->
+    <rect x="80" y="330" width="140" height="40" fill="#4285f4" fill-opacity="0.5" stroke="#4285f4" rx="5"/>
+    <text x="150" y="355" text-anchor="middle" font-family="Arial, sans-serif" font-size="12">Output Layer</text>
+    
+    <!-- Arrows -->
+    <defs>
+      <marker id="arrow1" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+        <polygon points="0 0, 8 3, 0 6" fill="#4285f4"/>
+      </marker>
+    </defs>
+    <path d="M 150 170 L 150 180" stroke="#4285f4" stroke-width="2" marker-end="url(#arrow1)"/>
+    <path d="M 150 220 L 150 230" stroke="#4285f4" stroke-width="2" marker-end="url(#arrow1)"/>
+    <path d="M 150 270 L 150 280" stroke="#4285f4" stroke-width="2" marker-end="url(#arrow1)"/>
+    <path d="M 150 320 L 150 330" stroke="#4285f4" stroke-width="2" marker-end="url(#arrow1)"/>
+  </g>
+  
+  <!-- Functional API -->
+  <g id="functional">
+    <rect x="300" y="80" width="300" height="300" fill="#0f9d58" fill-opacity="0.1" stroke="#0f9d58" stroke-width="2" rx="10"/>
+    <text x="450" y="110" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#0f9d58">
+      Functional API Model
+    </text>
+    
+    <!-- Input -->
+    <rect x="420" y="130" width="60" height="30" fill="#0f9d58" fill-opacity="0.3" stroke="#0f9d58" rx="3"/>
+    <text x="450" y="150" text-anchor="middle" font-family="Arial, sans-serif" font-size="11">Input</text>
+    
+    <!-- Branch 1 -->
+    <rect x="320" y="180" width="60" height="30" fill="#0f9d58" fill-opacity="0.4" stroke="#0f9d58" rx="3"/>
+    <text x="350" y="200" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">Conv2D</text>
+    
+    <rect x="320" y="220" width="60" height="30" fill="#0f9d58" fill-opacity="0.4" stroke="#0f9d58" rx="3"/>
+    <text x="350" y="240" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">MaxPool</text>
+    
+    <!-- Branch 2 -->
+    <rect x="520" y="180" width="60" height="30" fill="#0f9d58" fill-opacity="0.4" stroke="#0f9d58" rx="3"/>
+    <text x="550" y="200" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">Dense</text>
+    
+    <rect x="520" y="220" width="60" height="30" fill="#0f9d58" fill-opacity="0.4" stroke="#0f9d58" rx="3"/>
+    <text x="550" y="240" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">Dropout</text>
+    
+    <!-- Merge -->
+    <rect x="420" y="280" width="60" height="30" fill="#0f9d58" fill-opacity="0.5" stroke="#0f9d58" rx="3"/>
+    <text x="450" y="300" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">Concat</text>
+    
+    <!-- Output -->
+    <rect x="420" y="330" width="60" height="30" fill="#0f9d58" fill-opacity="0.6" stroke="#0f9d58" rx="3"/>
+    <text x="450" y="350" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">Output</text>
+    
+    <!-- Arrows -->
+    <defs>
+      <marker id="arrow2" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+        <polygon points="0 0, 8 3, 0 6" fill="#0f9d58"/>
+      </marker>
+    </defs>
+    <!-- Input to branches -->
+    <path d="M 430 160 L 350 180" stroke="#0f9d58" stroke-width="2" marker-end="url(#arrow2)"/>
+    <path d="M 470 160 L 550 180" stroke="#0f9d58" stroke-width="2" marker-end="url(#arrow2)"/>
+    <!-- Branch connections -->
+    <path d="M 350 210 L 350 220" stroke="#0f9d58" stroke-width="2" marker-end="url(#arrow2)"/>
+    <path d="M 550 210 L 550 220" stroke="#0f9d58" stroke-width="2" marker-end="url(#arrow2)"/>
+    <!-- Branches to merge -->
+    <path d="M 350 250 L 430 280" stroke="#0f9d58" stroke-width="2" marker-end="url(#arrow2)"/>
+    <path d="M 550 250 L 470 280" stroke="#0f9d58" stroke-width="2" marker-end="url(#arrow2)"/>
+    <!-- Merge to output -->
+    <path d="M 450 310 L 450 330" stroke="#0f9d58" stroke-width="2" marker-end="url(#arrow2)"/>
+  </g>
+  
+  <!-- Model Subclassing -->
+  <g id="subclassing">
+    <rect x="650" y="80" width="200" height="300" fill="#ea4335" fill-opacity="0.1" stroke="#ea4335" stroke-width="2" rx="10"/>
+    <text x="750" y="110" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#ea4335">
+      Model Subclassing
+    </text>
+    
+    <!-- Custom components -->
+    <rect x="680" y="130" width="140" height="40" fill="#ea4335" fill-opacity="0.3" stroke="#ea4335" rx="5"/>
+    <text x="750" y="155" text-anchor="middle" font-family="Arial, sans-serif" font-size="11">Custom Layers</text>
+    
+    <rect x="680" y="180" width="140" height="40" fill="#ea4335" fill-opacity="0.4" stroke="#ea4335" rx="5"/>
+    <text x="750" y="205" text-anchor="middle" font-family="Arial, sans-serif" font-size="11">Attention Block</text>
+    
+    <rect x="680" y="230" width="140" height="40" fill="#ea4335" fill-opacity="0.4" stroke="#ea4335" rx="5"/>
+    <text x="750" y="255" text-anchor="middle" font-family="Arial, sans-serif" font-size="11">Residual Block</text>
+    
+    <rect x="680" y="280" width="140" height="40" fill="#ea4335" fill-opacity="0.4" stroke="#ea4335" rx="5"/>
+    <text x="750" y="305" text-anchor="middle" font-family="Arial, sans-serif" font-size="11">Custom Training</text>
+    
+    <rect x="680" y="330" width="140" height="40" fill="#ea4335" fill-opacity="0.5" stroke="#ea4335" rx="5"/>
+    <text x="750" y="355" text-anchor="middle" font-family="Arial, sans-serif" font-size="11">Dynamic Output</text>
+  </g>
+  
+  <!-- CNN Architecture -->
+  <g id="cnn">
+    <rect x="900" y="80" width="450" height="200" fill="#ff6f00" fill-opacity="0.1" stroke="#ff6f00" stroke-width="2" rx="10"/>
+    <text x="1125" y="110" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#ff6f00">
+      Convolutional Neural Network
+    </text>
+    
+    <!-- Input image -->
+    <rect x="920" y="130" width="60" height="60" fill="#ff6f00" fill-opacity="0.3" stroke="#ff6f00" rx="3"/>
+    <text x="950" y="165" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">Image</text>
+    <text x="950" y="177" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">224x224x3</text>
+    
+    <!-- Conv layers -->
+    <rect x="1000" y="135" width="50" height="50" fill="#ff6f00" fill-opacity="0.4" stroke="#ff6f00" rx="3"/>
+    <text x="1025" y="165" text-anchor="middle" font-family="Arial, sans-serif" font-size="9">Conv2D</text>
+    <text x="1025" y="175" text-anchor="middle" font-family="Arial, sans-serif" font-size="7">32@3x3</text>
+    
+    <rect x="1070" y="140" width="45" height="40" fill="#ff6f00" fill-opacity="0.4" stroke="#ff6f00" rx="3"/>
+    <text x="1092" y="162" text-anchor="middle" font-family="Arial, sans-serif" font-size="9">Pool</text>
+    <text x="1092" y="172" text-anchor="middle" font-family="Arial, sans-serif" font-size="7">2x2</text>
+    
+    <rect x="1135" y="142" width="40" height="36" fill="#ff6f00" fill-opacity="0.5" stroke="#ff6f00" rx="3"/>
+    <text x="1155" y="162" text-anchor="middle" font-family="Arial, sans-serif" font-size="9">Conv2D</text>
+    <text x="1155" y="170" text-anchor="middle" font-family="Arial, sans-serif" font-size="7">64@3x3</text>
+    
+    <rect x="1195" y="144" width="35" height="32" fill="#ff6f00" fill-opacity="0.5" stroke="#ff6f00" rx="3"/>
+    <text x="1212" y="162" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">Pool</text>
+    
+    <!-- Flatten -->
+    <rect x="1250" y="146" width="30" height="28" fill="#ff6f00" fill-opacity="0.6" stroke="#ff6f00" rx="3"/>
+    <text x="1265" y="162" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">Flat</text>
+    
+    <!-- Dense layers -->
+    <rect x="1300" y="140" width="35" height="40" fill="#ff6f00" fill-opacity="0.7" stroke="#ff6f00" rx="3"/>
+    <text x="1317" y="160" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">Dense</text>
+    <text x="1317" y="170" text-anchor="middle" font-family="Arial, sans-serif" font-size="7">128</text>
+    
+    <!-- Output -->
+    <rect x="1300" y="200" width="35" height="30" fill="#ff6f00" fill-opacity="0.8" stroke="#ff6f00" rx="3"/>
+    <text x="1317" y="218" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">Output</text>
+    <text x="1317" y="226" text-anchor="middle" font-family="Arial, sans-serif" font-size="7">10</text>
+    
+    <!-- Arrows -->
+    <defs>
+      <marker id="arrow3" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+        <polygon points="0 0, 8 3, 0 6" fill="#ff6f00"/>
+      </marker>
+    </defs>
+    <path d="M 980 160 L 1000 160" stroke="#ff6f00" stroke-width="2" marker-end="url(#arrow3)"/>
+    <path d="M 1050 160 L 1070 160" stroke="#ff6f00" stroke-width="2" marker-end="url(#arrow3)"/>
+    <path d="M 1115 160 L 1135 160" stroke="#ff6f00" stroke-width="2" marker-end="url(#arrow3)"/>
+    <path d="M 1175 160 L 1195 160" stroke="#ff6f00" stroke-width="2" marker-end="url(#arrow3)"/>
+    <path d="M 1230 160 L 1250 160" stroke="#ff6f00" stroke-width="2" marker-end="url(#arrow3)"/>
+    <path d="M 1280 160 L 1300 160" stroke="#ff6f00" stroke-width="2" marker-end="url(#arrow3)"/>
+    <path d="M 1317 180 L 1317 200" stroke="#ff6f00" stroke-width="2" marker-end="url(#arrow3)"/>
+  </g>
+  
+  <!-- RNN/LSTM -->
+  <g id="rnn">
+    <rect x="900" y="300" width="450" height="180" fill="#9c27b0" fill-opacity="0.1" stroke="#9c27b0" stroke-width="2" rx="10"/>
+    <text x="1125" y="330" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#9c27b0">
+      Recurrent Neural Network (LSTM)
+    </text>
+    
+    <!-- Input sequence -->
+    <rect x="920" y="350" width="40" height="30" fill="#9c27b0" fill-opacity="0.3" stroke="#9c27b0" rx="3"/>
+    <text x="940" y="370" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">x₁</text>
+    
+    <rect x="920" y="390" width="40" height="30" fill="#9c27b0" fill-opacity="0.3" stroke="#9c27b0" rx="3"/>
+    <text x="940" y="410" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">x₂</text>
+    
+    <rect x="920" y="430" width="40" height="30" fill="#9c27b0" fill-opacity="0.3" stroke="#9c27b0" rx="3"/>
+    <text x="940" y="450" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">xₜ</text>
+    
+    <!-- LSTM cells -->
+    <rect x="1000" y="350" width="50" height="30" fill="#9c27b0" fill-opacity="0.4" stroke="#9c27b0" rx="3"/>
+    <text x="1025" y="370" text-anchor="middle" font-family="Arial, sans-serif" font-size="9">LSTM</text>
+    
+    <rect x="1000" y="390" width="50" height="30" fill="#9c27b0" fill-opacity="0.4" stroke="#9c27b0" rx="3"/>
+    <text x="1025" y="410" text-anchor="middle" font-family="Arial, sans-serif" font-size="9">LSTM</text>
+    
+    <rect x="1000" y="430" width="50" height="30" fill="#9c27b0" fill-opacity="0.4" stroke="#9c27b0" rx="3"/>
+    <text x="1025" y="450" text-anchor="middle" font-family="Arial, sans-serif" font-size="9">LSTM</text>
+    
+    <!-- Hidden states -->
+    <rect x="1080" y="350" width="40" height="30" fill="#9c27b0" fill-opacity="0.5" stroke="#9c27b0" rx="3"/>
+    <text x="1100" y="370" text-anchor="middle" font-family="Arial, sans-serif" font-size="9">h₁</text>
+    
+    <rect x="1080" y="390" width="40" height="30" fill="#9c27b0" fill-opacity="0.5" stroke="#9c27b0" rx="3"/>
+    <text x="1100" y="410" text-anchor="middle" font-family="Arial, sans-serif" font-size="9">h₂</text>
+    
+    <rect x="1080" y="430" width="40" height="30" fill="#9c27b0" fill-opacity="0.5" stroke="#9c27b0" rx="3"/>
+    <text x="1100" y="450" text-anchor="middle" font-family="Arial, sans-serif" font-size="9">hₜ</text>
+    
+    <!-- Output -->
+    <rect x="1250" y="390" width="50" height="30" fill="#9c27b0" fill-opacity="0.6" stroke="#9c27b0" rx="3"/>
+    <text x="1275" y="410" text-anchor="middle" font-family="Arial, sans-serif" font-size="9">Dense</text>
+    
+    <rect x="1320" y="390" width="40" height="30" fill="#9c27b0" fill-opacity="0.7" stroke="#9c27b0" rx="3"/>
+    <text x="1340" y="410" text-anchor="middle" font-family="Arial, sans-serif" font-size="9">Output</text>
+    
+    <!-- Arrows -->
+    <defs>
+      <marker id="arrow4" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+        <polygon points="0 0, 8 3, 0 6" fill="#9c27b0"/>
+      </marker>
+    </defs>
+    <!-- Input to LSTM -->
+    <path d="M 960 365 L 1000 365" stroke="#9c27b0" stroke-width="2" marker-end="url(#arrow4)"/>
+    <path d="M 960 405 L 1000 405" stroke="#9c27b0" stroke-width="2" marker-end="url(#arrow4)"/>
+    <path d="M 960 445 L 1000 445" stroke="#9c27b0" stroke-width="2" marker-end="url(#arrow4)"/>
+    
+    <!-- LSTM to hidden -->
+    <path d="M 1050 365 L 1080 365" stroke="#9c27b0" stroke-width="2" marker-end="url(#arrow4)"/>
+    <path d="M 1050 405 L 1080 405" stroke="#9c27b0" stroke-width="2" marker-end="url(#arrow4)"/>
+    <path d="M 1050 445 L 1080 445" stroke="#9c27b0" stroke-width="2" marker-end="url(#arrow4)"/>
+    
+    <!-- Hidden state connections -->
+    <path d="M 1025 350 L 1025 390" stroke="#9c27b0" stroke-width="1" stroke-dasharray="5,5"/>
+    <path d="M 1025 390 L 1025 430" stroke="#9c27b0" stroke-width="1" stroke-dasharray="5,5"/>
+    
+    <!-- Final output -->
+    <path d="M 1120 405 L 1250 405" stroke="#9c27b0" stroke-width="2" marker-end="url(#arrow4)"/>
+    <path d="M 1300 405 L 1320 405" stroke="#9c27b0" stroke-width="2" marker-end="url(#arrow4)"/>
+  </g>
+  
+  <!-- Transformer Architecture -->
+  <g id="transformer">
+    <rect x="50" y="520" width="600" height="320" fill="#00acc1" fill-opacity="0.1" stroke="#00acc1" stroke-width="2" rx="10"/>
+    <text x="350" y="550" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="#00acc1">
+      Transformer Architecture
+    </text>
+    
+    <!-- Encoder -->
+    <rect x="80" y="570" width="250" height="240" fill="#00acc1" fill-opacity="0.15" stroke="#00acc1" stroke-width="1" rx="5"/>
+    <text x="205" y="595" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#00acc1">
+      Encoder
+    </text>
+    
+    <!-- Input Embeddings -->
+    <rect x="100" y="610" width="80" height="30" fill="#00acc1" fill-opacity="0.3" stroke="#00acc1" rx="3"/>
+    <text x="140" y="630" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">Input Embed</text>
+    
+    <rect x="190" y="610" width="80" height="30" fill="#00acc1" fill-opacity="0.3" stroke="#00acc1" rx="3"/>
+    <text x="230" y="630" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">Pos Encode</text>
+    
+    <!-- Multi-Head Attention -->
+    <rect x="120" y="660" width="140" height="40" fill="#00acc1" fill-opacity="0.4" stroke="#00acc1" rx="3"/>
+    <text x="190" y="685" text-anchor="middle" font-family="Arial, sans-serif" font-size="11">Multi-Head Attention</text>
+    
+    <!-- Add & Norm -->
+    <rect x="120" y="710" width="140" height="30" fill="#00acc1" fill-opacity="0.4" stroke="#00acc1" rx="3"/>
+    <text x="190" y="730" text-anchor="middle" font-family="Arial, sans-serif" font-size="11">Add & Norm</text>
+    
+    <!-- Feed Forward -->
+    <rect x="120" y="750" width="140" height="30" fill="#00acc1" fill-opacity="0.4" stroke="#00acc1" rx="3"/>
+    <text x="190" y="770" text-anchor="middle" font-family="Arial, sans-serif" font-size="11">Feed Forward</text>
+    
+    <!-- Decoder -->
+    <rect x="370" y="570" width="250" height="240" fill="#00acc1" fill-opacity="0.15" stroke="#00acc1" stroke-width="1" rx="5"/>
+    <text x="495" y="595" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#00acc1">
+      Decoder
+    </text>
+    
+    <!-- Output Embeddings -->
+    <rect x="390" y="610" width="80" height="30" fill="#00acc1" fill-opacity="0.3" stroke="#00acc1" rx="3"/>
+    <text x="430" y="630" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">Output Embed</text>
+    
+    <rect x="480" y="610" width="80" height="30" fill="#00acc1" fill-opacity="0.3" stroke="#00acc1" rx="3"/>
+    <text x="520" y="630" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">Pos Encode</text>
+    
+    <!-- Masked Attention -->
+    <rect x="410" y="660" width="140" height="30" fill="#00acc1" fill-opacity="0.4" stroke="#00acc1" rx="3"/>
+    <text x="480" y="680" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">Masked Attention</text>
+    
+    <!-- Cross Attention -->
+    <rect x="410" y="700" width="140" height="30" fill="#00acc1" fill-opacity="0.5" stroke="#00acc1" rx="3"/>
+    <text x="480" y="720" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">Cross Attention</text>
+    
+    <!-- Feed Forward -->
+    <rect x="410" y="740" width="140" height="30" fill="#00acc1" fill-opacity="0.4" stroke="#00acc1" rx="3"/>
+    <text x="480" y="760" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">Feed Forward</text>
+    
+    <!-- Output -->
+    <rect x="450" y="790" width="80" height="30" fill="#00acc1" fill-opacity="0.6" stroke="#00acc1" rx="3"/>
+    <text x="490" y="810" text-anchor="middle" font-family="Arial, sans-serif" font-size="11">Linear + Softmax</text>
+    
+    <!-- Arrows -->
+    <defs>
+      <marker id="arrow5" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+        <polygon points="0 0, 8 3, 0 6" fill="#00acc1"/>
+      </marker>
+    </defs>
+    
+    <!-- Encoder flow -->
+    <path d="M 190 640 L 190 660" stroke="#00acc1" stroke-width="2" marker-end="url(#arrow5)"/>
+    <path d="M 190 700 L 190 710" stroke="#00acc1" stroke-width="2" marker-end="url(#arrow5)"/>
+    <path d="M 190 740 L 190 750" stroke="#00acc1" stroke-width="2" marker-end="url(#arrow5)"/>
+    
+    <!-- Decoder flow -->
+    <path d="M 480 640 L 480 660" stroke="#00acc1" stroke-width="2" marker-end="url(#arrow5)"/>
+    <path d="M 480 690 L 480 700" stroke="#00acc1" stroke-width="2" marker-end="url(#arrow5)"/>
+    <path d="M 480 730 L 480 740" stroke="#00acc1" stroke-width="2" marker-end="url(#arrow5)"/>
+    <path d="M 480 770 L 480 790" stroke="#00acc1" stroke-width="2" marker-end="url(#arrow5)"/>
+    
+    <!-- Cross connection -->
+    <path d="M 330 700 L 410 715" stroke="#00acc1" stroke-width="2" stroke-dasharray="5,5" marker-end="url(#arrow5)"/>
+  </g>
+  
+  <!-- Custom Components -->
+  <g id="custom">
+    <rect x="700" y="520" width="650" height="320" fill="#f44336" fill-opacity="0.1" stroke="#f44336" stroke-width="2" rx="10"/>
+    <text x="1025" y="550" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="#f44336">
+      Custom Components & Advanced Architectures
+    </text>
+    
+    <!-- Custom Layers -->
+    <rect x="720" y="570" width="150" height="100" fill="#f44336" fill-opacity="0.15" stroke="#f44336" rx="5"/>
+    <text x="795" y="590" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#f44336">Custom Layers</text>
+    
+    <rect x="730" y="610" width="130" height="20" fill="#f44336" fill-opacity="0.3" stroke="#f44336" rx="2"/>
+    <text x="795" y="625" text-anchor="middle" font-family="Arial, sans-serif" font-size="9">Attention Mechanisms</text>
+    
+    <rect x="730" y="635" width="130" height="20" fill="#f44336" fill-opacity="0.3" stroke="#f44336" rx="2"/>
+    <text x="795" y="650" text-anchor="middle" font-family="Arial, sans-serif" font-size="9">Residual Connections</text>
+    
+    <!-- Loss Functions -->
+    <rect x="890" y="570" width="150" height="100" fill="#f44336" fill-opacity="0.15" stroke="#f44336" rx="5"/>
+    <text x="965" y="590" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#f44336">Custom Loss</text>
+    
+    <rect x="900" y="610" width="130" height="20" fill="#f44336" fill-opacity="0.3" stroke="#f44336" rx="2"/>
+    <text x="965" y="625" text-anchor="middle" font-family="Arial, sans-serif" font-size="9">Focal Loss</text>
+    
+    <rect x="900" y="635" width="130" height="20" fill="#f44336" fill-opacity="0.3" stroke="#f44336" rx="2"/>
+    <text x="965" y="650" text-anchor="middle" font-family="Arial, sans-serif" font-size="9">Contrastive Loss</text>
+    
+    <!-- Training Loops -->
+    <rect x="1060" y="570" width="150" height="100" fill="#f44336" fill-opacity="0.15" stroke="#f44336" rx="5"/>
+    <text x="1135" y="590" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#f44336">Custom Training</text>
+    
+    <rect x="1070" y="610" width="130" height="20" fill="#f44336" fill-opacity="0.3" stroke="#f44336" rx="2"/>
+    <text x="1135" y="625" text-anchor="middle" font-family="Arial, sans-serif" font-size="9">GradientTape</text>
+    
+    <rect x="1070" y="635" width="130" height="20" fill="#f44336" fill-opacity="0.3" stroke="#f44336" rx="2"/>
+    <text x="1135" y="650" text-anchor="middle" font-family="Arial, sans-serif" font-size="9">Multi-Objective</text>
+    
+    <!-- Advanced Architectures -->
+    <rect x="720" y="690" width="200" height="120" fill="#f44336" fill-opacity="0.15" stroke="#f44336" rx="5"/>
+    <text x="820" y="710" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#f44336">Advanced Architectures</text>
+    
+    <rect x="730" y="720" width="80" height="30" fill="#f44336" fill-opacity="0.3" stroke="#f44336" rx="2"/>
+    <text x="770" y="740" text-anchor="middle" font-family="Arial, sans-serif" font-size="9">U-Net</text>
+    
+    <rect x="820" y="720" width="80" height="30" fill="#f44336" fill-opacity="0.3" stroke="#f44336" rx="2"/>
+    <text x="860" y="740" text-anchor="middle" font-family="Arial, sans-serif" font-size="9">GANs</text>
+    
+    <rect x="730" y="760" width="80" height="30" fill="#f44336" fill-opacity="0.3" stroke="#f44336" rx="2"/>
+    <text x="770" y="780" text-anchor="middle" font-family="Arial, sans-serif" font-size="9">VAE</text>
+    
+    <rect x="820" y="760" width="80" height="30" fill="#f44336" fill-opacity="0.3" stroke="#f44336" rx="2"/>
+    <text x="860" y="780" text-anchor="middle" font-family="Arial, sans-serif" font-size="9">Multimodal</text>
+    
+    <!-- Model Optimization -->
+    <rect x="950" y="690" width="260" height="120" fill="#f44336" fill-opacity="0.15" stroke="#f44336" rx="5"/>
+    <text x="1080" y="710" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#f44336">Model Optimization</text>
+    
+    <rect x="960" y="720" width="70" height="30" fill="#f44336" fill-opacity="0.3" stroke="#f44336" rx="2"/>
+    <text x="995" y="740" text-anchor="middle" font-family="Arial, sans-serif" font-size="9">Pruning</text>
+    
+    <rect x="1040" y="720" width="70" height="30" fill="#f44336" fill-opacity="0.3" stroke="#f44336" rx="2"/>
+    <text x="1075" y="740" text-anchor="middle" font-family="Arial, sans-serif" font-size="9">Quantization</text>
+    
+    <rect x="1120" y="720" width="70" height="30" fill="#f44336" fill-opacity="0.3" stroke="#f44336" rx="2"/>
+    <text x="1155" y="740" text-anchor="middle" font-family="Arial, sans-serif" font-size="9">Distillation</text>
+    
+    <rect x="960" y="760" width="70" height="30" fill="#f44336" fill-opacity="0.3" stroke="#f44336" rx="2"/>
+    <text x="995" y="780" text-anchor="middle" font-family="Arial, sans-serif" font-size="9">TensorRT</text>
+    
+    <rect x="1040" y="760" width="70" height="30" fill="#f44336" fill-opacity="0.3" stroke="#f44336" rx="2"/>
+    <text x="1075" y="780" text-anchor="middle" font-family="Arial, sans-serif" font-size="9">TFLite</text>
+    
+    <rect x="1120" y="760" width="70" height="30" fill="#f44336" fill-opacity="0.3" stroke="#f44336" rx="2"/>
+    <text x="1155" y="780" text-anchor="middle" font-family="Arial, sans-serif" font-size="9">ONNX</text>
+  </g>
+  
+  <!-- Code examples -->
+  <text x="50" y="430" font-family="monospace" font-size="10" fill="#666">
+    model = tf.keras.Sequential([
+  </text>
+  <text x="70" y="445" font-family="monospace" font-size="10" fill="#666">
+    layers.Dense(128, activation='relu'),
+  </text>
+  <text x="70" y="460" font-family="monospace" font-size="10" fill="#666">
+    layers.Dropout(0.3),
+  </text>
+  <text x="70" y="475" font-family="monospace" font-size="10" fill="#666">
+    layers.Dense(10, activation='softmax')
+  </text>
+  <text x="50" y="490" font-family="monospace" font-size="10" fill="#666">
+    ])
+  </text>
+  
+  <text x="320" y="410" font-family="monospace" font-size="10" fill="#666">
+    inputs = tf.keras.Input(shape=(28, 28, 1))
+  </text>
+  <text x="320" y="425" font-family="monospace" font-size="10" fill="#666">
+    x = layers.Conv2D(32, 3)(inputs)
+  </text>
+  <text x="320" y="440" font-family="monospace" font-size="10" fill="#666">
+    y = layers.Dense(64)(inputs)
+  </text>
+  <text x="320" y="455" font-family="monospace" font-size="10" fill="#666">
+    outputs = layers.Concatenate()([x, y])
+  </text>
+  <text x="320" y="470" font-family="monospace" font-size="10" fill="#666">
+    model = tf.keras.Model(inputs, outputs)
+  </text>
+  
+  <!-- Version info -->
+  <text x="1350" y="890" text-anchor="end" font-family="Arial, sans-serif" font-size="10" fill="#999">
+    TensorFlow 2.15+ / tf.keras Architectures
+  </text>
+</svg>

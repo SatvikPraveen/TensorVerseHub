@@ -1,0 +1,292 @@
+<svg viewBox="0 0 1400 900" xmlns="http://www.w3.org/2000/svg">
+  <!-- File Location: docs/assets/architecture_diagrams/distributed_training_strategies.svg -->
+  
+  <rect width="1400" height="900" fill="#f8f9fa"/>
+  
+  <text x="700" y="40" text-anchor="middle" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="#1a1a1a">
+    TensorFlow Distributed Training Strategies
+  </text>
+  
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#333"/>
+    </marker>
+  </defs>
+  
+  <!-- MirroredStrategy -->
+  <rect x="50" y="80" width="650" height="200" fill="#4285f4" fill-opacity="0.1" stroke="#4285f4" stroke-width="3" rx="10"/>
+  <text x="375" y="110" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="#4285f4">MirroredStrategy - Single Machine Multi-GPU</text>
+  
+  <!-- GPU Cards -->
+  <rect x="100" y="130" width="80" height="60" fill="#4285f4" fill-opacity="0.3" stroke="#4285f4" stroke-width="2" rx="5"/>
+  <text x="140" y="155" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="white">GPU 0</text>
+  <text x="140" y="170" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="white">Model Copy</text>
+  <text x="140" y="182" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="white">Local Batch</text>
+  
+  <rect x="200" y="130" width="80" height="60" fill="#4285f4" fill-opacity="0.3" stroke="#4285f4" stroke-width="2" rx="5"/>
+  <text x="240" y="155" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="white">GPU 1</text>
+  <text x="240" y="170" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="white">Model Copy</text>
+  <text x="240" y="182" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="white">Local Batch</text>
+  
+  <rect x="300" y="130" width="80" height="60" fill="#4285f4" fill-opacity="0.3" stroke="#4285f4" stroke-width="2" rx="5"/>
+  <text x="340" y="155" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="white">GPU 2</text>
+  <text x="340" y="170" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="white">Model Copy</text>
+  <text x="340" y="182" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="white">Local Batch</text>
+  
+  <rect x="400" y="130" width="80" height="60" fill="#4285f4" fill-opacity="0.3" stroke="#4285f4" stroke-width="2" rx="5"/>
+  <text x="440" y="155" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="white">GPU 3</text>
+  <text x="440" y="170" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="white">Model Copy</text>
+  <text x="440" y="182" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="white">Local Batch</text>
+  
+  <!-- All-Reduce Communication -->
+  <rect x="500" y="140" width="120" height="40" fill="#0f9d58" fill-opacity="0.3" stroke="#0f9d58" stroke-width="2" rx="5"/>
+  <text x="560" y="160" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="white">All-Reduce</text>
+  <text x="560" y="173" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="white">Gradient Sync</text>
+  
+  <!-- Communication arrows -->
+  <path d="M 180 160 L 200 160" stroke="#0f9d58" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+  <path d="M 280 160 L 300 160" stroke="#0f9d58" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+  <path d="M 380 160 L 400 160" stroke="#0f9d58" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+  <path d="M 480 160 L 500 160" stroke="#0f9d58" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+  
+  <!-- Strategy details -->
+  <rect x="70" y="210" width="550" height="55" fill="#ffffff" stroke="#4285f4" stroke-width="1" rx="5"/>
+  <text x="345" y="230" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#4285f4">Key Features</text>
+  <text x="80" y="245" font-family="Arial, sans-serif" font-size="10">• Synchronous training with identical model copies on each GPU</text>
+  <text x="80" y="258" font-family="Arial, sans-serif" font-size="10">• All-reduce communication for gradient aggregation and weight updates</text>
+  
+  <!-- TPUStrategy -->
+  <rect x="720" y="80" width="630" height="200" fill="#ea4335" fill-opacity="0.1" stroke="#ea4335" stroke-width="3" rx="10"/>
+  <text x="1035" y="110" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="#ea4335">TPUStrategy - Tensor Processing Units</text>
+  
+  <!-- TPU Pod representation -->
+  <rect x="750" y="130" width="100" height="80" fill="#ea4335" fill-opacity="0.15" stroke="#ea4335" stroke-width="2" rx="5"/>
+  <text x="800" y="150" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#ea4335">TPU Pod</text>
+  
+  <!-- TPU Cores -->
+  <rect x="760" y="160" width="35" height="20" fill="#ea4335" fill-opacity="0.4" stroke="#ea4335" rx="2"/>
+  <text x="777" y="173" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="white">Core 0</text>
+  
+  <rect x="800" y="160" width="35" height="20" fill="#ea4335" fill-opacity="0.4" stroke="#ea4335" rx="2"/>
+  <text x="817" y="173" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="white">Core 1</text>
+  
+  <rect x="760" y="185" width="35" height="20" fill="#ea4335" fill-opacity="0.4" stroke="#ea4335" rx="2"/>
+  <text x="777" y="198" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="white">Core 2</text>
+  
+  <rect x="800" y="185" width="35" height="20" fill="#ea4335" fill-opacity="0.4" stroke="#ea4335" rx="2"/>
+  <text x="817" y="198" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="white">Core 3</text>
+  
+  <!-- High-speed interconnect -->
+  <rect x="870" y="150" width="120" height="40" fill="#ff6f00" fill-opacity="0.3" stroke="#ff6f00" stroke-width="2" rx="5"/>
+  <text x="930" y="170" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="white">High-Speed</text>
+  <text x="930" y="183" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="white">Interconnect</text>
+  
+  <!-- More TPU Pods -->
+  <rect x="1010" y="130" width="100" height="80" fill="#ea4335" fill-opacity="0.15" stroke="#ea4335" stroke-width="2" rx="5"/>
+  <text x="1060" y="150" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#ea4335">TPU Pod</text>
+  
+  <rect x="1020" y="160" width="35" height="20" fill="#ea4335" fill-opacity="0.4" stroke="#ea4335" rx="2"/>
+  <text x="1037" y="173" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="white">Core 0</text>
+  
+  <rect x="1060" y="160" width="35" height="20" fill="#ea4335" fill-opacity="0.4" stroke="#ea4335" rx="2"/>
+  <text x="1077" y="173" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="white">Core 1</text>
+  
+  <rect x="1020" y="185" width="35" height="20" fill="#ea4335" fill-opacity="0.4" stroke="#ea4335" rx="2"/>
+  <text x="1037" y="198" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="white">Core 2</text>
+  
+  <rect x="1060" y="185" width="35" height="20" fill="#ea4335" fill-opacity="0.4" stroke="#ea4335" rx="2"/>
+  <text x="1077" y="198" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="white">Core 3</text>
+  
+  <!-- Connection arrows -->
+  <path d="M 850 170 L 870 170" stroke="#ff6f00" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+  <path d="M 990 170 L 1010 170" stroke="#ff6f00" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+  
+  <rect x="740" y="225" width="580" height="40" fill="#ffffff" stroke="#ea4335" stroke-width="1" rx="5"/>
+  <text x="80" y="245" font-family="Arial, sans-serif" font-size="10">• Optimized for large-scale training with specialized matrix operations</text>
+  <text x="750" y="245" font-family="Arial, sans-serif" font-size="10">• Automatic sharding across TPU cores with XLA compilation</text>
+  
+  <!-- MultiWorkerMirroredStrategy -->
+  <rect x="50" y="300" width="650" height="220" fill="#0f9d58" fill-opacity="0.1" stroke="#0f9d58" stroke-width="3" rx="10"/>
+  <text x="375" y="330" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="#0f9d58">MultiWorkerMirroredStrategy - Multi-Machine Training</text>
+  
+  <!-- Worker 1 -->
+  <rect x="80" y="350" width="120" height="80" fill="#0f9d58" fill-opacity="0.15" stroke="#0f9d58" stroke-width="2" rx="5"/>
+  <text x="140" y="370" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#0f9d58">Worker 1</text>
+  <rect x="90" y="380" width="45" height="20" fill="#0f9d58" fill-opacity="0.4" stroke="#0f9d58" rx="2"/>
+  <text x="112" y="393" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="white">GPU 0</text>
+  <rect x="145" y="380" width="45" height="20" fill="#0f9d58" fill-opacity="0.4" stroke="#0f9d58" rx="2"/>
+  <text x="167" y="393" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="white">GPU 1</text>
+  <rect x="90" y="405" width="45" height="20" fill="#0f9d58" fill-opacity="0.4" stroke="#0f9d58" rx="2"/>
+  <text x="112" y="418" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="white">GPU 2</text>
+  <rect x="145" y="405" width="45" height="20" fill="#0f9d58" fill-opacity="0.4" stroke="#0f9d8" rx="2"/>
+  <text x="167" y="418" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="white">GPU 3</text>
+  
+  <!-- Worker 2 -->
+  <rect x="250" y="350" width="120" height="80" fill="#0f9d58" fill-opacity="0.15" stroke="#0f9d58" stroke-width="2" rx="5"/>
+  <text x="310" y="370" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#0f9d58">Worker 2</text>
+  <rect x="260" y="380" width="45" height="20" fill="#0f9d58" fill-opacity="0.4" stroke="#0f9d58" rx="2"/>
+  <text x="282" y="393" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="white">GPU 0</text>
+  <rect x="315" y="380" width="45" height="20" fill="#0f9d58" fill-opacity="0.4" stroke="#0f9d58" rx="2"/>
+  <text x="337" y="393" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="white">GPU 1</text>
+  <rect x="260" y="405" width="45" height="20" fill="#0f9d58" fill-opacity="0.4" stroke="#0f9d58" rx="2"/>
+  <text x="282" y="418" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="white">GPU 2</text>
+  <rect x="315" y="405" width="45" height="20" fill="#0f9d58" fill-opacity="0.4" stroke="#0f9d58" rx="2"/>
+  <text x="337" y="418" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="white">GPU 3</text>
+  
+  <!-- Worker 3 -->
+  <rect x="420" y="350" width="120" height="80" fill="#0f9d58" fill-opacity="0.15" stroke="#0f9d58" stroke-width="2" rx="5"/>
+  <text x="480" y="370" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#0f9d58">Worker 3</text>
+  <rect x="430" y="380" width="45" height="20" fill="#0f9d58" fill-opacity="0.4" stroke="#0f9d58" rx="2"/>
+  <text x="452" y="393" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="white">GPU 0</text>
+  <rect x="485" y="380" width="45" height="20" fill="#0f9d58" fill-opacity="0.4" stroke="#0f9d58" rx="2"/>
+  <text x="507" y="393" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="white">GPU 1</text>
+  <rect x="430" y="405" width="45" height="20" fill="#0f9d58" fill-opacity="0.4" stroke="#0f9d58" rx="2"/>
+  <text x="452" y="418" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="white">GPU 2</text>
+  <rect x="485" y="405" width="45" height="20" fill="#0f9d58" fill-opacity="0.4" stroke="#0f9d58" rx="2"/>
+  <text x="507" y="418" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="white">GPU 3</text>
+  
+  <!-- Network communication -->
+  <rect x="560" y="375" width="100" height="50" fill="#ff6f00" fill-opacity="0.3" stroke="#ff6f00" stroke-width="2" rx="5"/>
+  <text x="610" y="395" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="white">Network</text>
+  <text x="610" y="408" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="white">All-Reduce</text>
+  <text x="610" y="420" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="white">Cross-machine</text>
+  
+  <!-- Communication arrows -->
+  <path d="M 200 390 L 250 390" stroke="#ff6f00" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+  <path d="M 370 390 L 420 390" stroke="#ff6f00" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+  <path d="M 540 390 L 560 390" stroke="#ff6f00" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+  
+  <rect x="70" y="450" width="600" height="55" fill="#ffffff" stroke="#0f9d58" stroke-width="1" rx="5"/>
+  <text x="370" y="470" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#0f9d58">Key Features</text>
+  <text x="80" y="485" font-family="Arial, sans-serif" font-size="10">• Scale across multiple machines with fault tolerance and collective communication</text>
+  <text x="80" y="498" font-family="Arial, sans-serif" font-size="10">• Requires cluster setup with TF_CONFIG environment variable for coordination</text>
+  
+  <!-- ParameterServerStrategy -->
+  <rect x="720" y="300" width="630" height="220" fill="#9c27b0" fill-opacity="0.1" stroke="#9c27b0" stroke-width="3" rx="10"/>
+  <text x="1035" y="330" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="#9c27b0">ParameterServerStrategy - Asynchronous Training</text>
+  
+  <!-- Parameter Servers -->
+  <rect x="750" y="350" width="80" height="60" fill="#9c27b0" fill-opacity="0.3" stroke="#9c27b0" stroke-width="2" rx="5"/>
+  <text x="790" y="375" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="white">Parameter</text>
+  <text x="790" y="388" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="white">Server 1</text>
+  <text x="790" y="400" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="white">Model Weights</text>
+  
+  <rect x="850" y="350" width="80" height="60" fill="#9c27b0" fill-opacity="0.3" stroke="#9c27b0" stroke-width="2" rx="5"/>
+  <text x="890" y="375" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="white">Parameter</text>
+  <text x="890" y="388" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="white">Server 2</text>
+  <text x="890" y="400" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="white">Model Weights</text>
+  
+  <!-- Workers -->
+  <rect x="980" y="350" width="80" height="30" fill="#4285f4" fill-opacity="0.3" stroke="#4285f4" stroke-width="2" rx="3"/>
+  <text x="1020" y="370" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" font-weight="bold" fill="white">Worker 1</text>
+  
+  <rect x="980" y="390" width="80" height="30" fill="#4285f4" fill-opacity="0.3" stroke="#4285f4" stroke-width="2" rx="3"/>
+  <text x="1020" y="410" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" font-weight="bold" fill="white">Worker 2</text>
+  
+  <rect x="1080" y="350" width="80" height="30" fill="#4285f4" fill-opacity="0.3" stroke="#4285f4" stroke-width="2" rx="3"/>
+  <text x="1120" y="370" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" font-weight="bold" fill="white">Worker 3</text>
+  
+  <rect x="1080" y="390" width="80" height="30" fill="#4285f4" fill-opacity="0.3" stroke="#4285f4" stroke-width="2" rx="3"/>
+  <text x="1120" y="410" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" font-weight="bold" fill="white">Worker 4</text>
+  
+  <!-- Communication arrows -->
+  <path d="M 930 365 L 980 365" stroke="#ff6f00" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+  <path d="M 930 405 L 980 405" stroke="#ff6f00" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+  <path d="M 930 375 L 1080 365" stroke="#ff6f00" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+  <path d="M 930 385 L 1080 405" stroke="#ff6f00" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+  
+  <rect x="740" y="440" width="580" height="65" fill="#ffffff" stroke="#9c27b0" stroke-width="1" rx="5"/>
+  <text x="1030" y="460" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#9c27b0">Key Features</text>
+  <text x="750" y="475" font-family="Arial, sans-serif" font-size="10">• Asynchronous parameter updates with dedicated parameter servers</text>
+  <text x="750" y="488" font-family="Arial, sans-serif" font-size="10">• Suitable for large-scale training with variable network latency</text>
+  <text x="750" y="501" font-family="Arial, sans-serif" font-size="10">• Better fault tolerance but potential staleness in gradients</text>
+  
+  <!-- Strategy Comparison Table -->
+  <rect x="50" y="540" width="1300" height="320" fill="#607d8b" fill-opacity="0.05" stroke="#607d8b" stroke-width="3" rx="10"/>
+  <text x="700" y="570" text-anchor="middle" font-family="Arial, sans-serif" font-size="20" font-weight="bold" fill="#607d8b">Strategy Comparison & Selection Guide</text>
+  
+  <!-- Table Headers -->
+  <rect x="80" y="590" width="140" height="30" fill="#607d8b" fill-opacity="0.8" stroke="#607d8b"/>
+  <text x="150" y="610" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="white">Strategy</text>
+  
+  <rect x="220" y="590" width="150" height="30" fill="#607d8b" fill-opacity="0.8" stroke="#607d8b"/>
+  <text x="295" y="610" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="white">Best For</text>
+  
+  <rect x="370" y="590" width="120" height="30" fill="#607d8b" fill-opacity="0.8" stroke="#607d8b"/>
+  <text x="430" y="610" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="white">Hardware</text>
+  
+  <rect x="490" y="590" width="120" height="30" fill="#607d8b" fill-opacity="0.8" stroke="#607d8b"/>
+  <text x="550" y="610" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="white">Scale</text>
+  
+  <rect x="610" y="590" width="150" height="30" fill="#607d8b" fill-opacity="0.8" stroke="#607d8b"/>
+  <text x="685" y="610" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="white">Communication</text>
+  
+  <rect x="760" y="590" width="120" height="30" fill="#607d8b" fill-opacity="0.8" stroke="#607d8b"/>
+  <text x="820" y="610" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="white">Complexity</text>
+  
+  <rect x="880" y="590" width="150" height="30" fill="#607d8b" fill-opacity="0.8" stroke="#607d8b"/>
+  <text x="955" y="610" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="white">Fault Tolerance</text>
+  
+  <rect x="1030" y="590" width="150" height="30" fill="#607d8b" fill-opacity="0.8" stroke="#607d8b"/>
+  <text x="1105" y="610" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="white">Performance</text>
+  
+  <rect x="1180" y="590" width="150" height="30" fill="#607d8b" fill-opacity="0.8" stroke="#607d8b"/>
+  <text x="1255" y="610" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="white">Setup</text>
+  
+  <!-- MirroredStrategy Row -->
+  <rect x="80" y="620" width="1250" height="35" fill="#4285f4" fill-opacity="0.1"/>
+  <text x="150" y="640" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">MirroredStrategy</text>
+  <text x="295" y="640" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">Single machine training</text>
+  <text x="430" y="640" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">Multi-GPU</text>
+  <text x="550" y="640" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">2-8 GPUs</text>
+  <text x="685" y="640" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">All-Reduce (fast)</text>
+  <text x="820" y="640" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">Low</text>
+  <text x="955" y="640" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">Limited</text>
+  <text x="1105" y="640" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">Excellent</text>
+  <text x="1255" y="640" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">Simple</text>
+  
+  <!-- TPUStrategy Row -->
+  <rect x="80" y="655" width="1250" height="35" fill="#ea4335" fill-opacity="0.1"/>
+  <text x="150" y="675" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">TPUStrategy</text>
+  <text x="295" y="675" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">Large-scale training</text>
+  <text x="430" y="675" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">TPU Pods</text>
+  <text x="550" y="675" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">8-2048 cores</text>
+  <text x="685" y="675" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">High-speed mesh</text>
+  <text x="820" y="675" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">Medium</text>
+  <text x="955" y="675" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">Good</text>
+  <text x="1105" y="675" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">Exceptional</text>
+  <text x="1255" y="675" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">Cloud-based</text>
+  
+  <!-- MultiWorkerMirrored Row -->
+  <rect x="80" y="690" width="1250" height="35" fill="#0f9d58" fill-opacity="0.1"/>
+  <text x="150" y="710" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">MultiWorkerMirrored</text>
+  <text x="295" y="710" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">Multi-machine sync</text>
+  <text x="430" y="710" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">Multi-GPU cluster</text>
+  <text x="550" y="710" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">10-100+ GPUs</text>
+  <text x="685" y="710" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">Network all-reduce</text>
+  <text x="820" y="710" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">High</text>
+  <text x="955" y="710" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">Good</text>
+  <text x="1105" y="710" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">Very Good</text>
+  <text x="1255" y="710" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">Complex</text>
+  
+  <!-- ParameterServer Row -->
+  <rect x="80" y="725" width="1250" height="35" fill="#9c27b0" fill-opacity="0.1"/>
+  <text x="150" y="745" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">ParameterServer</text>
+  <text x="295" y="745" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">Large async training</text>
+  <text x="430" y="745" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">Heterogeneous</text>
+  <text x="550" y="745" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">100+ workers</text>
+  <text x="685" y="745" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">Parameter server</text>
+  <text x="820" y="745" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">Very High</text>
+  <text x="955" y="745" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">Excellent</text>
+  <text x="1105" y="745" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">Good</text>
+  <text x="1255" y="745" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">Very Complex</text>
+  
+  <!-- Best Practices -->
+  <rect x="80" y="780" width="1250" height="60" fill="#ffffff" stroke="#607d8b" stroke-width="2" rx="5"/>
+  <text x="705" y="800" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#607d8b">Implementation Best Practices</text>
+  <text x="90" y="815" font-family="Arial, sans-serif" font-size="10">• Start with MirroredStrategy for single-machine multi-GPU setups (easiest to implement)</text>
+  <text x="90" y="828" font-family="Arial, sans-serif" font-size="10">• Use TPUStrategy for large models requiring massive compute (research/production scale)</text>
+  <text x="90" y="841" font-family="Arial, sans-serif" font-size="10">• Consider MultiWorkerMirroredStrategy when you need to scale beyond single machine limitations</text>
+  
+  <text x="1350" y="890" text-anchor="end" font-family="Arial, sans-serif" font-size="10" fill="#666">v1.0</text>
+</svg>

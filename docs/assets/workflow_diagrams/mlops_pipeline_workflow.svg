@@ -1,0 +1,218 @@
+<svg viewBox="0 0 1400 800" xmlns="http://www.w3.org/2000/svg">
+  <!-- File Location: docs/assets/workflow_diagrams/mlops_pipeline_workflow.svg -->
+  
+  <rect width="1400" height="800" fill="#f8f9fa"/>
+  
+  <text x="700" y="40" text-anchor="middle" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="#1a1a1a">
+    MLOps Pipeline Workflow
+  </text>
+  
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#333"/>
+    </marker>
+  </defs>
+  
+  <!-- Data Pipeline -->
+  <rect x="50" y="80" width="1300" height="80" fill="#4285f4" fill-opacity="0.1" stroke="#4285f4" stroke-width="3" rx="10"/>
+  <text x="700" y="105" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#4285f4">1. Data Pipeline & Management</text>
+  
+  <rect x="100" y="120" width="100" height="35" fill="#4285f4" fill-opacity="0.3" stroke="#4285f4" rx="3"/>
+  <text x="150" y="140" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" font-weight="bold" fill="white">Data Sources</text>
+  
+  <rect x="220" y="120" width="100" height="35" fill="#4285f4" fill-opacity="0.3" stroke="#4285f4" rx="3"/>
+  <text x="270" y="140" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" font-weight="bold" fill="white">Validation</text>
+  
+  <rect x="340" y="120" width="100" height="35" fill="#4285f4" fill-opacity="0.3" stroke="#4285f4" rx="3"/>
+  <text x="390" y="140" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" font-weight="bold" fill="white">Feature Store</text>
+  
+  <rect x="460" y="120" width="100" height="35" fill="#4285f4" fill-opacity="0.3" stroke="#4285f4" rx="3"/>
+  <text x="510" y="140" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" font-weight="bold" fill="white">Data Lineage</text>
+  
+  <rect x="580" y="120" width="100" height="35" fill="#4285f4" fill-opacity="0.3" stroke="#4285f4" rx="3"/>
+  <text x="630" y="140" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" font-weight="bold" fill="white">Security</text>
+  
+  <rect x="700" y="120" width="100" height="35" fill="#4285f4" fill-opacity="0.3" stroke="#4285f4" rx="3"/>
+  <text x="750" y="140" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" font-weight="bold" fill="white">Testing</text>
+  
+  <rect x="820" y="120" width="100" height="35" fill="#4285f4" fill-opacity="0.3" stroke="#4285f4" rx="3"/>
+  <text x="870" y="140" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" font-weight="bold" fill="white">Version Control</text>
+  
+  <rect x="940" y="120" width="100" height="35" fill="#4285f4" fill-opacity="0.3" stroke="#4285f4" rx="3"/>
+  <text x="990" y="140" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" font-weight="bold" fill="white">Orchestration</text>
+  
+  <rect x="1060" y="120" width="100" height="35" fill="#4285f4" fill-opacity="0.3" stroke="#4285f4" rx="3"/>
+  <text x="1110" y="140" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" font-weight="bold" fill="white">Monitoring</text>
+  
+  <rect x="1180" y="120" width="100" height="35" fill="#4285f4" fill-opacity="0.3" stroke="#4285f4" rx="3"/>
+  <text x="1230" y="140" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" font-weight="bold" fill="white">Quality Gates</text>
+  
+  <!-- Model Development -->
+  <rect x="50" y="180" width="1300" height="100" fill="#0f9d58" fill-opacity="0.1" stroke="#0f9d58" stroke-width="3" rx="10"/>
+  <text x="700" y="205" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#0f9d58">2. Model Development & Training</text>
+  
+  <rect x="100" y="225" width="130" height="45" fill="#0f9d58" fill-opacity="0.15" stroke="#0f9d58" rx="3"/>
+  <text x="165" y="245" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#0f9d58">Experiment Tracking</text>
+  <text x="165" y="260" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">MLflow | W&B | Neptune</text>
+  
+  <rect x="250" y="225" width="130" height="45" fill="#0f9d58" fill-opacity="0.15" stroke="#0f9d58" rx="3"/>
+  <text x="315" y="245" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#0f9d58">Model Training</text>
+  <text x="315" y="260" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">TF | PyTorch | Distributed</text>
+  
+  <rect x="400" y="225" width="130" height="45" fill="#0f9d58" fill-opacity="0.15" stroke="#0f9d58" rx="3"/>
+  <text x="465" y="245" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#0f9d58">Model Registry</text>
+  <text x="465" y="260" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">Versioning | Metadata</text>
+  
+  <rect x="550" y="225" width="130" height="45" fill="#0f9d58" fill-opacity="0.15" stroke="#0f9d58" rx="3"/>
+  <text x="615" y="245" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#0f9d58">Model Validation</text>
+  <text x="615" y="260" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">Performance | Bias</text>
+  
+  <rect x="700" y="225" width="130" height="45" fill="#0f9d58" fill-opacity="0.15" stroke="#0f9d58" rx="3"/>
+  <text x="765" y="245" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#0f9d58">Optimization</text>
+  <text x="765" y="260" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">Quantization | Pruning</text>
+  
+  <rect x="850" y="225" width="130" height="45" fill="#0f9d58" fill-opacity="0.15" stroke="#0f9d58" rx="3"/>
+  <text x="915" y="245" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#0f9d58">AutoML</text>
+  <text x="915" y="260" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">Hyperparameter Tuning</text>
+  
+  <rect x="1000" y="225" width="130" height="45" fill="#0f9d58" fill-opacity="0.15" stroke="#0f9d58" rx="3"/>
+  <text x="1065" y="245" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#0f9d58">A/B Testing</text>
+  <text x="1065" y="260" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">Champion-Challenger</text>
+  
+  <rect x="1150" y="225" width="130" height="45" fill="#0f9d58" fill-opacity="0.15" stroke="#0f9d58" rx="3"/>
+  <text x="1215" y="245" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#0f9d58">Feature Engineering</text>
+  <text x="1215" y="260" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">Preprocessing | Selection</text>
+  
+  <!-- CI/CD Pipeline -->
+  <rect x="50" y="300" width="1300" height="80" fill="#ea4335" fill-opacity="0.1" stroke="#ea4335" stroke-width="3" rx="10"/>
+  <text x="700" y="325" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#ea4335">3. CI/CD Pipeline</text>
+  
+  <rect x="100" y="345" width="100" height="30" fill="#ea4335" fill-opacity="0.3" stroke="#ea4335" rx="3"/>
+  <text x="150" y="363" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" font-weight="bold" fill="white">Source Control</text>
+  
+  <rect x="220" y="345" width="100" height="30" fill="#ea4335" fill-opacity="0.3" stroke="#ea4335" rx="3"/>
+  <text x="270" y="363" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" font-weight="bold" fill="white">Testing</text>
+  
+  <rect x="340" y="345" width="100" height="30" fill="#ea4335" fill-opacity="0.3" stroke="#ea4335" rx="3"/>
+  <text x="390" y="363" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" font-weight="bold" fill="white">Build & Package</text>
+  
+  <rect x="460" y="345" width="100" height="30" fill="#ea4335" fill-opacity="0.3" stroke="#ea4335" rx="3"/>
+  <text x="510" y="363" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" font-weight="bold" fill="white">Security</text>
+  
+  <rect x="580" y="345" width="100" height="30" fill="#ea4335" fill-opacity="0.3" stroke="#ea4335" rx="3"/>
+  <text x="630" y="363" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" font-weight="bold" fill="white">Quality Gates</text>
+  
+  <rect x="700" y="345" width="100" height="30" fill="#ea4335" fill-opacity="0.3" stroke="#ea4335" rx="3"/>
+  <text x="750" y="363" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" font-weight="bold" fill="white">Deployment</text>
+  
+  <rect x="820" y="345" width="100" height="30" fill="#ea4335" fill-opacity="0.3" stroke="#ea4335" rx="3"/>
+  <text x="870" y="363" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" font-weight="bold" fill="white">Infrastructure</text>
+  
+  <rect x="940" y="345" width="100" height="30" fill="#ea4335" fill-opacity="0.3" stroke="#ea4335" rx="3"/>
+  <text x="990" y="363" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" font-weight="bold" fill="white">Release Mgmt</text>
+  
+  <rect x="1060" y="345" width="100" height="30" fill="#ea4335" fill-opacity="0.3" stroke="#ea4335" rx="3"/>
+  <text x="1110" y="363" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" font-weight="bold" fill="white">Rollback</text>
+  
+  <rect x="1180" y="345" width="100" height="30" fill="#ea4335" fill-opacity="0.3" stroke="#ea4335" rx="3"/>
+  <text x="1230" y="363" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" font-weight="bold" fill="white">Environment</text>
+  
+  <!-- Production Serving -->
+  <rect x="50" y="400" width="1300" height="100" fill="#ff6f00" fill-opacity="0.1" stroke="#ff6f00" stroke-width="3" rx="10"/>
+  <text x="700" y="425" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#ff6f00">4. Production Serving & Inference</text>
+  
+  <rect x="100" y="445" width="120" height="45" fill="#ff6f00" fill-opacity="0.15" stroke="#ff6f00" rx="3"/>
+  <text x="160" y="465" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#ff6f00">Model Serving</text>
+  <text x="160" y="480" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">TF Serving | REST/gRPC</text>
+  
+  <rect x="240" y="445" width="120" height="45" fill="#ff6f00" fill-opacity="0.15" stroke="#ff6f00" rx="3"/>
+  <text x="300" y="465" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#ff6f00">Load Balancing</text>
+  <text x="300" y="480" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">Auto-scaling | Routing</text>
+  
+  <rect x="380" y="445" width="120" height="45" fill="#ff6f00" fill-opacity="0.15" stroke="#ff6f00" rx="3"/>
+  <text x="440" y="465" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#ff6f00">Caching</text>
+  <text x="440" y="480" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">Redis | Feature Cache</text>
+  
+  <rect x="520" y="445" width="120" height="45" fill="#ff6f00" fill-opacity="0.15" stroke="#ff6f00" rx="3"/>
+  <text x="580" y="465" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#ff6f00">Edge Deployment</text>
+  <text x="580" y="480" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">Mobile | IoT | TFLite</text>
+  
+  <rect x="660" y="445" width="120" height="45" fill="#ff6f00" fill-opacity="0.15" stroke="#ff6f00" rx="3"/>
+  <text x="720" y="465" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#ff6f00">Stream Processing</text>
+  <text x="720" y="480" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">Kafka | Real-time ML</text>
+  
+  <rect x="800" y="445" width="120" height="45" fill="#ff6f00" fill-opacity="0.15" stroke="#ff6f00" rx="3"/>
+  <text x="860" y="465" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#ff6f00">Ensemble</text>
+  <text x="860" y="480" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">Multi-model | Voting</text>
+  
+  <rect x="940" y="445" width="120" height="45" fill="#ff6f00" fill-opacity="0.15" stroke="#ff6f00" rx="3"/>
+  <text x="1000" y="465" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#ff6f00">API Gateway</text>
+  <text x="1000" y="480" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">Rate Limit | Auth</text>
+  
+  <rect x="1080" y="445" width="120" height="45" fill="#ff6f00" fill-opacity="0.15" stroke="#ff6f00" rx="3"/>
+  <text x="1140" y="465" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#ff6f00">Batch Processing</text>
+  <text x="1140" y="480" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">Spark | Airflow</text>
+  
+  <!-- Monitoring & Observability -->
+  <rect x="50" y="520" width="1300" height="160" fill="#9c27b0" fill-opacity="0.1" stroke="#9c27b0" stroke-width="3" rx="10"/>
+  <text x="700" y="545" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#9c27b0">5. Monitoring & Observability</text>
+  
+  <rect x="100" y="565" width="130" height="45" fill="#9c27b0" fill-opacity="0.15" stroke="#9c27b0" rx="3"/>
+  <text x="165" y="585" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#9c27b0">Model Performance</text>
+  <text x="165" y="600" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">Accuracy | Drift | Quality</text>
+  
+  <rect x="250" y="565" width="130" height="45" fill="#9c27b0" fill-opacity="0.15" stroke="#9c27b0" rx="3"/>
+  <text x="315" y="585" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#9c27b0">Infrastructure</text>
+  <text x="315" y="600" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">CPU | Memory | Latency</text>
+  
+  <rect x="400" y="565" width="130" height="45" fill="#9c27b0" fill-opacity="0.15" stroke="#9c27b0" rx="3"/>
+  <text x="465" y="585" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#9c27b0">Data Quality</text>
+  <text x="465" y="600" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">Schema | Distribution</text>
+  
+  <rect x="550" y="565" width="130" height="45" fill="#9c27b0" fill-opacity="0.15" stroke="#9c27b0" rx="3"/>
+  <text x="615" y="585" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#9c27b0">Business KPIs</text>
+  <text x="615" y="600" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">Revenue | Engagement</text>
+  
+  <rect x="700" y="565" width="130" height="45" fill="#9c27b0" fill-opacity="0.15" stroke="#9c27b0" rx="3"/>
+  <text x="765" y="585" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#9c27b0">Alerting</text>
+  <text x="765" y="600" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">Slack | PagerDuty</text>
+  
+  <rect x="850" y="565" width="130" height="45" fill="#9c27b0" fill-opacity="0.15" stroke="#9c27b0" rx="3"/>
+  <text x="915" y="585" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#9c27b0">Logging & Tracing</text>
+  <text x="915" y="600" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">ELK | Jaeger</text>
+  
+  <rect x="1000" y="565" width="130" height="45" fill="#9c27b0" fill-opacity="0.15" stroke="#9c27b0" rx="3"/>
+  <text x="1065" y="585" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#9c27b0">Dashboards</text>
+  <text x="1065" y="600" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">Grafana | Real-time</text>
+  
+  <rect x="1150" y="565" width="130" height="45" fill="#9c27b0" fill-opacity="0.15" stroke="#9c27b0" rx="3"/>
+  <text x="1215" y="585" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#9c27b0">Audit & Compliance</text>
+  <text x="1215" y="600" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">GDPR | Documentation</text>
+  
+  <!-- Feedback Loop -->
+  <rect x="100" y="630" width="1200" height="80" fill="#ffffff" stroke="#9c27b0" stroke-width="2" rx="5"/>
+  <text x="700" y="655" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#9c27b0">Continuous Feedback & Improvement Loop</text>
+  
+  <circle cx="120" cy="675" r="2" fill="#4285f4"/>
+  <text x="130" y="680" font-family="Arial, sans-serif" font-size="10">Human-in-the-loop feedback and active learning for model improvement</text>
+  
+  <circle cx="120" cy="695" r="2" fill="#0f9d58"/>
+  <text x="130" y="700" font-family="Arial, sans-serif" font-size="10">Automated model retraining triggers based on performance degradation</text>
+  
+  <circle cx="700" cy="675" r="2" fill="#ea4335"/>
+  <text x="710" y="680" font-family="Arial, sans-serif" font-size="10">Champion-challenger testing and gradual rollouts for risk mitigation</text>
+  
+  <circle cx="700" cy="695" r="2" fill="#ff6f00"/>
+  <text x="710" y="700" font-family="Arial, sans-serif" font-size="10">Continuous integration of new data and features into production pipeline</text>
+  
+  <!-- Flow arrows -->
+  <path d="M 700 160 L 700 180" stroke="#333" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+  <path d="M 700 280 L 700 300" stroke="#333" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+  <path d="M 700 380 L 700 400" stroke="#333" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+  <path d="M 700 500 L 700 520" stroke="#333" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+  
+  <!-- Feedback arrow -->
+  <path d="M 1250 670 Q 1320 670 1320 400 Q 1320 120 100 120" stroke="#9c27b0" stroke-width="3" fill="none" marker-end="url(#arrow)" stroke-dasharray="5,5"/>
+  
+  <text x="1350" y="790" text-anchor="end" font-family="Arial, sans-serif" font-size="10" fill="#666">v1.0</text>
+</svg>

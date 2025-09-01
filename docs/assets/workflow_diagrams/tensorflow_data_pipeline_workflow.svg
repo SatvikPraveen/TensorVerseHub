@@ -1,0 +1,305 @@
+<svg viewBox="0 0 1400 800" xmlns="http://www.w3.org/2000/svg">
+  <!-- File Location: docs/assets/workflow_diagrams/tensorflow_data_pipeline_workflow.svg -->
+  
+  <!-- Background -->
+  <rect width="1400" height="800" fill="#f8f9fa"/>
+  
+  <!-- Title -->
+  <text x="700" y="40" text-anchor="middle" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="#1a1a1a">
+    TensorFlow Data Pipeline Workflow
+  </text>
+  
+  <!-- Data Sources -->
+  <rect x="50" y="80" width="250" height="160" fill="#4285f4" fill-opacity="0.1" stroke="#4285f4" stroke-width="2" rx="10"/>
+  <text x="175" y="110" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#4285f4">
+    Data Sources
+  </text>
+  
+  <!-- Various data sources -->
+  <rect x="70" y="130" width="70" height="40" fill="#4285f4" fill-opacity="0.3" stroke="#4285f4" rx="3"/>
+  <text x="105" y="155" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">CSV/JSON</text>
+  
+  <rect x="150" y="130" width="70" height="40" fill="#4285f4" fill-opacity="0.3" stroke="#4285f4" rx="3"/>
+  <text x="185" y="155" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">Images</text>
+  
+  <rect x="230" y="130" width="60" height="40" fill="#4285f4" fill-opacity="0.3" stroke="#4285f4" rx="3"/>
+  <text x="260" y="155" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">Audio</text>
+  
+  <rect x="70" y="180" width="70" height="40" fill="#4285f4" fill-opacity="0.3" stroke="#4285f4" rx="3"/>
+  <text x="105" y="205" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">TFRecord</text>
+  
+  <rect x="150" y="180" width="70" height="40" fill="#4285f4" fill-opacity="0.3" stroke="#4285f4" rx="3"/>
+  <text x="185" y="205" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">Database</text>
+  
+  <rect x="230" y="180" width="60" height="40" fill="#4285f4" fill-opacity="0.3" stroke="#4285f4" rx="3"/>
+  <text x="260" y="205" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">Cloud</text>
+  
+  <!-- Data Ingestion -->
+  <rect x="350" y="80" width="200" height="160" fill="#0f9d58" fill-opacity="0.1" stroke="#0f9d58" stroke-width="2" rx="10"/>
+  <text x="450" y="110" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#0f9d58">
+    tf.data.Dataset
+  </text>
+  
+  <!-- Dataset creation methods -->
+  <rect x="370" y="130" width="160" height="25" fill="#0f9d58" fill-opacity="0.3" stroke="#0f9d58" rx="2"/>
+  <text x="450" y="147" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">from_tensor_slices()</text>
+  
+  <rect x="370" y="160" width="160" height="25" fill="#0f9d58" fill-opacity="0.3" stroke="#0f9d58" rx="2"/>
+  <text x="450" y="177" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">from_generator()</text>
+  
+  <rect x="370" y="190" width="160" height="25" fill="#0f9d58" fill-opacity="0.3" stroke="#0f9d58" rx="2"/>
+  <text x="450" y="207" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">list_files() + map()</text>
+  
+  <!-- Data Preprocessing -->
+  <rect x="600" y="80" width="300" height="300" fill="#ea4335" fill-opacity="0.1" stroke="#ea4335" stroke-width="2" rx="10"/>
+  <text x="750" y="110" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#ea4335">
+    Preprocessing Pipeline
+  </text>
+  
+  <!-- Preprocessing steps -->
+  <rect x="620" y="130" width="120" height="35" fill="#ea4335" fill-opacity="0.3" stroke="#ea4335" rx="3"/>
+  <text x="680" y="152" text-anchor="middle" font-family="Arial, sans-serif" font-size="11">Data Parsing</text>
+  
+  <rect x="760" y="130" width="120" height="35" fill="#ea4335" fill-opacity="0.3" stroke="#ea4335" rx="3"/>
+  <text x="820" y="152" text-anchor="middle" font-family="Arial, sans-serif" font-size="11">Type Conversion</text>
+  
+  <!-- Transformation pipeline -->
+  <rect x="620" y="180" width="260" height="30" fill="#ea4335" fill-opacity="0.2" stroke="#ea4335" rx="3"/>
+  <text x="750" y="200" text-anchor="middle" font-family="Arial, sans-serif" font-size="12">Data Transformations</text>
+  
+  <rect x="630" y="220" width="100" height="25" fill="#ea4335" fill-opacity="0.4" stroke="#ea4335" rx="2"/>
+  <text x="680" y="237" text-anchor="middle" font-family="Arial, sans-serif" font-size="9">Normalization</text>
+  
+  <rect x="740" y="220" width="100" height="25" fill="#ea4335" fill-opacity="0.4" stroke="#ea4335" rx="2"/>
+  <text x="790" y="237" text-anchor="middle" font-family="Arial, sans-serif" font-size="9">Resize/Crop</text>
+  
+  <rect x="630" y="250" width="100" height="25" fill="#ea4335" fill-opacity="0.4" stroke="#ea4335" rx="2"/>
+  <text x="680" y="267" text-anchor="middle" font-family="Arial, sans-serif" font-size="9">Encoding</text>
+  
+  <rect x="740" y="250" width="100" height="25" fill="#ea4335" fill-opacity="0.4" stroke="#ea4335" rx="2"/>
+  <text x="790" y="267" text-anchor="middle" font-family="Arial, sans-serif" font-size="9">Feature Scaling</text>
+  
+  <!-- Augmentation -->
+  <rect x="620" y="290" width="260" height="30" fill="#ea4335" fill-opacity="0.2" stroke="#ea4335" rx="3"/>
+  <text x="750" y="310" text-anchor="middle" font-family="Arial, sans-serif" font-size="12">Data Augmentation</text>
+  
+  <rect x="630" y="330" width="70" height="25" fill="#ea4335" fill-opacity="0.4" stroke="#ea4335" rx="2"/>
+  <text x="665" y="347" text-anchor="middle" font-family="Arial, sans-serif" font-size="9">Rotation</text>
+  
+  <rect x="710" y="330" width="70" height="25" fill="#ea4335" fill-opacity="0.4" stroke="#ea4335" rx="2"/>
+  <text x="745" y="347" text-anchor="middle" font-family="Arial, sans-serif" font-size="9">Flip</text>
+  
+  <rect x="790" y="330" width="70" height="25" fill="#ea4335" fill-opacity="0.4" stroke="#ea4335" rx="2"/>
+  <text x="825" y="347" text-anchor="middle" font-family="Arial, sans-serif" font-size="9">Color</text>
+  
+  <!-- Performance Optimization -->
+  <rect x="950" y="80" width="350" height="300" fill="#ff6f00" fill-opacity="0.1" stroke="#ff6f00" stroke-width="2" rx="10"/>
+  <text x="1125" y="110" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#ff6f00">
+    Performance Optimization
+  </text>
+  
+  <!-- Caching -->
+  <rect x="970" y="130" width="100" height="40" fill="#ff6f00" fill-opacity="0.3" stroke="#ff6f00" rx="3"/>
+  <text x="1020" y="155" text-anchor="middle" font-family="Arial, sans-serif" font-size="11">cache()</text>
+  
+  <!-- Parallelization -->
+  <rect x="1080" y="130" width="100" height="40" fill="#ff6f00" fill-opacity="0.3" stroke="#ff6f00" rx="3"/>
+  <text x="1130" y="155" text-anchor="middle" font-family="Arial, sans-serif" font-size="11">map()</text>
+  <text x="1130" y="165" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">parallel</text>
+  
+  <!-- Prefetching -->
+  <rect x="1190" y="130" width="100" height="40" fill="#ff6f00" fill-opacity="0.3" stroke="#ff6f00" rx="3"/>
+  <text x="1240" y="155" text-anchor="middle" font-family="Arial, sans-serif" font-size="11">prefetch()</text>
+  
+  <!-- Batching -->
+  <rect x="970" y="190" width="100" height="40" fill="#ff6f00" fill-opacity="0.4" stroke="#ff6f00" rx="3"/>
+  <text x="1020" y="215" text-anchor="middle" font-family="Arial, sans-serif" font-size="11">batch()</text>
+  
+  <!-- Shuffling -->
+  <rect x="1080" y="190" width="100" height="40" fill="#ff6f00" fill-opacity="0.4" stroke="#ff6f00" rx="3"/>
+  <text x="1130" y="215" text-anchor="middle" font-family="Arial, sans-serif" font-size="11">shuffle()</text>
+  
+  <!-- Repeat -->
+  <rect x="1190" y="190" width="100" height="40" fill="#ff6f00" fill-opacity="0.4" stroke="#ff6f00" rx="3"/>
+  <text x="1240" y="215" text-anchor="middle" font-family="Arial, sans-serif" font-size="11">repeat()</text>
+  
+  <!-- Auto-optimization -->
+  <rect x="970" y="250" width="320" height="50" fill="#ff6f00" fill-opacity="0.2" stroke="#ff6f00" rx="3"/>
+  <text x="1130" y="275" text-anchor="middle" font-family="Arial, sans-serif" font-size="12">Auto-optimization</text>
+  <text x="1130" y="290" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">tf.data.AUTOTUNE</text>
+  
+  <!-- Advanced Features -->
+  <rect x="970" y="320" width="160" height="40" fill="#ff6f00" fill-opacity="0.3" stroke="#ff6f00" rx="3"/>
+  <text x="1050" y="345" text-anchor="middle" font-family="Arial, sans-serif" font-size="11">Interleave</text>
+  
+  <rect x="1140" y="320" width="150" height="40" fill="#ff6f00" fill-opacity="0.3" stroke="#ff6f00" rx="3"/>
+  <text x="1215" y="345" text-anchor="middle" font-family="Arial, sans-serif" font-size="11">Filter & Take</text>
+  
+  <!-- Memory Management -->
+  <rect x="50" y="420" width="400" height="160" fill="#9c27b0" fill-opacity="0.1" stroke="#9c27b0" stroke-width="2" rx="10"/>
+  <text x="250" y="450" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#9c27b0">
+    Memory Management
+  </text>
+  
+  <!-- Memory strategies -->
+  <rect x="70" y="470" width="120" height="35" fill="#9c27b0" fill-opacity="0.3" stroke="#9c27b0" rx="3"/>
+  <text x="130" y="492" text-anchor="middle" font-family="Arial, sans-serif" font-size="11">Memory Mapping</text>
+  
+  <rect x="200" y="470" width="120" height="35" fill="#9c27b0" fill-opacity="0.3" stroke="#9c27b0" rx="3"/>
+  <text x="260" y="492" text-anchor="middle" font-family="Arial, sans-serif" font-size="11">Lazy Loading</text>
+  
+  <rect x="330" y="470" width="100" height="35" fill="#9c27b0" fill-opacity="0.3" stroke="#9c27b0" rx="3"/>
+  <text x="380" y="492" text-anchor="middle" font-family="Arial, sans-serif" font-size="11">Streaming</text>
+  
+  <!-- Buffer management -->
+  <rect x="70" y="520" width="180" height="30" fill="#9c27b0" fill-opacity="0.2" stroke="#9c27b0" rx="3"/>
+  <text x="160" y="540" text-anchor="middle" font-family="Arial, sans-serif" font-size="11">Buffer Size Tuning</text>
+  
+  <rect x="260" y="520" width="170" height="30" fill="#9c27b0" fill-opacity="0.2" stroke="#9c27b0" rx="3"/>
+  <text x="345" y="540" text-anchor="middle" font-family="Arial, sans-serif" font-size="11">Memory Usage Profiling</text>
+  
+  <!-- Distributed Processing -->
+  <rect x="500" y="420" width="350" height="160" fill="#00acc1" fill-opacity="0.1" stroke="#00acc1" stroke-width="2" rx="10"/>
+  <text x="675" y="450" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#00acc1">
+    Distributed Data Processing
+  </text>
+  
+  <!-- Distribution strategies -->
+  <rect x="520" y="470" width="100" height="35" fill="#00acc1" fill-opacity="0.3" stroke="#00acc1" rx="3"/>
+  <text x="570" y="492" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">Sharding</text>
+  
+  <rect x="630" y="470" width="100" height="35" fill="#00acc1" fill-opacity="0.3" stroke="#00acc1" rx="3"/>
+  <text x="680" y="492" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">Partitioning</text>
+  
+  <rect x="740" y="470" width="100" height="35" fill="#00acc1" fill-opacity="0.3" stroke="#00acc1" rx="3"/>
+  <text x="790" y="492" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">Load Balancing</text>
+  
+  <!-- Multi-worker setup -->
+  <rect x="520" y="520" width="150" height="40" fill="#00acc1" fill-opacity="0.2" stroke="#00acc1" rx="3"/>
+  <text x="595" y="545" text-anchor="middle" font-family="Arial, sans-serif" font-size="11">Multi-Worker Training</text>
+  
+  <rect x="680" y="520" width="150" height="40" fill="#00acc1" fill-opacity="0.2" stroke="#00acc1" rx="3"/>
+  <text x="755" y="545" text-anchor="middle" font-family="Arial, sans-serif" font-size="11">Data Service</text>
+  
+  <!-- Model Integration -->
+  <rect x="900" y="420" width="450" height="160" fill="#607d8b" fill-opacity="0.1" stroke="#607d8b" stroke-width="2" rx="10"/>
+  <text x="1125" y="450" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#607d8b">
+    Model Integration
+  </text>
+  
+  <!-- Training integration -->
+  <rect x="920" y="470" width="120" height="40" fill="#607d8b" fill-opacity="0.3" stroke="#607d8b" rx="3"/>
+  <text x="980" y="490" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">model.fit()</text>
+  <text x="980" y="500" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">Integration</text>
+  
+  <rect x="1050" y="470" width="120" height="40" fill="#607d8b" fill-opacity="0.3" stroke="#607d8b" rx="3"/>
+  <text x="1110" y="490" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">Custom Loop</text>
+  <text x="1110" y="500" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">Integration</text>
+  
+  <rect x="1180" y="470" width="120" height="40" fill="#607d8b" fill-opacity="0.3" stroke="#607d8b" rx="3"/>
+  <text x="1240" y="495" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">Keras Layers</text>
+  
+  <!-- Pipeline monitoring -->
+  <rect x="920" y="530" width="260" height="30" fill="#607d8b" fill-opacity="0.2" stroke="#607d8b" rx="3"/>
+  <text x="1050" y="550" text-anchor="middle" font-family="Arial, sans-serif" font-size="11">Pipeline Performance Monitoring</text>
+  
+  <rect x="1190" y="530" width="130" height="30" fill="#607d8b" fill-opacity="0.2" stroke="#607d8b" rx="3"/>
+  <text x="1255" y="550" text-anchor="middle" font-family="Arial, sans-serif" font-size="11">Bottleneck Analysis</text>
+  
+  <!-- Production Pipeline -->
+  <rect x="50" y="620" width="1300" height="140" fill="#795548" fill-opacity="0.1" stroke="#795548" stroke-width="2" rx="10"/>
+  <text x="700" y="650" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="#795548">
+    Production Data Pipeline
+  </text>
+  
+  <!-- Real-time processing -->
+  <rect x="70" y="670" width="150" height="35" fill="#795548" fill-opacity="0.3" stroke="#795548" rx="3"/>
+  <text x="145" y="692" text-anchor="middle" font-family="Arial, sans-serif" font-size="11">Real-time Streaming</text>
+  
+  <rect x="230" y="670" width="150" height="35" fill="#795548" fill-opacity="0.3" stroke="#795548" rx="3"/>
+  <text x="305" y="692" text-anchor="middle" font-family="Arial, sans-serif" font-size="11">Batch Processing</text>
+  
+  <rect x="390" y="670" width="150" height="35" fill="#795548" fill-opacity="0.3" stroke="#795548" rx="3"/>
+  <text x="465" y="692" text-anchor="middle" font-family="Arial, sans-serif" font-size="11">ETL Pipeline</text>
+  
+  <!-- Quality assurance -->
+  <rect x="550" y="670" width="150" height="35" fill="#795548" fill-opacity="0.3" stroke="#795548" rx="3"/>
+  <text x="625" y="692" text-anchor="middle" font-family="Arial, sans-serif" font-size="11">Data Validation</text>
+  
+  <rect x="710" y="670" width="150" height="35" fill="#795548" fill-opacity="0.3" stroke="#795548" rx="3"/>
+  <text x="785" y="692" text-anchor="middle" font-family="Arial, sans-serif" font-size="11">Schema Evolution</text>
+  
+  <!-- Monitoring -->
+  <rect x="870" y="670" width="150" height="35" fill="#795548" fill-opacity="0.3" stroke="#795548" rx="3"/>
+  <text x="945" y="692" text-anchor="middle" font-family="Arial, sans-serif" font-size="11">Pipeline Monitoring</text>
+  
+  <rect x="1030" y="670" width="150" height="35" fill="#795548" fill-opacity="0.3" stroke="#795548" rx="3"/>
+  <text x="1105" y="692" text-anchor="middle" font-family="Arial, sans-serif" font-size="11">Alerting System</text>
+  
+  <rect x="1190" y="670" width="140" height="35" fill="#795548" fill-opacity="0.3" stroke="#795548" rx="3"/>
+  <text x="1260" y="692" text-anchor="middle" font-family="Arial, sans-serif" font-size="11">A/B Testing</text>
+  
+  <!-- Deployment considerations -->
+  <rect x="70" y="720" width="1260" height="25" fill="#795548" fill-opacity="0.2" stroke="#795548" rx="3"/>
+  <text x="700" y="737" text-anchor="middle" font-family="Arial, sans-serif" font-size="12">
+    Cloud Storage • Container Orchestration • Auto-scaling • Data Lineage Tracking
+  </text>
+  
+  <!-- Arrows showing data flow -->
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#333"/>
+    </marker>
+  </defs>
+  
+  <!-- Main data flow -->
+  <path d="M 300 160 L 350 160" stroke="#333" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+  <path d="M 550 160 L 600 160" stroke="#333" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+  <path d="M 900 230 L 950 230" stroke="#333" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+  
+  <!-- Integration flows -->
+  <path d="M 750 380 L 750 420" stroke="#333" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+  <path d="M 1125 380 L 1125 420" stroke="#333" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+  
+  <!-- Production flow -->
+  <path d="M 700 580 L 700 620" stroke="#333" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+  
+  <!-- Code examples -->
+  <text x="1330" y="140" font-family="monospace" font-size="9" fill="#666">
+    dataset = tf.data.Dataset.from_tensor_slices(data)
+  </text>
+  <text x="1330" y="155" font-family="monospace" font-size="9" fill="#666">
+      .map(preprocess_fn, num_parallel_calls=tf.data.AUTOTUNE)
+  </text>
+  <text x="1330" y="170" font-family="monospace" font-size="9" fill="#666">
+      .cache()
+  </text>
+  <text x="1330" y="185" font-family="monospace" font-size="9" fill="#666">
+      .shuffle(buffer_size=1000)
+  </text>
+  <text x="1330" y="200" font-family="monospace" font-size="9" fill="#666">
+      .batch(32)
+  </text>
+  <text x="1330" y="215" font-family="monospace" font-size="9" fill="#666">
+      .prefetch(tf.data.AUTOTUNE)
+  </text>
+  
+  <!-- Performance tips -->
+  <text x="480" y="320" font-family="Arial, sans-serif" font-size="9" fill="#666">
+    Best Practices:
+  </text>
+  <text x="480" y="335" font-family="Arial, sans-serif" font-size="8" fill="#666">
+    • Use vectorized operations
+  </text>
+  <text x="480" y="348" font-family="Arial, sans-serif" font-size="8" fill="#666">
+    • Profile pipeline bottlenecks
+  </text>
+  <text x="480" y="361" font-family="Arial, sans-serif" font-size="8" fill="#666">
+    • Optimize for I/O throughput
+  </text>
+  
+  <!-- Version info -->
+  <text x="1350" y="790" text-anchor="end" font-family="Arial, sans-serif" font-size="10" fill="#999">
+    TensorFlow 2.15+ Data Pipeline
+  </text>
+</svg>
