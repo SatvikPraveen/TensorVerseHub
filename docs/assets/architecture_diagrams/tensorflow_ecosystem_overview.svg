@@ -1,0 +1,235 @@
+<svg viewBox="0 0 1400 800" xmlns="http://www.w3.org/2000/svg">
+  <!-- File Location: docs/assets/architecture_diagrams/tensorflow_ecosystem_overview.svg -->
+  
+  <rect width="1400" height="800" fill="#f8f9fa"/>
+  
+  <text x="700" y="40" text-anchor="middle" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="#1a1a1a">
+    TensorFlow Ecosystem Overview
+  </text>
+  
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#333"/>
+    </marker>
+  </defs>
+  
+  <!-- Core TensorFlow -->
+  <rect x="500" y="180" width="400" height="120" fill="#4285f4" fill-opacity="0.2" stroke="#4285f4" stroke-width="4" rx="15"/>
+  <text x="700" y="210" text-anchor="middle" font-family="Arial, sans-serif" font-size="20" font-weight="bold" fill="#4285f4">Core TensorFlow</text>
+  
+  <rect x="520" y="230" width="80" height="25" fill="#4285f4" fill-opacity="0.4" stroke="#4285f4" rx="3"/>
+  <text x="560" y="247" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="white">tf.keras</text>
+  
+  <rect x="620" y="230" width="80" height="25" fill="#4285f4" fill-opacity="0.4" stroke="#4285f4" rx="3"/>
+  <text x="660" y="247" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="white">tf.data</text>
+  
+  <rect x="720" y="230" width="80" height="25" fill="#4285f4" fill-opacity="0.4" stroke="#4285f4" rx="3"/>
+  <text x="760" y="247" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="white">tf.function</text>
+  
+  <rect x="820" y="230" width="80" height="25" fill="#4285f4" fill-opacity="0.4" stroke="#4285f4" rx="3"/>
+  <text x="860" y="247" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="white">tf.distribute</text>
+  
+  <rect x="570" y="265" width="80" height="25" fill="#4285f4" fill-opacity="0.4" stroke="#4285f4" rx="3"/>
+  <text x="610" y="282" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="white">Eager/Graph</text>
+  
+  <rect x="670" y="265" width="80" height="25" fill="#4285f4" fill-opacity="0.4" stroke="#4285f4" rx="3"/>
+  <text x="710" y="282" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="white">AutoDiff</text>
+  
+  <rect x="770" y="265" width="80" height="25" fill="#4285f4" fill-opacity="0.4" stroke="#4285f4" rx="3"/>
+  <text x="810" y="282" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="white">XLA/JIT</text>
+  
+  <!-- Development Tools -->
+  <rect x="50" y="80" width="180" height="100" fill="#0f9d58" fill-opacity="0.1" stroke="#0f9d58" stroke-width="3" rx="10"/>
+  <text x="140" y="105" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#0f9d58">Development Tools</text>
+  
+  <rect x="70" y="120" width="140" height="20" fill="#0f9d58" fill-opacity="0.3" stroke="#0f9d58" rx="3"/>
+  <text x="140" y="133" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" font-weight="bold" fill="white">TensorBoard</text>
+  
+  <rect x="70" y="145" width="140" height="20" fill="#0f9d58" fill-opacity="0.3" stroke="#0f9d58" rx="3"/>
+  <text x="140" y="158" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" font-weight="bold" fill="white">TF Profiler</text>
+  
+  <!-- Data & ETL -->
+  <rect x="250" y="80" width="180" height="100" fill="#ff6f00" fill-opacity="0.1" stroke="#ff6f00" stroke-width="3" rx="10"/>
+  <text x="340" y="105" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#ff6f00">Data & ETL</text>
+  
+  <rect x="270" y="120" width="140" height="20" fill="#ff6f00" fill-opacity="0.3" stroke="#ff6f00" rx="3"/>
+  <text x="340" y="133" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" font-weight="bold" fill="white">TensorFlow I/O</text>
+  
+  <rect x="270" y="145" width="140" height="20" fill="#ff6f00" fill-opacity="0.3" stroke="#ff6f00" rx="3"/>
+  <text x="340" y="158" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" font-weight="bold" fill="white">TF Transform</text>
+  
+  <!-- Specialized Libraries -->
+  <rect x="50" y="320" width="180" height="140" fill="#9c27b0" fill-opacity="0.1" stroke="#9c27b0" stroke-width="3" rx="10"/>
+  <text x="140" y="345" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#9c27b0">Specialized</text>
+  
+  <rect x="70" y="360" width="140" height="18" fill="#9c27b0" fill-opacity="0.3" stroke="#9c27b0" rx="2"/>
+  <text x="140" y="372" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" font-weight="bold" fill="white">TF Probability</text>
+  
+  <rect x="70" y="383" width="140" height="18" fill="#9c27b0" fill-opacity="0.3" stroke="#9c27b0" rx="2"/>
+  <text x="140" y="395" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" font-weight="bold" fill="white">TF Agents (RL)</text>
+  
+  <rect x="70" y="406" width="140" height="18" fill="#9c27b0" fill-opacity="0.3" stroke="#9c27b0" rx="2"/>
+  <text x="140" y="418" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" font-weight="bold" fill="white">TF Graphics</text>
+  
+  <rect x="70" y="429" width="140" height="18" fill="#9c27b0" fill-opacity="0.3" stroke="#9c27b0" rx="2"/>
+  <text x="140" y="441" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" font-weight="bold" fill="white">TF Quantum</text>
+  
+  <!-- Domain Libraries -->
+  <rect x="250" y="320" width="180" height="140" fill="#4caf50" fill-opacity="0.1" stroke="#4caf50" stroke-width="3" rx="10"/>
+  <text x="340" y="345" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#4caf50">Domain Libraries</text>
+  
+  <rect x="270" y="360" width="140" height="18" fill="#4caf50" fill-opacity="0.3" stroke="#4caf50" rx="2"/>
+  <text x="340" y="372" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" font-weight="bold" fill="white">TF Text (NLP)</text>
+  
+  <rect x="270" y="383" width="140" height="18" fill="#4caf50" fill-opacity="0.3" stroke="#4caf50" rx="2"/>
+  <text x="340" y="395" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" font-weight="bold" fill="white">TF Object Detection</text>
+  
+  <rect x="270" y="406" width="140" height="18" fill="#4caf50" fill-opacity="0.3" stroke="#4caf50" rx="2"/>
+  <text x="340" y="418" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" font-weight="bold" fill="white">TF Recommenders</text>
+  
+  <rect x="270" y="429" width="140" height="18" fill="#4caf50" fill-opacity="0.3" stroke="#4caf50" rx="2"/>
+  <text x="340" y="441" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" font-weight="bold" fill="white">TF Decision Forests</text>
+  
+  <!-- Production & Serving -->
+  <rect x="970" y="80" width="180" height="100" fill="#607d8b" fill-opacity="0.1" stroke="#607d8b" stroke-width="3" rx="10"/>
+  <text x="1060" y="105" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#607d8b">Production</text>
+  
+  <rect x="990" y="120" width="140" height="20" fill="#607d8b" fill-opacity="0.3" stroke="#607d8b" rx="3"/>
+  <text x="1060" y="133" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" font-weight="bold" fill="white">TF Serving</text>
+  
+  <rect x="990" y="145" width="140" height="20" fill="#607d8b" fill-opacity="0.3" stroke="#607d8b" rx="3"/>
+  <text x="1060" y="158" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" font-weight="bold" fill="white">TFX Pipelines</text>
+  
+  <!-- Mobile & Edge -->
+  <rect x="1170" y="80" width="180" height="100" fill="#795548" fill-opacity="0.1" stroke="#795548" stroke-width="3" rx="10"/>
+  <text x="1260" y="105" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#795548">Mobile & Edge</text>
+  
+  <rect x="1190" y="120" width="140" height="20" fill="#795548" fill-opacity="0.3" stroke="#795548" rx="3"/>
+  <text x="1260" y="133" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" font-weight="bold" fill="white">TensorFlow Lite</text>
+  
+  <rect x="1190" y="145" width="140" height="20" fill="#795548" fill-opacity="0.3" stroke="#795548" rx="3"/>
+  <text x="1260" y="158" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" font-weight="bold" fill="white">TF Micro</text>
+  
+  <!-- Web & JavaScript -->
+  <rect x="970" y="200" width="180" height="100" fill="#ff5722" fill-opacity="0.1" stroke="#ff5722" stroke-width="3" rx="10"/>
+  <text x="1060" y="225" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#ff5722">Web Platform</text>
+  
+  <rect x="990" y="240" width="140" height="20" fill="#ff5722" fill-opacity="0.3" stroke="#ff5722" rx="3"/>
+  <text x="1060" y="253" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" font-weight="bold" fill="white">TensorFlow.js</text>
+  
+  <rect x="990" y="265" width="140" height="20" fill="#ff5722" fill-opacity="0.3" stroke="#ff5722" rx="3"/>
+  <text x="1060" y="278" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" font-weight="bold" fill="white">Node.js Backend</text>
+  
+  <!-- Cloud Platforms -->
+  <rect x="1170" y="200" width="180" height="100" fill="#00bcd4" fill-opacity="0.1" stroke="#00bcd4" stroke-width="3" rx="10"/>
+  <text x="1260" y="225" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#00bcd4">Cloud</text>
+  
+  <rect x="1190" y="240" width="140" height="20" fill="#00bcd4" fill-opacity="0.3" stroke="#00bcd4" rx="3"/>
+  <text x="1260" y="253" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" font-weight="bold" fill="white">Google Cloud AI</text>
+  
+  <rect x="1190" y="265" width="140" height="20" fill="#00bcd4" fill-opacity="0.3" stroke="#00bcd4" rx="3"/>
+  <text x="1260" y="278" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" font-weight="bold" fill="white">AWS/Azure</text>
+  
+  <!-- Model Hub -->
+  <rect x="970" y="320" width="180" height="140" fill="#ea4335" fill-opacity="0.1" stroke="#ea4335" stroke-width="3" rx="10"/>
+  <text x="1060" y="345" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#ea4335">Model Hub</text>
+  
+  <rect x="990" y="360" width="140" height="18" fill="#ea4335" fill-opacity="0.3" stroke="#ea4335" rx="2"/>
+  <text x="1060" y="372" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" font-weight="bold" fill="white">TensorFlow Hub</text>
+  
+  <rect x="990" y="383" width="140" height="18" fill="#ea4335" fill-opacity="0.3" stroke="#ea4335" rx="2"/>
+  <text x="1060" y="395" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" font-weight="bold" fill="white">Model Garden</text>
+  
+  <rect x="990" y="406" width="140" height="18" fill="#ea4335" fill-opacity="0.3" stroke="#ea4335" rx="2"/>
+  <text x="1060" y="418" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" font-weight="bold" fill="white">Kaggle Models</text>
+  
+  <rect x="990" y="429" width="140" height="18" fill="#ea4335" fill-opacity="0.3" stroke="#ea4335" rx="2"/>
+  <text x="1060" y="441" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" font-weight="bold" fill="white">Hugging Face</text>
+  
+  <!-- Research Tools -->
+  <rect x="1170" y="320" width="180" height="140" fill="#673ab7" fill-opacity="0.1" stroke="#673ab7" stroke-width="3" rx="10"/>
+  <text x="1260" y="345" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#673ab7">Research</text>
+  
+  <rect x="1190" y="360" width="140" height="18" fill="#673ab7" fill-opacity="0.3" stroke="#673ab7" rx="2"/>
+  <text x="1260" y="372" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" font-weight="bold" fill="white">TF Federated</text>
+  
+  <rect x="1190" y="383" width="140" height="18" fill="#673ab7" fill-opacity="0.3" stroke="#673ab7" rx="2"/>
+  <text x="1260" y="395" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" font-weight="bold" fill="white">TF Privacy</text>
+  
+  <rect x="1190" y="406" width="140" height="18" fill="#673ab7" fill-opacity="0.3" stroke="#673ab7" rx="2"/>
+  <text x="1260" y="418" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" font-weight="bold" fill="white">TF Ranking</text>
+  
+  <rect x="1190" y="429" width="140" height="18" fill="#673ab7" fill-opacity="0.3" stroke="#673ab7" rx="2"/>
+  <text x="1260" y="441" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" font-weight="bold" fill="white">Swift for TF</text>
+  
+  <!-- MLOps & Workflow -->
+  <rect x="500" y="480" width="400" height="120" fill="#795548" fill-opacity="0.1" stroke="#795548" stroke-width="3" rx="10"/>
+  <text x="700" y="505" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#795548">MLOps & Workflow Tools</text>
+  
+  <rect x="520" y="525" width="80" height="25" fill="#795548" fill-opacity="0.3" stroke="#795548" rx="3"/>
+  <text x="560" y="542" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" font-weight="bold" fill="white">MLflow</text>
+  
+  <rect x="620" y="525" width="80" height="25" fill="#795548" fill-opacity="0.3" stroke="#795548" rx="3"/>
+  <text x="660" y="542" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" font-weight="bold" fill="white">Kubeflow</text>
+  
+  <rect x="720" y="525" width="80" height="25" fill="#795548" fill-opacity="0.3" stroke="#795548" rx="3"/>
+  <text x="760" y="542" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" font-weight="bold" fill="white">Airflow</text>
+  
+  <rect x="820" y="525" width="80" height="25" fill="#795548" fill-opacity="0.3" stroke="#795548" rx="3"/>
+  <text x="860" y="542" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" font-weight="bold" fill="white">DVC</text>
+  
+  <rect x="570" y="560" width="80" height="25" fill="#795548" fill-opacity="0.3" stroke="#795548" rx="3"/>
+  <text x="610" y="577" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" font-weight="bold" fill="white">W&B</text>
+  
+  <rect x="670" y="560" width="80" height="25" fill="#795548" fill-opacity="0.3" stroke="#795548" rx="3"/>
+  <text x="710" y="577" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" font-weight="bold" fill="white">Neptune</text>
+  
+  <rect x="770" y="560" width="80" height="25" fill="#795548" fill-opacity="0.3" stroke="#795548" rx="3"/>
+  <text x="810" y="577" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" font-weight="bold" fill="white">Keras Tuner</text>
+  
+  <!-- Connection arrows -->
+  <path d="M 430 240 L 500 240" stroke="#666" stroke-width="2" fill="none" marker-end="url(#arrow)" opacity="0.6"/>
+  <path d="M 430 380 L 500 280" stroke="#666" stroke-width="2" fill="none" marker-end="url(#arrow)" opacity="0.6"/>
+  <path d="M 230 180 L 500 220" stroke="#666" stroke-width="2" fill="none" marker-end="url(#arrow)" opacity="0.6"/>
+  <path d="M 230 380 L 500 260" stroke="#666" stroke-width="2" fill="none" marker-end="url(#arrow)" opacity="0.6"/>
+  
+  <path d="M 900 240 L 970 130" stroke="#666" stroke-width="2" fill="none" marker-end="url(#arrow)" opacity="0.6"/>
+  <path d="M 900 250 L 970 250" stroke="#666" stroke-width="2" fill="none" marker-end="url(#arrow)" opacity="0.6"/>
+  <path d="M 900 260 L 970 380" stroke="#666" stroke-width="2" fill="none" marker-end="url(#arrow)" opacity="0.6"/>
+  <path d="M 900 270 L 1170 130" stroke="#666" stroke-width="2" fill="none" marker-end="url(#arrow)" opacity="0.6"/>
+  <path d="M 900 280 L 1170 250" stroke="#666" stroke-width="2" fill="none" marker-end="url(#arrow)" opacity="0.6"/>
+  <path d="M 900 290 L 1170 380" stroke="#666" stroke-width="2" fill="none" marker-end="url(#arrow)" opacity="0.6"/>
+  
+  <path d="M 700 300 L 700 480" stroke="#666" stroke-width="2" fill="none" marker-end="url(#arrow)" opacity="0.6"/>
+  
+  <!-- Ecosystem Benefits -->
+  <rect x="50" y="640" width="1300" height="120" fill="#263238" fill-opacity="0.05" stroke="#263238" stroke-width="2" rx="10"/>
+  <text x="700" y="665" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="#263238">TensorFlow Ecosystem Benefits</text>
+  
+  <rect x="80" y="685" width="240" height="60" fill="#ffffff" stroke="#4285f4" stroke-width="2" rx="5"/>
+  <text x="200" y="705" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#4285f4">Unified Platform</text>
+  <text x="90" y="720" font-family="Arial, sans-serif" font-size="9">• Single framework for research to production</text>
+  <text x="90" y="735" font-family="Arial, sans-serif" font-size="9">• Consistent APIs across all components</text>
+  
+  <rect x="340" y="685" width="240" height="60" fill="#ffffff" stroke="#0f9d58" stroke-width="2" rx="5"/>
+  <text x="460" y="705" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#0f9d58">Scalability</text>
+  <text x="350" y="720" font-family="Arial, sans-serif" font-size="9">• From mobile to massive TPU clusters</text>
+  <text x="350" y="735" font-family="Arial, sans-serif" font-size="9">• Distributed training strategies</text>
+  
+  <rect x="600" y="685" width="240" height="60" fill="#ffffff" stroke="#ea4335" stroke-width="2" rx="5"/>
+  <text x="720" y="705" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#ea4335">Flexibility</text>
+  <text x="610" y="720" font-family="Arial, sans-serif" font-size="9">• High-level Keras to low-level ops</text>
+  <text x="610" y="735" font-family="Arial, sans-serif" font-size="9">• Multiple deployment targets</text>
+  
+  <rect x="860" y="685" width="240" height="60" fill="#ffffff" stroke="#ff6f00" stroke-width="2" rx="5"/>
+  <text x="980" y="705" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#ff6f00">Community</text>
+  <text x="870" y="720" font-family="Arial, sans-serif" font-size="9">• Large open-source community</text>
+  <text x="870" y="735" font-family="Arial, sans-serif" font-size="9">• Rich ecosystem of tools</text>
+  
+  <rect x="1120" y="685" width="240" height="60" fill="#ffffff" stroke="#9c27b0" stroke-width="2" rx="5"/>
+  <text x="1240" y="705" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#9c27b0">Production Ready</text>
+  <text x="1130" y="720" font-family="Arial, sans-serif" font-size="9">• Enterprise-grade deployment</text>
+  <text x="1130" y="735" font-family="Arial, sans-serif" font-size="9">• Robust monitoring and serving</text>
+  
+  <text x="1350" y="790" text-anchor="end" font-family="Arial, sans-serif" font-size="10" fill="#666">v1.0</text>
+</svg>

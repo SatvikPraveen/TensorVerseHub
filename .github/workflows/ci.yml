@@ -1,0 +1,484 @@
+# Location: /.github/workflows/ci.yml
+
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+  schedule:
+    # Run tests daily at 2 AM UTC
+    - cron: "0 2 * * *"
+
+env:
+  PYTHON_VERSION: "3.9"
+  TF_VERSION: "2.13.0"
+
+jobs:
+  code-quality:
+    name: Code Quality Checks
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install flake8 black isort mypy
+          pip install -r requirements.txt
+
+      - name: Run Black formatter check
+        run: |
+          black --check --diff .
+
+      - name: Run isort import sorting check
+        run: |
+          isort --check-only --diff .
+
+      - name: Run flake8 linting
+        run: |
+          # Stop the build if there are Python syntax errors or undefined names
+          flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+          # Exit-zero treats all errors as warnings
+          flake8 . --count --exit-zero --max-complexity=10 --max-line-length=88 --statistics
+
+      - name: Run mypy type checking
+        run: |
+          mypy src/ --ignore-missing-imports
+        continue-on-error: true
+
+  unit-tests:
+    name: Unit Tests
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        python-version: ["3.8", "3.9", "3.10", "3.11"]
+        exclude:
+          # Reduce matrix size for efficiency
+          - os: windows-latest
+            python-version: "3.8"
+          - os: macos-latest
+            python-version: "3.8"
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Cache pip dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements*.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest pytest-cov pytest-xdist
+          pip install tensorflow==${{ env.TF_VERSION }}
+          pip install -r requirements.txt
+
+      - name: Run unit tests
+        run: |
+          pytest tests/ -v --cov=src --cov-report=xml --cov-report=term-missing -n auto
+
+      - name: Upload coverage reports
+        uses: codecov/codecov-action@v3
+        with:
+          file: ./coverage.xml
+          flags: unittests
+          name: codecov-umbrella
+          fail_ci_if_error: false
+
+  integration-tests:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    needs: [code-quality, unit-tests]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y graphviz
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install tensorflow==${{ env.TF_VERSION }}
+          pip install -r requirements.txt
+          pip install pytest pytest-xdist
+
+      - name: Run integration tests
+        run: |
+          pytest tests/test_integration.py -v -n auto --tb=short
+        timeout-minutes: 30
+
+  notebook-tests:
+    name: Notebook Tests
+    runs-on: ubuntu-latest
+    needs: [code-quality]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install tensorflow==${{ env.TF_VERSION }}
+          pip install nbformat nbconvert jupyter
+          pip install -r requirements.txt
+
+      - name: Test notebook execution
+        run: |
+          python tests/test_notebooks.py --notebooks-dir notebooks/ --timeout 300
+        timeout-minutes: 45
+
+      - name: Generate notebook test report
+        if: always()
+        run: |
+          python tests/test_notebooks.py --notebooks-dir notebooks/ --output notebook_test_report.html
+
+      - name: Upload notebook test results
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: notebook-test-results
+          path: |
+            notebook_test_report.html
+            *.log
+
+  model-benchmarks:
+    name: Model Benchmarks
+    runs-on: ubuntu-latest
+    needs: [unit-tests]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install tensorflow==${{ env.TF_VERSION }}
+          pip install -r requirements.txt
+          pip install psutil
+
+      - name: Run training benchmarks
+        run: |
+          python benchmarks/training_benchmarks.py --configs simple_cnn mlp_small --epochs 3 --output-csv
+        timeout-minutes: 20
+
+      - name: Run inference benchmarks
+        run: |
+          python benchmarks/inference_benchmarks.py --models-dir models --iterations 50 --output-csv
+        timeout-minutes: 15
+        continue-on-error: true
+
+      - name: Upload benchmark results
+        uses: actions/upload-artifact@v3
+        with:
+          name: benchmark-results
+          path: |
+            benchmarks/results/*.json
+            benchmarks/results/*.csv
+
+  security-scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install security tools
+        run: |
+          python -m pip install --upgrade pip
+          pip install bandit safety
+
+      - name: Run Bandit security linter
+        run: |
+          bandit -r src/ -f json -o bandit-report.json
+        continue-on-error: true
+
+      - name: Check dependencies for known vulnerabilities
+        run: |
+          safety check --json --output safety-report.json
+        continue-on-error: true
+
+      - name: Upload security scan results
+        uses: actions/upload-artifact@v3
+        with:
+          name: security-reports
+          path: |
+            bandit-report.json
+            safety-report.json
+
+  docker-build:
+    name: Docker Build Test
+    runs-on: ubuntu-latest
+    needs: [unit-tests]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker image
+        run: |
+          docker build -t tensorversehub:test .
+        timeout-minutes: 15
+
+      - name: Test Docker image
+        run: |
+          docker run --rm tensorversehub:test python -c "import tensorflow; print('TF Version:', tensorflow.__version__)"
+
+  performance-regression:
+    name: Performance Regression Tests
+    runs-on: ubuntu-latest
+    needs: [unit-tests]
+    if: github.event_name == 'pull_request'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Fetch full history for comparison
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install tensorflow==${{ env.TF_VERSION }}
+          pip install -r requirements.txt
+          pip install pytest-benchmark
+
+      - name: Run performance benchmarks
+        run: |
+          pytest tests/test_performance.py --benchmark-only --benchmark-json=benchmark.json
+        continue-on-error: true
+
+      - name: Compare with baseline
+        run: |
+          python scripts/compare_performance.py --current benchmark.json --baseline main
+        continue-on-error: true
+
+  documentation-check:
+    name: Documentation Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install documentation dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install sphinx sphinx-rtd-theme
+          pip install -r requirements.txt
+
+      - name: Check documentation builds
+        run: |
+          python scripts/generate_docs.py --project-root . --output-dir temp_docs
+
+      - name: Validate documentation links
+        run: |
+          # Check for broken internal links
+          find docs/ -name "*.md" -exec grep -H "](.*\.md)" {} \; | while read line; do
+            file=$(echo $line | cut -d: -f1)
+            link=$(echo $line | sed 's/.*](\([^)]*\)).*/\1/')
+            if [[ $link == *".md" ]] && [[ ! -f "docs/$link" ]]; then
+              echo "Broken link in $file: $link"
+              exit 1
+            fi
+          done
+
+  compatibility-tests:
+    name: TensorFlow Version Compatibility
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        tf-version: ["2.10.0", "2.11.0", "2.12.0", "2.13.0"]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install TensorFlow ${{ matrix.tf-version }}
+        run: |
+          python -m pip install --upgrade pip
+          pip install tensorflow==${{ matrix.tf-version }}
+          pip install -r requirements.txt
+
+      - name: Run compatibility tests
+        run: |
+          python -c "import tensorflow as tf; print(f'TensorFlow {tf.__version__} compatibility test passed')"
+          pytest tests/test_compatibility.py -v
+        continue-on-error: true
+
+  deploy-staging:
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
+    needs: [integration-tests, notebook-tests]
+    if: github.ref == 'refs/heads/develop'
+    environment: staging
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Deploy to staging environment
+        run: |
+          echo "Deploying to staging environment..."
+          # Add actual deployment commands here
+          echo "Staging deployment completed"
+
+  release-preparation:
+    name: Prepare Release
+    runs-on: ubuntu-latest
+    needs: [integration-tests, notebook-tests, model-benchmarks, security-scan]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install release tools
+        run: |
+          python -m pip install --upgrade pip
+          pip install bump2version
+          pip install -r requirements.txt
+
+      - name: Generate release artifacts
+        run: |
+          # Generate documentation
+          python scripts/generate_docs.py --project-root . --output-dir release_docs
+
+          # Create distribution packages
+          python setup.py sdist bdist_wheel
+
+          # Generate changelog
+          git log --oneline --since="1 month ago" > CHANGELOG_LATEST.md
+
+      - name: Upload release artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: release-artifacts
+          path: |
+            dist/
+            release_docs/
+            CHANGELOG_LATEST.md
+
+  notify-slack:
+    name: Notify Team
+    runs-on: ubuntu-latest
+    needs: [integration-tests, notebook-tests]
+    if: always() && (github.ref == 'refs/heads/main' || github.event_name == 'pull_request')
+
+    steps:
+      - name: Send Slack notification
+        uses: 8398a7/action-slack@v3
+        with:
+          status: ${{ job.status }}
+          channel: "#tensorversehub-ci"
+          fields: repo,message,commit,author,action,eventName,ref,workflow
+          mention: here
+          if_mention: failure,cancelled
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+  # Job status summary for PR checks
+  ci-success:
+    name: CI Success
+    runs-on: ubuntu-latest
+    needs:
+      [
+        code-quality,
+        unit-tests,
+        integration-tests,
+        notebook-tests,
+        security-scan,
+      ]
+    if: always()
+
+    steps:
+      - name: Check all jobs status
+        run: |
+          if [[ "${{ needs.code-quality.result }}" == "success" && \
+                "${{ needs.unit-tests.result }}" == "success" && \
+                "${{ needs.integration-tests.result }}" == "success" && \
+                "${{ needs.notebook-tests.result }}" == "success" && \
+                "${{ needs.security-scan.result }}" == "success" ]]; then
+            echo "All CI jobs passed successfully! ✅"
+            exit 0
+          else
+            echo "Some CI jobs failed ❌"
+            echo "Code Quality: ${{ needs.code-quality.result }}"
+            echo "Unit Tests: ${{ needs.unit-tests.result }}"
+            echo "Integration Tests: ${{ needs.integration-tests.result }}"
+            echo "Notebook Tests: ${{ needs.notebook-tests.result }}"
+            echo "Security Scan: ${{ needs.security-scan.result }}"
+            exit 1
+          fi

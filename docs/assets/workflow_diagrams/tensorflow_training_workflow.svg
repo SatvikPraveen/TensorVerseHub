@@ -1,0 +1,318 @@
+<svg viewBox="0 0 1200 1000" xmlns="http://www.w3.org/2000/svg">
+  <!-- File Location: docs/assets/workflow_diagrams/tensorflow_training_workflow.svg -->
+  
+  <!-- Background -->
+  <rect width="1200" height="1000" fill="#f8f9fa"/>
+  
+  <!-- Title -->
+  <text x="600" y="40" text-anchor="middle" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="#1a1a1a">
+    TensorFlow Training Workflow
+  </text>
+  
+  <!-- Data Pipeline Stage -->
+  <rect x="50" y="80" width="300" height="180" fill="#4285f4" fill-opacity="0.1" stroke="#4285f4" stroke-width="2" rx="10"/>
+  <text x="200" y="110" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#4285f4">
+    Data Pipeline
+  </text>
+  
+  <!-- Data sources -->
+  <rect x="70" y="130" width="80" height="40" fill="#4285f4" fill-opacity="0.3" stroke="#4285f4" rx="5"/>
+  <text x="110" y="155" text-anchor="middle" font-family="Arial, sans-serif" font-size="11">Raw Data</text>
+  
+  <rect x="160" y="130" width="80" height="40" fill="#4285f4" fill-opacity="0.3" stroke="#4285f4" rx="5"/>
+  <text x="200" y="155" text-anchor="middle" font-family="Arial, sans-serif" font-size="11">TFRecord</text>
+  
+  <rect x="250" y="130" width="80" height="40" fill="#4285f4" fill-opacity="0.3" stroke="#4285f4" rx="5"/>
+  <text x="290" y="155" text-anchor="middle" font-family="Arial, sans-serif" font-size="11">tf.data</text>
+  
+  <!-- Processing steps -->
+  <rect x="70" y="190" width="260" height="30" fill="#4285f4" fill-opacity="0.4" stroke="#4285f4" rx="3"/>
+  <text x="200" y="210" text-anchor="middle" font-family="Arial, sans-serif" font-size="12">Preprocessing & Augmentation</text>
+  
+  <rect x="70" y="230" width="260" height="20" fill="#4285f4" fill-opacity="0.4" stroke="#4285f4" rx="3"/>
+  <text x="200" y="245" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">Batch, Shuffle, Prefetch</text>
+  
+  <!-- Model Definition Stage -->
+  <rect x="400" y="80" width="300" height="180" fill="#0f9d58" fill-opacity="0.1" stroke="#0f9d58" stroke-width="2" rx="10"/>
+  <text x="550" y="110" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#0f9d58">
+    Model Definition
+  </text>
+  
+  <!-- Model types -->
+  <rect x="420" y="130" width="80" height="30" fill="#0f9d58" fill-opacity="0.3" stroke="#0f9d58" rx="3"/>
+  <text x="460" y="150" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">Sequential</text>
+  
+  <rect x="510" y="130" width="80" height="30" fill="#0f9d58" fill-opacity="0.3" stroke="#0f9d58" rx="3"/>
+  <text x="550" y="150" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">Functional</text>
+  
+  <rect x="600" y="130" width="80" height="30" fill="#0f9d58" fill-opacity="0.3" stroke="#0f9d58" rx="3"/>
+  <text x="640" y="150" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">Subclassing</text>
+  
+  <!-- Layers -->
+  <rect x="420" y="170" width="260" height="25" fill="#0f9d58" fill-opacity="0.4" stroke="#0f9d58" rx="3"/>
+  <text x="550" y="187" text-anchor="middle" font-family="Arial, sans-serif" font-size="11">Add Layers (Dense, Conv2D, LSTM, etc.)</text>
+  
+  <rect x="420" y="200" width="260" height="25" fill="#0f9d58" fill-opacity="0.4" stroke="#0f9d58" rx="3"/>
+  <text x="550" y="217" text-anchor="middle" font-family="Arial, sans-serif" font-size="11">Define Architecture & Connections</text>
+  
+  <rect x="420" y="230" width="260" height="25" fill="#0f9d58" fill-opacity="0.4" stroke="#0f9d58" rx="3"/>
+  <text x="550" y="247" text-anchor="middle" font-family="Arial, sans-serif" font-size="11">Custom Layers & Components</text>
+  
+  <!-- Compilation Stage -->
+  <rect x="750" y="80" width="300" height="180" fill="#ea4335" fill-opacity="0.1" stroke="#ea4335" stroke-width="2" rx="10"/>
+  <text x="900" y="110" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#ea4335">
+    Model Compilation
+  </text>
+  
+  <!-- Compilation components -->
+  <rect x="770" y="130" width="260" height="30" fill="#ea4335" fill-opacity="0.3" stroke="#ea4335" rx="3"/>
+  <text x="900" y="150" text-anchor="middle" font-family="Arial, sans-serif" font-size="12">Loss Function</text>
+  
+  <rect x="770" y="170" width="260" height="30" fill="#ea4335" fill-opacity="0.3" stroke="#ea4335" rx="3"/>
+  <text x="900" y="190" text-anchor="middle" font-family="Arial, sans-serif" font-size="12">Optimizer (Adam, SGD, RMSprop)</text>
+  
+  <rect x="770" y="210" width="260" height="30" fill="#ea4335" fill-opacity="0.3" stroke="#ea4335" rx="3"/>
+  <text x="900" y="230" text-anchor="middle" font-family="Arial, sans-serif" font-size="12">Metrics (Accuracy, F1, etc.)</text>
+  
+  <!-- Training Stage -->
+  <rect x="50" y="300" width="500" height="250" fill="#ff6f00" fill-opacity="0.1" stroke="#ff6f00" stroke-width="2" rx="10"/>
+  <text x="300" y="330" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="#ff6f00">
+    Training Process
+  </text>
+  
+  <!-- Training loop -->
+  <rect x="80" y="350" width="200" height="180" fill="#ff6f00" fill-opacity="0.15" stroke="#ff6f00" rx="5"/>
+  <text x="180" y="375" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#ff6f00">
+    Forward Pass
+  </text>
+  
+  <rect x="90" y="390" width="180" height="25" fill="#ff6f00" fill-opacity="0.3" stroke="#ff6f00" rx="2"/>
+  <text x="180" y="407" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">Input → Model → Predictions</text>
+  
+  <rect x="90" y="420" width="180" height="25" fill="#ff6f00" fill-opacity="0.3" stroke="#ff6f00" rx="2"/>
+  <text x="180" y="437" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">Loss Calculation</text>
+  
+  <rect x="90" y="450" width="180" height="25" fill="#ff6f00" fill-opacity="0.3" stroke="#ff6f00" rx="2"/>
+  <text x="180" y="467" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">Gradient Computation</text>
+  
+  <rect x="90" y="480" width="180" height="25" fill="#ff6f00" fill-opacity="0.3" stroke="#ff6f00" rx="2"/>
+  <text x="180" y="497" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">Weight Updates</text>
+  
+  <!-- Validation -->
+  <rect x="300" y="350" width="200" height="180" fill="#ff6f00" fill-opacity="0.15" stroke="#ff6f00" rx="5"/>
+  <text x="400" y="375" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#ff6f00">
+    Validation
+  </text>
+  
+  <rect x="310" y="390" width="180" height="25" fill="#ff6f00" fill-opacity="0.3" stroke="#ff6f00" rx="2"/>
+  <text x="400" y="407" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">Validation Data</text>
+  
+  <rect x="310" y="420" width="180" height="25" fill="#ff6f00" fill-opacity="0.3" stroke="#ff6f00" rx="2"/>
+  <text x="400" y="437" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">Performance Metrics</text>
+  
+  <rect x="310" y="450" width="180" height="25" fill="#ff6f00" fill-opacity="0.3" stroke="#ff6f00" rx="2"/>
+  <text x="400" y="467" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">Early Stopping</text>
+  
+  <rect x="310" y="480" width="180" height="25" fill="#ff6f00" fill-opacity="0.3" stroke="#ff6f00" rx="2"/>
+  <text x="400" y="497" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">Model Checkpoints</text>
+  
+  <!-- Callbacks & Monitoring -->
+  <rect x="600" y="300" width="300" height="250" fill="#9c27b0" fill-opacity="0.1" stroke="#9c27b0" stroke-width="2" rx="10"/>
+  <text x="750" y="330" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="#9c27b0">
+    Callbacks & Monitoring
+  </text>
+  
+  <!-- Callback types -->
+  <rect x="620" y="350" width="120" height="30" fill="#9c27b0" fill-opacity="0.3" stroke="#9c27b0" rx="3"/>
+  <text x="680" y="370" text-anchor="middle" font-family="Arial, sans-serif" font-size="11">EarlyStopping</text>
+  
+  <rect x="750" y="350" width="120" height="30" fill="#9c27b0" fill-opacity="0.3" stroke="#9c27b0" rx="3"/>
+  <text x="810" y="370" text-anchor="middle" font-family="Arial, sans-serif" font-size="11">ModelCheckpoint</text>
+  
+  <rect x="620" y="390" width="120" height="30" fill="#9c27b0" fill-opacity="0.3" stroke="#9c27b0" rx="3"/>
+  <text x="680" y="410" text-anchor="middle" font-family="Arial, sans-serif" font-size="11">ReduceLROnPlateau</text>
+  
+  <rect x="750" y="390" width="120" height="30" fill="#9c27b0" fill-opacity="0.3" stroke="#9c27b0" rx="3"/>
+  <text x="810" y="410" text-anchor="middle" font-family="Arial, sans-serif" font-size="11">TensorBoard</text>
+  
+  <rect x="620" y="430" width="120" height="30" fill="#9c27b0" fill-opacity="0.3" stroke="#9c27b0" rx="3"/>
+  <text x="680" y="450" text-anchor="middle" font-family="Arial, sans-serif" font-size="11">CSVLogger</text>
+  
+  <rect x="750" y="430" width="120" height="30" fill="#9c27b0" fill-opacity="0.3" stroke="#9c27b0" rx="3"/>
+  <text x="810" y="450" text-anchor="middle" font-family="Arial, sans-serif" font-size="11">Custom Callbacks</text>
+  
+  <!-- Monitoring dashboard -->
+  <rect x="620" y="480" width="250" height="50" fill="#9c27b0" fill-opacity="0.2" stroke="#9c27b0" rx="3"/>
+  <text x="745" y="500" text-anchor="middle" font-family="Arial, sans-serif" font-size="12">Real-time Monitoring</text>
+  <text x="745" y="515" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">Loss, Accuracy, Learning Rate</text>
+  
+  <!-- Custom Training Loop -->
+  <rect x="50" y="580" width="400" height="150" fill="#00acc1" fill-opacity="0.1" stroke="#00acc1" stroke-width="2" rx="10"/>
+  <text x="250" y="610" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#00acc1">
+    Custom Training Loop
+  </text>
+  
+  <rect x="70" y="630" width="360" height="25" fill="#00acc1" fill-opacity="0.3" stroke="#00acc1" rx="2"/>
+  <text x="250" y="647" text-anchor="middle" font-family="Arial, sans-serif" font-size="11">with tf.GradientTape() as tape:</text>
+  
+  <rect x="90" y="660" width="320" height="20" fill="#00acc1" fill-opacity="0.2" stroke="#00acc1" rx="2"/>
+  <text x="250" y="674" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">predictions = model(inputs, training=True)</text>
+  
+  <rect x="90" y="685" width="320" height="20" fill="#00acc1" fill-opacity="0.2" stroke="#00acc1" rx="2"/>
+  <text x="250" y="699" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">loss = loss_fn(labels, predictions)</text>
+  
+  <rect x="70" y="710" width="360" height="15" fill="#00acc1" fill-opacity="0.3" stroke="#00acc1" rx="2"/>
+  <text x="250" y="722" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">gradients = tape.gradient(loss, model.trainable_variables)</text>
+  
+  <!-- Evaluation Stage -->
+  <rect x="500" y="580" width="300" height="150" fill="#607d8b" fill-opacity="0.1" stroke="#607d8b" stroke-width="2" rx="10"/>
+  <text x="650" y="610" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#607d8b">
+    Model Evaluation
+  </text>
+  
+  <rect x="520" y="630" width="120" height="30" fill="#607d8b" fill-opacity="0.3" stroke="#607d8b" rx="3"/>
+  <text x="580" y="650" text-anchor="middle" font-family="Arial, sans-serif" font-size="11">Test Dataset</text>
+  
+  <rect x="660" y="630" width="120" height="30" fill="#607d8b" fill-opacity="0.3" stroke="#607d8b" rx="3"/>
+  <text x="720" y="650" text-anchor="middle" font-family="Arial, sans-serif" font-size="11">model.evaluate()</text>
+  
+  <rect x="520" y="670" width="260" height="25" fill="#607d8b" fill-opacity="0.2" stroke="#607d8b" rx="2"/>
+  <text x="650" y="687" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">Performance Metrics & Visualization</text>
+  
+  <rect x="520" y="700" width="260" height="25" fill="#607d8b" fill-opacity="0.2" stroke="#607d8b" rx="2"/>
+  <text x="650" y="717" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">Confusion Matrix, ROC Curves</text>
+  
+  <!-- Deployment Stage -->
+  <rect x="50" y="760" width="550" height="200" fill="#795548" fill-opacity="0.1" stroke="#795548" stroke-width="2" rx="10"/>
+  <text x="325" y="790" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="#795548">
+    Model Deployment
+  </text>
+  
+  <!-- Deployment options -->
+  <rect x="70" y="810" width="120" height="40" fill="#795548" fill-opacity="0.3" stroke="#795548" rx="3"/>
+  <text x="130" y="835" text-anchor="middle" font-family="Arial, sans-serif" font-size="11">SavedModel</text>
+  
+  <rect x="200" y="810" width="120" height="40" fill="#795548" fill-opacity="0.3" stroke="#795548" rx="3"/>
+  <text x="260" y="835" text-anchor="middle" font-family="Arial, sans-serif" font-size="11">TensorFlow Serving</text>
+  
+  <rect x="330" y="810" width="120" height="40" fill="#795548" fill-opacity="0.3" stroke="#795548" rx="3"/>
+  <text x="390" y="835" text-anchor="middle" font-family="Arial, sans-serif" font-size="11">TensorFlow Lite</text>
+  
+  <rect x="460" y="810" width="120" height="40" fill="#795548" fill-opacity="0.3" stroke="#795548" rx="3"/>
+  <text x="520" y="835" text-anchor="middle" font-family="Arial, sans-serif" font-size="11">TensorFlow.js</text>
+  
+  <!-- Cloud deployment -->
+  <rect x="70" y="860" width="180" height="40" fill="#795548" fill-opacity="0.2" stroke="#795548" rx="3"/>
+  <text x="160" y="885" text-anchor="middle" font-family="Arial, sans-serif" font-size="11">Cloud Platforms</text>
+  
+  <rect x="260" y="860" width="180" height="40" fill="#795548" fill-opacity="0.2" stroke="#795548" rx="3"/>
+  <text x="350" y="885" text-anchor="middle" font-family="Arial, sans-serif" font-size="11">Docker Containers</text>
+  
+  <rect x="450" y="860" width="130" height="40" fill="#795548" fill-opacity="0.2" stroke="#795548" rx="3"/>
+  <text x="515" y="885" text-anchor="middle" font-family="Arial, sans-serif" font-size="11">Edge Devices</text>
+  
+  <!-- Production monitoring -->
+  <rect x="70" y="910" width="510" height="35" fill="#795548" fill-opacity="0.15" stroke="#795548" rx="3"/>
+  <text x="325" y="932" text-anchor="middle" font-family="Arial, sans-serif" font-size="12">Production Monitoring & A/B Testing</text>
+  
+  <!-- Model Optimization -->
+  <rect x="650" y="760" width="500" height="200" fill="#e91e63" fill-opacity="0.1" stroke="#e91e63" stroke-width="2" rx="10"/>
+  <text x="900" y="790" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="#e91e63">
+    Model Optimization
+  </text>
+  
+  <!-- Optimization techniques -->
+  <rect x="670" y="810" width="100" height="35" fill="#e91e63" fill-opacity="0.3" stroke="#e91e63" rx="3"/>
+  <text x="720" y="832" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">Quantization</text>
+  
+  <rect x="780" y="810" width="100" height="35" fill="#e91e63" fill-opacity="0.3" stroke="#e91e63" rx="3"/>
+  <text x="830" y="832" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">Pruning</text>
+  
+  <rect x="890" y="810" width="100" height="35" fill="#e91e63" fill-opacity="0.3" stroke="#e91e63" rx="3"/>
+  <text x="940" y="832" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">Distillation</text>
+  
+  <rect x="1000" y="810" width="130" height="35" fill="#e91e63" fill-opacity="0.3" stroke="#e91e63" rx="3"/>
+  <text x="1065" y="832" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">Mixed Precision</text>
+  
+  <!-- Hardware acceleration -->
+  <rect x="670" y="855" width="120" height="30" fill="#e91e63" fill-opacity="0.2" stroke="#e91e63" rx="3"/>
+  <text x="730" y="875" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">GPU/TPU</text>
+  
+  <rect x="800" y="855" width="120" height="30" fill="#e91e63" fill-opacity="0.2" stroke="#e91e63" rx="3"/>
+  <text x="860" y="875" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">XLA Compiler</text>
+  
+  <rect x="930" y="855" width="120" height="30" fill="#e91e63" fill-opacity="0.2" stroke="#e91e63" rx="3"/>
+  <text x="990" y="875" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">TensorRT</text>
+  
+  <!-- Performance monitoring -->
+  <rect x="670" y="895" width="460" height="50" fill="#e91e63" fill-opacity="0.15" stroke="#e91e63" rx="3"/>
+  <text x="900" y="915" text-anchor="middle" font-family="Arial, sans-serif" font-size="11">Performance Profiling</text>
+  <text x="900" y="930" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">Memory Usage, Latency, Throughput</text>
+  
+  <!-- Arrows showing workflow -->
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#333"/>
+    </marker>
+  </defs>
+  
+  <!-- Main workflow arrows -->
+  <path d="M 350 170 L 400 170" stroke="#333" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+  <path d="M 700 170 L 750 170" stroke="#333" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+  <path d="M 550 260 L 550 300" stroke="#333" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+  <path d="M 300 550 L 300 580" stroke="#333" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+  <path d="M 450 650 L 500 650" stroke="#333" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+  <path d="M 325 730 L 325 760" stroke="#333" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+  <path d="M 600 850 L 650 850" stroke="#333" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+  
+  <!-- Feedback arrows -->
+  <path d="M 750 550 L 900 300" stroke="#666" stroke-width="1" stroke-dasharray="5,5" fill="none" marker-end="url(#arrow)"/>
+  <path d="M 650 730 L 400 300" stroke="#666" stroke-width="1" stroke-dasharray="5,5" fill="none" marker-end="url(#arrow)"/>
+  
+  <!-- Labels for workflow stages -->
+  <text x="375" y="155" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#666">Define</text>
+  <text x="725" y="155" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#666">Compile</text>
+  <text x="565" y="285" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#666">Train</text>
+  <text x="315" y="570" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#666">Custom Loop</text>
+  <text x="475" y="635" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#666">Evaluate</text>
+  <text x="340" y="750" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#666">Deploy</text>
+  <text x="625" y="835" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#666">Optimize</text>
+  
+  <!-- Code snippets -->
+  <text x="970" y="150" font-family="monospace" font-size="9" fill="#666">
+    model.compile(
+  </text>
+  <text x="980" y="165" font-family="monospace" font-size="9" fill="#666">
+    optimizer='adam',
+  </text>
+  <text x="980" y="180" font-family="monospace" font-size="9" fill="#666">
+    loss='categorical_crossentropy'
+  </text>
+  <text x="970" y="195" font-family="monospace" font-size="9" fill="#666">
+    )
+  </text>
+  
+  <text x="950" y="370" font-family="monospace" font-size="9" fill="#666">
+    model.fit(
+  </text>
+  <text x="960" y="385" font-family="monospace" font-size="9" fill="#666">
+    train_data,
+  </text>
+  <text x="960" y="400" font-family="monospace" font-size="9" fill="#666">
+    validation_data=val_data,
+  </text>
+  <text x="960" y="415" font-family="monospace" font-size="9" fill="#666">
+    epochs=100,
+  </text>
+  <text x="960" y="430" font-family="monospace" font-size="9" fill="#666">
+    callbacks=[...]
+  </text>
+  <text x="950" y="445" font-family="monospace" font-size="9" fill="#666">
+    )
+  </text>
+  
+  <!-- Version info -->
+  <text x="1150" y="990" text-anchor="end" font-family="Arial, sans-serif" font-size="10" fill="#999">
+    TensorFlow 2.15+ Training Workflow
+  </text>
+</svg>

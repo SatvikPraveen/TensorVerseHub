@@ -1,0 +1,227 @@
+<svg viewBox="0 0 1400 800" xmlns="http://www.w3.org/2000/svg">
+  <!-- File Location: docs/assets/workflow_diagrams/model_evaluation_workflow.svg -->
+  
+  <rect width="1400" height="800" fill="#f8f9fa"/>
+  
+  <text x="700" y="40" text-anchor="middle" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="#1a1a1a">
+    Model Evaluation Workflow
+  </text>
+  
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#333"/>
+    </marker>
+  </defs>
+  
+  <!-- Data Preparation -->
+  <rect x="50" y="80" width="1300" height="70" fill="#4285f4" fill-opacity="0.1" stroke="#4285f4" stroke-width="3" rx="10"/>
+  <text x="700" y="105" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#4285f4">1. Evaluation Data Preparation</text>
+  
+  <rect x="100" y="120" width="80" height="25" fill="#4285f4" fill-opacity="0.3" stroke="#4285f4" rx="3"/>
+  <text x="140" y="135" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" font-weight="bold" fill="white">Test Set</text>
+  
+  <rect x="200" y="120" width="80" height="25" fill="#4285f4" fill-opacity="0.3" stroke="#4285f4" rx="3"/>
+  <text x="240" y="135" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" font-weight="bold" fill="white">Validation</text>
+  
+  <rect x="300" y="120" width="80" height="25" fill="#4285f4" fill-opacity="0.3" stroke="#4285f4" rx="3"/>
+  <text x="340" y="135" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" font-weight="bold" fill="white">Cross-Val</text>
+  
+  <rect x="400" y="120" width="80" height="25" fill="#4285f4" fill-opacity="0.3" stroke="#4285f4" rx="3"/>
+  <text x="440" y="135" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" font-weight="bold" fill="white">Holdout</text>
+  
+  <rect x="500" y="120" width="80" height="25" fill="#4285f4" fill-opacity="0.3" stroke="#4285f4" rx="3"/>
+  <text x="540" y="135" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" font-weight="bold" fill="white">Stratified</text>
+  
+  <rect x="600" y="120" width="80" height="25" fill="#4285f4" fill-opacity="0.3" stroke="#4285f4" rx="3"/>
+  <text x="640" y="135" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" font-weight="bold" fill="white">Time Series</text>
+  
+  <rect x="700" y="120" width="80" height="25" fill="#4285f4" fill-opacity="0.3" stroke="#4285f4" rx="3"/>
+  <text x="740" y="135" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" font-weight="bold" fill="white">Bootstrap</text>
+  
+  <rect x="800" y="120" width="90" height="25" fill="#4285f4" fill-opacity="0.3" stroke="#4285f4" rx="3"/>
+  <text x="845" y="135" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" font-weight="bold" fill="white">Out-of-Sample</text>
+  
+  <rect x="910" y="120" width="100" height="25" fill="#4285f4" fill-opacity="0.3" stroke="#4285f4" rx="3"/>
+  <text x="960" y="135" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" font-weight="bold" fill="white">Domain Shift</text>
+  
+  <rect x="1030" y="120" width="90" height="25" fill="#4285f4" fill-opacity="0.3" stroke="#4285f4" rx="3"/>
+  <text x="1075" y="135" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" font-weight="bold" fill="white">A/B Testing</text>
+  
+  <!-- Core Metrics -->
+  <rect x="50" y="170" width="1300" height="100" fill="#0f9d58" fill-opacity="0.1" stroke="#0f9d58" stroke-width="3" rx="10"/>
+  <text x="700" y="195" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#0f9d58">2. Core Evaluation Metrics</text>
+  
+  <!-- Classification -->
+  <rect x="100" y="215" width="150" height="45" fill="#0f9d58" fill-opacity="0.15" stroke="#0f9d58" rx="3"/>
+  <text x="175" y="230" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#0f9d58">Classification</text>
+  <text x="175" y="245" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">Accuracy | Precision | Recall</text>
+  <text x="175" y="255" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">F1 | ROC-AUC | PR-AUC</text>
+  
+  <!-- Regression -->
+  <rect x="270" y="215" width="150" height="45" fill="#0f9d58" fill-opacity="0.15" stroke="#0f9d58" rx="3"/>
+  <text x="345" y="230" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#0f9d58">Regression</text>
+  <text x="345" y="245" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">MAE | MSE | RMSE</text>
+  <text x="345" y="255" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">R² | MAPE | Huber</text>
+  
+  <!-- Deep Learning -->
+  <rect x="440" y="215" width="150" height="45" fill="#0f9d58" fill-opacity="0.15" stroke="#0f9d58" rx="3"/>
+  <text x="515" y="230" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#0f9d58">Deep Learning</text>
+  <text x="515" y="245" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">Loss | Perplexity | Top-k</text>
+  <text x="515" y="255" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">BLEU | ROUGE | FID</text>
+  
+  <!-- Computer Vision -->
+  <rect x="610" y="215" width="150" height="45" fill="#0f9d58" fill-opacity="0.15" stroke="#0f9d58" rx="3"/>
+  <text x="685" y="230" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#0f9d58">Computer Vision</text>
+  <text x="685" y="245" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">IoU | mAP | SSIM</text>
+  <text x="685" y="255" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">PSNR | LPIPS | IS</text>
+  
+  <!-- Business -->
+  <rect x="780" y="215" width="150" height="45" fill="#0f9d58" fill-opacity="0.15" stroke="#0f9d58" rx="3"/>
+  <text x="855" y="230" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#0f9d58">Business</text>
+  <text x="855" y="245" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">ROI | CTR | Conversion</text>
+  <text x="855" y="255" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">Churn | LTV | Revenue</text>
+  
+  <!-- Fairness -->
+  <rect x="950" y="215" width="150" height="45" fill="#0f9d58" fill-opacity="0.15" stroke="#0f9d58" rx="3"/>
+  <text x="1025" y="230" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#0f9d58">Fairness</text>
+  <text x="1025" y="245" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">Demographic Parity</text>
+  <text x="1025" y="255" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">Equalized Odds</text>
+  
+  <!-- Performance -->
+  <rect x="1120" y="215" width="150" height="45" fill="#0f9d58" fill-opacity="0.15" stroke="#0f9d58" rx="3"/>
+  <text x="1195" y="230" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#0f9d58">Performance</text>
+  <text x="1195" y="245" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">Latency | Throughput</text>
+  <text x="1195" y="255" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">Memory | Energy</text>
+  
+  <!-- Advanced Analysis -->
+  <rect x="50" y="290" width="1300" height="100" fill="#ea4335" fill-opacity="0.1" stroke="#ea4335" stroke-width="3" rx="10"/>
+  <text x="700" y="315" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#ea4335">3. Advanced Analysis Techniques</text>
+  
+  <!-- Error Analysis -->
+  <rect x="100" y="335" width="160" height="45" fill="#ea4335" fill-opacity="0.15" stroke="#ea4335" rx="3"/>
+  <text x="180" y="350" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#ea4335">Error Analysis</text>
+  <text x="180" y="365" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">Confusion Matrix | Residuals</text>
+  <text x="180" y="375" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">Error Distribution | Outliers</text>
+  
+  <!-- Statistical Testing -->
+  <rect x="280" y="335" width="160" height="45" fill="#ea4335" fill-opacity="0.15" stroke="#ea4335" rx="3"/>
+  <text x="360" y="350" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#ea4335">Statistical Testing</text>
+  <text x="360" y="365" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">t-test | McNemar | Wilcoxon</text>
+  <text x="360" y="375" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">Bootstrap CI | p-values</text>
+  
+  <!-- Interpretability -->
+  <rect x="460" y="335" width="160" height="45" fill="#ea4335" fill-opacity="0.15" stroke="#ea4335" rx="3"/>
+  <text x="540" y="350" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#ea4335">Interpretability</text>
+  <text x="540" y="365" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">SHAP | LIME | Grad-CAM</text>
+  <text x="540" y="375" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">Feature Attribution</text>
+  
+  <!-- Robustness -->
+  <rect x="640" y="335" width="160" height="45" fill="#ea4335" fill-opacity="0.15" stroke="#ea4335" rx="3"/>
+  <text x="720" y="350" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#ea4335">Robustness</text>
+  <text x="720" y="365" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">Adversarial | Noise Testing</text>
+  <text x="720" y="375" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">Perturbation | Edge Cases</text>
+  
+  <!-- Calibration -->
+  <rect x="820" y="335" width="160" height="45" fill="#ea4335" fill-opacity="0.15" stroke="#ea4335" rx="3"/>
+  <text x="900" y="350" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#ea4335">Calibration</text>
+  <text x="900" y="365" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">Reliability Diagrams</text>
+  <text x="900" y="375" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">Brier Score | ECE</text>
+  
+  <!-- Data Quality -->
+  <rect x="1000" y="335" width="160" height="45" fill="#ea4335" fill-opacity="0.15" stroke="#ea4335" rx="3"/>
+  <text x="1080" y="350" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#ea4335">Data Quality</text>
+  <text x="1080" y="365" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">Distribution Shift</text>
+  <text x="1080" y="375" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">Feature Drift | Bias</text>
+  
+  <!-- Model Comparison -->
+  <rect x="50" y="410" width="1300" height="80" fill="#ff6f00" fill-opacity="0.1" stroke="#ff6f00" stroke-width="3" rx="10"/>
+  <text x="700" y="435" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#ff6f00">4. Model Comparison & Selection</text>
+  
+  <rect x="150" y="455" width="100" height="30" fill="#ff6f00" fill-opacity="0.3" stroke="#ff6f00" rx="3"/>
+  <text x="200" y="473" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" font-weight="bold" fill="white">A/B Testing</text>
+  
+  <rect x="270" y="455" width="120" height="30" fill="#ff6f00" fill-opacity="0.3" stroke="#ff6f00" rx="3"/>
+  <text x="330" y="473" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" font-weight="bold" fill="white">Champion-Challenger</text>
+  
+  <rect x="410" y="455" width="120" height="30" fill="#ff6f00" fill-opacity="0.3" stroke="#ff6f00" rx="3"/>
+  <text x="470" y="473" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" font-weight="bold" fill="white">Multi-Armed Bandit</text>
+  
+  <rect x="550" y="455" width="100" height="30" fill="#ff6f00" fill-opacity="0.3" stroke="#ff6f00" rx="3"/>
+  <text x="600" y="473" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" font-weight="bold" fill="white">Ensemble</text>
+  
+  <rect x="670" y="455" width="100" height="30" fill="#ff6f00" fill-opacity="0.3" stroke="#ff6f00" rx="3"/>
+  <text x="720" y="473" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" font-weight="bold" fill="white">Grid Search</text>
+  
+  <rect x="790" y="455" width="100" height="30" fill="#ff6f00" fill-opacity="0.3" stroke="#ff6f00" rx="3"/>
+  <text x="840" y="473" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" font-weight="bold" fill="white">Bayesian Opt</text>
+  
+  <rect x="910" y="455" width="100" height="30" fill="#ff6f00" fill-opacity="0.3" stroke="#ff6f00" rx="3"/>
+  <text x="960" y="473" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" font-weight="bold" fill="white">AutoML</text>
+  
+  <rect x="1030" y="455" width="120" height="30" fill="#ff6f00" fill-opacity="0.3" stroke="#ff6f00" rx="3"/>
+  <text x="1090" y="473" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" font-weight="bold" fill="white">Neural Architecture</text>
+  
+  <!-- Production Monitoring -->
+  <rect x="50" y="510" width="1300" height="220" fill="#9c27b0" fill-opacity="0.1" stroke="#9c27b0" stroke-width="3" rx="10"/>
+  <text x="700" y="535" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#9c27b0">5. Production Monitoring & Continuous Evaluation</text>
+  
+  <!-- Real-time Monitoring -->
+  <rect x="100" y="555" width="180" height="50" fill="#9c27b0" fill-opacity="0.15" stroke="#9c27b0" rx="3"/>
+  <text x="190" y="575" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#9c27b0">Real-time Monitoring</text>
+  <text x="190" y="590" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">Prediction | Data | Concept Drift</text>
+  <text x="190" y="600" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">Alert Systems | Anomaly Detection</text>
+  
+  <!-- Model Health -->
+  <rect x="300" y="555" width="180" height="50" fill="#9c27b0" fill-opacity="0.15" stroke="#9c27b0" rx="3"/>
+  <text x="390" y="575" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#9c27b0">Model Health</text>
+  <text x="390" y="590" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">Accuracy Drop | Feature Stability</text>
+  <text x="390" y="600" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">Latency SLA | Error Rates</text>
+  
+  <!-- Business Impact -->
+  <rect x="500" y="555" width="180" height="50" fill="#9c27b0" fill-opacity="0.15" stroke="#9c27b0" rx="3"/>
+  <text x="590" y="575" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#9c27b0">Business Impact</text>
+  <text x="590" y="590" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">Revenue | User Satisfaction</text>
+  <text x="590" y="600" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">KPI Tracking | ROI Analysis</text>
+  
+  <!-- Feedback Loop -->
+  <rect x="700" y="555" width="180" height="50" fill="#9c27b0" fill-opacity="0.15" stroke="#9c27b0" rx="3"/>
+  <text x="790" y="575" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#9c27b0">Feedback Loop</text>
+  <text x="790" y="590" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">Human in Loop | Active Learning</text>
+  <text x="790" y="600" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">Model Retraining | Updates</text>
+  
+  <!-- Compliance & Governance -->
+  <rect x="900" y="555" width="180" height="50" fill="#9c27b0" fill-opacity="0.15" stroke="#9c27b0" rx="3"/>
+  <text x="990" y="575" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#9c27b0">Compliance</text>
+  <text x="990" y="590" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">GDPR | Audit Trails</text>
+  <text x="990" y="600" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">Model Documentation</text>
+  
+  <!-- Best Practices -->
+  <rect x="100" y="625" width="1200" height="90" fill="#ffffff" stroke="#9c27b0" stroke-width="2" rx="5"/>
+  <text x="700" y="645" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#9c27b0">Evaluation Best Practices & Implementation</text>
+  
+  <circle cx="120" cy="665" r="2" fill="#4285f4"/>
+  <text x="130" y="670" font-family="Arial, sans-serif" font-size="10">Use multiple complementary metrics appropriate for your specific use case</text>
+  
+  <circle cx="120" cy="685" r="2" fill="#0f9d58"/>
+  <text x="130" y="690" font-family="Arial, sans-serif" font-size="10">Establish baseline models and statistical significance testing for comparisons</text>
+  
+  <circle cx="120" cy="705" r="2" fill="#ea4335"/>
+  <text x="130" y="710" font-family="Arial, sans-serif" font-size="10">Implement continuous monitoring with automated alerts for model degradation</text>
+  
+  <circle cx="700" cy="665" r="2" fill="#ff6f00"/>
+  <text x="710" y="670" font-family="Arial, sans-serif" font-size="10">Document evaluation methodology and maintain reproducible evaluation pipelines</text>
+  
+  <circle cx="700" cy="685" r="2" fill="#9c27b0"/>
+  <text x="710" y="690" font-family="Arial, sans-serif" font-size="10">Consider fairness, interpretability, and business constraints alongside technical metrics</text>
+  
+  <circle cx="700" cy="705" r="2" fill="#607d8b"/>
+  <text x="710" y="710" font-family="Arial, sans-serif" font-size="10">Plan for model updates and maintain versioning for evaluation experiments</text>
+  
+  <!-- Flow arrows -->
+  <path d="M 700 150 L 700 170" stroke="#333" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+  <path d="M 700 270 L 700 290" stroke="#333" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+  <path d="M 700 390 L 700 410" stroke="#333" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+  <path d="M 700 490 L 700 510" stroke="#333" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+  
+  <text x="1350" y="790" text-anchor="end" font-family="Arial, sans-serif" font-size="10" fill="#666">v1.0</text>
+</svg>

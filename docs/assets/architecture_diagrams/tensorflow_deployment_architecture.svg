@@ -1,0 +1,356 @@
+<svg viewBox="0 0 1400 800" xmlns="http://www.w3.org/2000/svg">
+  <!-- File Location: docs/assets/architecture_diagrams/tensorflow_deployment_architecture.svg -->
+  
+  <!-- Background -->
+  <rect width="1400" height="800" fill="#f8f9fa"/>
+  
+  <!-- Title -->
+  <text x="700" y="40" text-anchor="middle" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="#1a1a1a">
+    TensorFlow Deployment Architecture
+  </text>
+  
+  <!-- Development Stage -->
+  <rect x="50" y="80" width="200" height="160" fill="#4285f4" fill-opacity="0.1" stroke="#4285f4" stroke-width="2" rx="10"/>
+  <text x="150" y="110" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#4285f4">
+    Development
+  </text>
+  
+  <rect x="70" y="130" width="160" height="30" fill="#4285f4" fill-opacity="0.3" stroke="#4285f4" rx="3"/>
+  <text x="150" y="150" text-anchor="middle" font-family="Arial, sans-serif" font-size="11">Model Training</text>
+  
+  <rect x="70" y="170" width="160" height="30" fill="#4285f4" fill-opacity="0.3" stroke="#4285f4" rx="3"/>
+  <text x="150" y="190" text-anchor="middle" font-family="Arial, sans-serif" font-size="11">Hyperparameter Tuning</text>
+  
+  <rect x="70" y="210" width="160" height="25" fill="#4285f4" fill-opacity="0.3" stroke="#4285f4" rx="3"/>
+  <text x="150" y="227" text-anchor="middle" font-family="Arial, sans-serif" font-size="11">Model Validation</text>
+  
+  <!-- Model Export -->
+  <rect x="300" y="80" width="200" height="160" fill="#0f9d58" fill-opacity="0.1" stroke="#0f9d58" stroke-width="2" rx="10"/>
+  <text x="400" y="110" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#0f9d58">
+    Model Export
+  </text>
+  
+  <rect x="320" y="130" width="160" height="25" fill="#0f9d58" fill-opacity="0.3" stroke="#0f9d58" rx="3"/>
+  <text x="400" y="147" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">SavedModel Format</text>
+  
+  <rect x="320" y="160" width="160" height="25" fill="#0f9d58" fill-opacity="0.3" stroke="#0f9d58" rx="3"/>
+  <text x="400" y="177" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">TensorFlow Lite</text>
+  
+  <rect x="320" y="190" width="160" height="25" fill="#0f9d58" fill-opacity="0.3" stroke="#0f9d58" rx="3"/>
+  <text x="400" y="207" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">TensorFlow.js</text>
+  
+  <rect x="320" y="220" width="160" height="15" fill="#0f9d58" fill-opacity="0.3" stroke="#0f9d58" rx="3"/>
+  <text x="400" y="230" text-anchor="middle" font-family="Arial, sans-serif" font-size="9">ONNX Export</text>
+  
+  <!-- Cloud Deployment -->
+  <rect x="550" y="80" width="300" height="160" fill="#ea4335" fill-opacity="0.1" stroke="#ea4335" stroke-width="2" rx="10"/>
+  <text x="700" y="110" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#ea4335">
+    Cloud Deployment
+  </text>
+  
+  <!-- Cloud providers -->
+  <rect x="570" y="130" width="80" height="35" fill="#ea4335" fill-opacity="0.3" stroke="#ea4335" rx="3"/>
+  <text x="610" y="152" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">Google Cloud</text>
+  
+  <rect x="660" y="130" width="80" height="35" fill="#ea4335" fill-opacity="0.3" stroke="#ea4335" rx="3"/>
+  <text x="700" y="152" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">AWS</text>
+  
+  <rect x="750" y="130" width="80" height="35" fill="#ea4335" fill-opacity="0.3" stroke="#ea4335" rx="3"/>
+  <text x="790" y="152" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">Azure</text>
+  
+  <!-- Services -->
+  <rect x="570" y="175" width="120" height="25" fill="#ea4335" fill-opacity="0.2" stroke="#ea4335" rx="3"/>
+  <text x="630" y="192" text-anchor="middle" font-family="Arial, sans-serif" font-size="9">TensorFlow Serving</text>
+  
+  <rect x="700" y="175" width="120" height="25" fill="#ea4335" fill-opacity="0.2" stroke="#ea4335" rx="3"/>
+  <text x="760" y="192" text-anchor="middle" font-family="Arial, sans-serif" font-size="9">Kubernetes</text>
+  
+  <rect x="570" y="210" width="120" height="25" fill="#ea4335" fill-opacity="0.2" stroke="#ea4335" rx="3"/>
+  <text x="630" y="227" text-anchor="middle" font-family="Arial, sans-serif" font-size="9">Docker Containers</text>
+  
+  <rect x="700" y="210" width="120" height="25" fill="#ea4335" fill-opacity="0.2" stroke="#ea4335" rx="3"/>
+  <text x="760" y="227" text-anchor="middle" font-family="Arial, sans-serif" font-size="9">Load Balancer</text>
+  
+  <!-- Edge Deployment -->
+  <rect x="900" y="80" width="200" height="160" fill="#ff6f00" fill-opacity="0.1" stroke="#ff6f00" stroke-width="2" rx="10"/>
+  <text x="1000" y="110" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#ff6f00">
+    Edge Deployment
+  </text>
+  
+  <rect x="920" y="130" width="160" height="25" fill="#ff6f00" fill-opacity="0.3" stroke="#ff6f00" rx="3"/>
+  <text x="1000" y="147" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">Mobile Devices</text>
+  
+  <rect x="920" y="160" width="160" height="25" fill="#ff6f00" fill-opacity="0.3" stroke="#ff6f00" rx="3"/>
+  <text x="1000" y="177" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">IoT Devices</text>
+  
+  <rect x="920" y="190" width="160" height="25" fill="#ff6f00" fill-opacity="0.3" stroke="#ff6f00" rx="3"/>
+  <text x="1000" y="207" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">Edge TPU</text>
+  
+  <rect x="920" y="220" width="160" height="15" fill="#ff6f00" fill-opacity="0.3" stroke="#ff6f00" rx="3"/>
+  <text x="1000" y="230" text-anchor="middle" font-family="Arial, sans-serif" font-size="9">Embedded Systems</text>
+  
+  <!-- Web Deployment -->
+  <rect x="1150" y="80" width="200" height="160" fill="#9c27b0" fill-opacity="0.1" stroke="#9c27b0" stroke-width="2" rx="10"/>
+  <text x="1250" y="110" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#9c27b0">
+    Web Deployment
+  </text>
+  
+  <rect x="1170" y="130" width="160" height="25" fill="#9c27b0" fill-opacity="0.3" stroke="#9c27b0" rx="3"/>
+  <text x="1250" y="147" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">TensorFlow.js</text>
+  
+  <rect x="1170" y="160" width="160" height="25" fill="#9c27b0" fill-opacity="0.3" stroke="#9c27b0" rx="3"/>
+  <text x="1250" y="177" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">Browser Inference</text>
+  
+  <rect x="1170" y="190" width="160" height="25" fill="#9c27b0" fill-opacity="0.3" stroke="#9c27b0" rx="3"/>
+  <text x="1250" y="207" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">Node.js Backend</text>
+  
+  <rect x="1170" y="220" width="160" height="15" fill="#9c27b0" fill-opacity="0.3" stroke="#9c27b0" rx="3"/>
+  <text x="1250" y="230" text-anchor="middle" font-family="Arial, sans-serif" font-size="9">WebGL Acceleration</text>
+  
+  <!-- Production Pipeline -->
+  <rect x="50" y="280" width="1300" height="200" fill="#00acc1" fill-opacity="0.1" stroke="#00acc1" stroke-width="2" rx="10"/>
+  <text x="700" y="310" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="#00acc1">
+    Production Pipeline
+  </text>
+  
+  <!-- CI/CD Pipeline -->
+  <rect x="70" y="330" width="180" height="120" fill="#00acc1" fill-opacity="0.15" stroke="#00acc1" rx="5"/>
+  <text x="160" y="355" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#00acc1">
+    CI/CD Pipeline
+  </text>
+  
+  <rect x="80" y="375" width="160" height="20" fill="#00acc1" fill-opacity="0.3" stroke="#00acc1" rx="2"/>
+  <text x="160" y="389" text-anchor="middle" font-family="Arial, sans-serif" font-size="9">Automated Testing</text>
+  
+  <rect x="80" y="400" width="160" height="20" fill="#00acc1" fill-opacity="0.3" stroke="#00acc1" rx="2"/>
+  <text x="160" y="414" text-anchor="middle" font-family="Arial, sans-serif" font-size="9">Model Validation</text>
+  
+  <rect x="80" y="425" width="160" height="20" fill="#00acc1" fill-opacity="0.3" stroke="#00acc1" rx="2"/>
+  <text x="160" y="439" text-anchor="middle" font-family="Arial, sans-serif" font-size="9">Deployment Automation</text>
+  
+  <!-- Model Registry -->
+  <rect x="270" y="330" width="180" height="120" fill="#00acc1" fill-opacity="0.15" stroke="#00acc1" rx="5"/>
+  <text x="360" y="355" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#00acc1">
+    Model Registry
+  </text>
+  
+  <rect x="280" y="375" width="160" height="20" fill="#00acc1" fill-opacity="0.3" stroke="#00acc1" rx="2"/>
+  <text x="360" y="389" text-anchor="middle" font-family="Arial, sans-serif" font-size="9">Version Management</text>
+  
+  <rect x="280" y="400" width="160" height="20" fill="#00acc1" fill-opacity="0.3" stroke="#00acc1" rx="2"/>
+  <text x="360" y="414" text-anchor="middle" font-family="Arial, sans-serif" font-size="9">Model Metadata</text>
+  
+  <rect x="280" y="425" width="160" height="20" fill="#00acc1" fill-opacity="0.3" stroke="#00acc1" rx="2"/>
+  <text x="360" y="439" text-anchor="middle" font-family="Arial, sans-serif" font-size="9">Lineage Tracking</text>
+  
+  <!-- A/B Testing -->
+  <rect x="470" y="330" width="180" height="120" fill="#00acc1" fill-opacity="0.15" stroke="#00acc1" rx="5"/>
+  <text x="560" y="355" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#00acc1">
+    A/B Testing
+  </text>
+  
+  <rect x="480" y="375" width="160" height="20" fill="#00acc1" fill-opacity="0.3" stroke="#00acc1" rx="2"/>
+  <text x="560" y="389" text-anchor="middle" font-family="Arial, sans-serif" font-size="9">Traffic Splitting</text>
+  
+  <rect x="480" y="400" width="160" height="20" fill="#00acc1" fill-opacity="0.3" stroke="#00acc1" rx="2"/>
+  <text x="560" y="414" text-anchor="middle" font-family="Arial, sans-serif" font-size="9">Performance Comparison</text>
+  
+  <rect x="480" y="425" width="160" height="20" fill="#00acc1" fill-opacity="0.3" stroke="#00acc1" rx="2"/>
+  <text x="560" y="439" text-anchor="middle" font-family="Arial, sans-serif" font-size="9">Statistical Analysis</text>
+  
+  <!-- Monitoring -->
+  <rect x="670" y="330" width="180" height="120" fill="#00acc1" fill-opacity="0.15" stroke="#00acc1" rx="5"/>
+  <text x="760" y="355" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#00acc1">
+    Monitoring
+  </text>
+  
+  <rect x="680" y="375" width="160" height="20" fill="#00acc1" fill-opacity="0.3" stroke="#00acc1" rx="2"/>
+  <text x="760" y="389" text-anchor="middle" font-family="Arial, sans-serif" font-size="9">Model Performance</text>
+  
+  <rect x="680" y="400" width="160" height="20" fill="#00acc1" fill-opacity="0.3" stroke="#00acc1" rx="2"/>
+  <text x="760" y="414" text-anchor="middle" font-family="Arial, sans-serif" font-size="9">Data Drift Detection</text>
+  
+  <rect x="680" y="425" width="160" height="20" fill="#00acc1" fill-opacity="0.3" stroke="#00acc1" rx="2"/>
+  <text x="760" y="439" text-anchor="middle" font-family="Arial, sans-serif" font-size="9">Alert Systems</text>
+  
+  <!-- Scaling -->
+  <rect x="870" y="330" width="180" height="120" fill="#00acc1" fill-opacity="0.15" stroke="#00acc1" rx="5"/>
+  <text x="960" y="355" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#00acc1">
+    Auto-Scaling
+  </text>
+  
+  <rect x="880" y="375" width="160" height="20" fill="#00acc1" fill-opacity="0.3" stroke="#00acc1" rx="2"/>
+  <text x="960" y="389" text-anchor="middle" font-family="Arial, sans-serif" font-size="9">Load-based Scaling</text>
+  
+  <rect x="880" y="400" width="160" height="20" fill="#00acc1" fill-opacity="0.3" stroke="#00acc1" rx="2"/>
+  <text x="960" y="414" text-anchor="middle" font-family="Arial, sans-serif" font-size="9">Resource Optimization</text>
+  
+  <rect x="880" y="425" width="160" height="20" fill="#00acc1" fill-opacity="0.3" stroke="#00acc1" rx="2"/>
+  <text x="960" y="439" text-anchor="middle" font-family="Arial, sans-serif" font-size="9">Cost Management</text>
+  
+  <!-- Security -->
+  <rect x="1070" y="330" width="260" height="120" fill="#00acc1" fill-opacity="0.15" stroke="#00acc1" rx="5"/>
+  <text x="1200" y="355" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#00acc1">
+    Security & Compliance
+  </text>
+  
+  <rect x="1080" y="375" width="110" height="20" fill="#00acc1" fill-opacity="0.3" stroke="#00acc1" rx="2"/>
+  <text x="1135" y="389" text-anchor="middle" font-family="Arial, sans-serif" font-size="9">Model Encryption</text>
+  
+  <rect x="1200" y="375" width="110" height="20" fill="#00acc1" fill-opacity="0.3" stroke="#00acc1" rx="2"/>
+  <text x="1255" y="389" text-anchor="middle" font-family="Arial, sans-serif" font-size="9">Access Control</text>
+  
+  <rect x="1080" y="400" width="110" height="20" fill="#00acc1" fill-opacity="0.3" stroke="#00acc1" rx="2"/>
+  <text x="1135" y="414" text-anchor="middle" font-family="Arial, sans-serif" font-size="9">Audit Logging</text>
+  
+  <rect x="1200" y="400" width="110" height="20" fill="#00acc1" fill-opacity="0.3" stroke="#00acc1" rx="2"/>
+  <text x="1255" y="414" text-anchor="middle" font-family="Arial, sans-serif" font-size="9">Data Privacy</text>
+  
+  <rect x="1080" y="425" width="110" height="20" fill="#00acc1" fill-opacity="0.3" stroke="#00acc1" rx="2"/>
+  <text x="1135" y="439" text-anchor="middle" font-family="Arial, sans-serif" font-size="9">Compliance</text>
+  
+  <rect x="1200" y="425" width="110" height="20" fill="#00acc1" fill-opacity="0.3" stroke="#00acc1" rx="2"/>
+  <text x="1255" y="439" text-anchor="middle" font-family="Arial, sans-serif" font-size="9">Model Watermarks</text>
+  
+  <!-- Inference Infrastructure -->
+  <rect x="50" y="520" width="1300" height="220" fill="#607d8b" fill-opacity="0.1" stroke="#607d8b" stroke-width="2" rx="10"/>
+  <text x="700" y="550" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="#607d8b">
+    Inference Infrastructure
+  </text>
+  
+  <!-- Real-time Inference -->
+  <rect x="70" y="570" width="200" height="140" fill="#607d8b" fill-opacity="0.15" stroke="#607d8b" rx="5"/>
+  <text x="170" y="595" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#607d8b">
+    Real-time Inference
+  </text>
+  
+  <rect x="80" y="615" width="180" height="25" fill="#607d8b" fill-opacity="0.3" stroke="#607d8b" rx="2"/>
+  <text x="170" y="632" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">REST APIs</text>
+  
+  <rect x="80" y="645" width="180" height="25" fill="#607d8b" fill-opacity="0.3" stroke="#607d8b" rx="2"/>
+  <text x="170" y="662" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">gRPC Services</text>
+  
+  <rect x="80" y="675" width="180" height="25" fill="#607d8b" fill-opacity="0.3" stroke="#607d8b" rx="2"/>
+  <text x="170" y="692" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">&lt;100ms Latency</text>
+  
+  <!-- Batch Inference -->
+  <rect x="290" y="570" width="200" height="140" fill="#607d8b" fill-opacity="0.15" stroke="#607d8b" rx="5"/>
+  <text x="390" y="595" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#607d8b">
+    Batch Inference
+  </text>
+  
+  <rect x="300" y="615" width="180" height="25" fill="#607d8b" fill-opacity="0.3" stroke="#607d8b" rx="2"/>
+  <text x="390" y="632" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">High Throughput</text>
+  
+  <rect x="300" y="645" width="180" height="25" fill="#607d8b" fill-opacity="0.3" stroke="#607d8b" rx="2"/>
+  <text x="390" y="662" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">Cost Optimized</text>
+  
+  <rect x="300" y="675" width="180" height="25" fill="#607d8b" fill-opacity="0.3" stroke="#607d8b" rx="2"/>
+  <text x="390" y="692" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">Scheduled Processing</text>
+  
+  <!-- Streaming Inference -->
+  <rect x="510" y="570" width="200" height="140" fill="#607d8b" fill-opacity="0.15" stroke="#607d8b" rx="5"/>
+  <text x="610" y="595" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#607d8b">
+    Streaming Inference
+  </text>
+  
+  <rect x="520" y="615" width="180" height="25" fill="#607d8b" fill-opacity="0.3" stroke="#607d8b" rx="2"/>
+  <text x="610" y="632" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">Apache Kafka</text>
+  
+  <rect x="520" y="645" width="180" height="25" fill="#607d8b" fill-opacity="0.3" stroke="#607d8b" rx="2"/>
+  <text x="610" y="662" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">Event-driven</text>
+  
+  <rect x="520" y="675" width="180" height="25" fill="#607d8b" fill-opacity="0.3" stroke="#607d8b" rx="2"/>
+  <text x="610" y="692" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">Real-time Analytics</text>
+  
+  <!-- Model Servers -->
+  <rect x="730" y="570" width="200" height="140" fill="#607d8b" fill-opacity="0.15" stroke="#607d8b" rx="5"/>
+  <text x="830" y="595" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#607d8b">
+    Model Servers
+  </text>
+  
+  <rect x="740" y="615" width="80" height="25" fill="#607d8b" fill-opacity="0.3" stroke="#607d8b" rx="2"/>
+  <text x="780" y="632" text-anchor="middle" font-family="Arial, sans-serif" font-size="9">TF Serving</text>
+  
+  <rect x="830" y="615" width="80" height="25" fill="#607d8b" fill-opacity="0.3" stroke="#607d8b" rx="2"/>
+  <text x="870" y="632" text-anchor="middle" font-family="Arial, sans-serif" font-size="9">Triton</text>
+  
+  <rect x="740" y="645" width="80" height="25" fill="#607d8b" fill-opacity="0.3" stroke="#607d8b" rx="2"/>
+  <text x="780" y="662" text-anchor="middle" font-family="Arial, sans-serif" font-size="9">MLflow</text>
+  
+  <rect x="830" y="645" width="80" height="25" fill="#607d8b" fill-opacity="0.3" stroke="#607d8b" rx="2"/>
+  <text x="870" y="662" text-anchor="middle" font-family="Arial, sans-serif" font-size="9">Seldon</text>
+  
+  <rect x="740" y="675" width="170" height="25" fill="#607d8b" fill-opacity="0.2" stroke="#607d8b" rx="2"/>
+  <text x="825" y="692" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">Multi-framework Support</text>
+  
+  <!-- Hardware Acceleration -->
+  <rect x="950" y="570" width="180" height="140" fill="#607d8b" fill-opacity="0.15" stroke="#607d8b" rx="5"/>
+  <text x="1040" y="595" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#607d8b">
+    Hardware Acceleration
+  </text>
+  
+  <rect x="960" y="615" width="80" height="25" fill="#607d8b" fill-opacity="0.3" stroke="#607d8b" rx="2"/>
+  <text x="1000" y="632" text-anchor="middle" font-family="Arial, sans-serif" font-size="9">GPU</text>
+  
+  <rect x="1050" y="615" width="70" height="25" fill="#607d8b" fill-opacity="0.3" stroke="#607d8b" rx="2"/>
+  <text x="1085" y="632" text-anchor="middle" font-family="Arial, sans-serif" font-size="9">TPU</text>
+  
+  <rect x="960" y="645" width="80" height="25" fill="#607d8b" fill-opacity="0.3" stroke="#607d8b" rx="2"/>
+  <text x="1000" y="662" text-anchor="middle" font-family="Arial, sans-serif" font-size="9">TensorRT</text>
+  
+  <rect x="1050" y="645" width="70" height="25" fill="#607d8b" fill-opacity="0.3" stroke="#607d8b" rx="2"/>
+  <text x="1085" y="662" text-anchor="middle" font-family="Arial, sans-serif" font-size="9">OpenVINO</text>
+  
+  <rect x="960" y="675" width="160" height="25" fill="#607d8b" fill-opacity="0.2" stroke="#607d8b" rx="2"/>
+  <text x="1040" y="692" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">10-100x Speed Boost</text>
+  
+  <!-- Client Applications -->
+  <rect x="1150" y="570" width="180" height="140" fill="#607d8b" fill-opacity="0.15" stroke="#607d8b" rx="5"/>
+  <text x="1240" y="595" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#607d8b">
+    Client Applications
+  </text>
+  
+  <rect x="1160" y="615" width="80" height="25" fill="#607d8b" fill-opacity="0.3" stroke="#607d8b" rx="2"/>
+  <text x="1200" y="632" text-anchor="middle" font-family="Arial, sans-serif" font-size="9">Web Apps</text>
+  
+  <rect x="1250" y="615" width="70" height="25" fill="#607d8b" fill-opacity="0.3" stroke="#607d8b" rx="2"/>
+  <text x="1285" y="632" text-anchor="middle" font-family="Arial, sans-serif" font-size="9">Mobile</text>
+  
+  <rect x="1160" y="645" width="80" height="25" fill="#607d8b" fill-opacity="0.3" stroke="#607d8b" rx="2"/>
+  <text x="1200" y="662" text-anchor="middle" font-family="Arial, sans-serif" font-size="9">Desktop</text>
+  
+  <rect x="1250" y="645" width="70" height="25" fill="#607d8b" fill-opacity="0.3" stroke="#607d8b" rx="2"/>
+  <text x="1285" y="662" text-anchor="middle" font-family="Arial, sans-serif" font-size="9">IoT</text>
+  
+  <rect x="1160" y="675" width="160" height="25" fill="#607d8b" fill-opacity="0.2" stroke="#607d8b" rx="2"/>
+  <text x="1240" y="692" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">Multi-platform SDKs</text>
+  
+  <!-- Arrows showing deployment flow -->
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#333"/>
+    </marker>
+  </defs>
+  
+  <!-- Development to Export -->
+  <path d="M 250 160 L 300 160" stroke="#333" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+  
+  <!-- Export to Deployment -->
+  <path d="M 500 160 L 550 160" stroke="#333" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+  <path d="M 450 240 L 900 160" stroke="#333" stroke-width="2" fill="none" marker-end="url(#arrow)" stroke-dasharray="5,5"/>
+  <path d="M 450 250 L 1150 160" stroke="#333" stroke-width="2" fill="none" marker-end="url(#arrow)" stroke-dasharray="5,5"/>
+  
+  <!-- Pipeline flows -->
+  <path d="M 700 260 L 700 280" stroke="#333" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+  <path d="M 700 480 L 700 520" stroke="#333" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+  
+  <!-- Flow labels -->
+  <text x="275" y="145" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#666">Export</text>
+  <text x="525" y="145" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#666">Deploy</text>
+  <text x="700" y="270" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#666">Pipeline</text>
+  <text x="700" y="510" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#666">Inference</text>
+  
+  <!-- Version indicator -->
+  <text x="1350" y="790" text-anchor="end" font-family="Arial, sans-serif" font-size="10" fill="#666">v2.0</text>
+</svg>

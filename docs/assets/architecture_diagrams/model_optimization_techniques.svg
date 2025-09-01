@@ -1,0 +1,299 @@
+<svg viewBox="0 0 1400 900" xmlns="http://www.w3.org/2000/svg">
+  <!-- File Location: docs/assets/architecture_diagrams/model_optimization_techniques.svg -->
+  
+  <!-- Background -->
+  <rect width="1400" height="900" fill="#f8f9fa"/>
+  
+  <!-- Title -->
+  <text x="700" y="40" text-anchor="middle" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="#1a1a1a">
+    TensorFlow Model Optimization Techniques
+  </text>
+  
+  <!-- Quantization Section -->
+  <rect x="50" y="80" width="300" height="200" fill="#4285f4" fill-opacity="0.1" stroke="#4285f4" stroke-width="2" rx="10"/>
+  <text x="200" y="110" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#4285f4">
+    Quantization
+  </text>
+  
+  <!-- Before/After comparison -->
+  <rect x="70" y="130" width="120" height="60" fill="#4285f4" fill-opacity="0.2" stroke="#4285f4" rx="3"/>
+  <text x="130" y="150" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold">Before</text>
+  <text x="130" y="165" text-anchor="middle" font-family="Arial, sans-serif" font-size="9">FP32 Weights</text>
+  <text x="130" y="178" text-anchor="middle" font-family="Arial, sans-serif" font-size="9">4 bytes/weight</text>
+  
+  <rect x="210" y="130" width="120" height="60" fill="#4285f4" fill-opacity="0.3" stroke="#4285f4" rx="3"/>
+  <text x="270" y="150" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold">After</text>
+  <text x="270" y="165" text-anchor="middle" font-family="Arial, sans-serif" font-size="9">INT8 Weights</text>
+  <text x="270" y="178" text-anchor="middle" font-family="Arial, sans-serif" font-size="9">1 byte/weight</text>
+  
+  <!-- Benefits -->
+  <rect x="70" y="200" width="260" height="60" fill="#4285f4" fill-opacity="0.1" stroke="#4285f4" rx="3"/>
+  <text x="200" y="220" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" font-weight="bold">Benefits</text>
+  <text x="200" y="235" text-anchor="middle" font-family="Arial, sans-serif" font-size="9">75% Model Size Reduction</text>
+  <text x="200" y="248" text-anchor="middle" font-family="Arial, sans-serif" font-size="9">2-4x Faster Inference</text>
+  
+  <!-- Pruning Section -->
+  <rect x="400" y="80" width="300" height="200" fill="#0f9d58" fill-opacity="0.1" stroke="#0f9d58" stroke-width="2" rx="10"/>
+  <text x="550" y="110" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#0f9d58">
+    Pruning
+  </text>
+  
+  <!-- Pruning visualization -->
+  <rect x="420" y="130" width="120" height="60" fill="#0f9d58" fill-opacity="0.2" stroke="#0f9d58" rx="3"/>
+  <text x="480" y="150" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold">Dense Network</text>
+  
+  <rect x="560" y="130" width="120" height="60" fill="#0f9d58" fill-opacity="0.3" stroke="#0f9d58" rx="3"/>
+  <text x="620" y="150" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold">Pruned Network</text>
+  
+  <!-- Benefits -->
+  <rect x="420" y="200" width="260" height="60" fill="#0f9d58" fill-opacity="0.1" stroke="#0f9d58" rx="3"/>
+  <text x="550" y="220" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" font-weight="bold">Benefits</text>
+  <text x="550" y="235" text-anchor="middle" font-family="Arial, sans-serif" font-size="9">90% Sparsity Achievable</text>
+  <text x="550" y="248" text-anchor="middle" font-family="Arial, sans-serif" font-size="9">Minimal Accuracy Loss</text>
+  
+  <!-- Knowledge Distillation -->
+  <rect x="750" y="80" width="300" height="200" fill="#ea4335" fill-opacity="0.1" stroke="#ea4335" stroke-width="2" rx="10"/>
+  <text x="900" y="110" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#ea4335">
+    Knowledge Distillation
+  </text>
+  
+  <!-- Teacher-Student model -->
+  <rect x="770" y="130" width="100" height="50" fill="#ea4335" fill-opacity="0.2" stroke="#ea4335" rx="3"/>
+  <text x="820" y="150" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold">Teacher</text>
+  <text x="820" y="165" text-anchor="middle" font-family="Arial, sans-serif" font-size="9">Large Model</text>
+  
+  <rect x="930" y="130" width="100" height="50" fill="#ea4335" fill-opacity="0.3" stroke="#ea4335" rx="3"/>
+  <text x="980" y="150" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold">Student</text>
+  <text x="980" y="165" text-anchor="middle" font-family="Arial, sans-serif" font-size="9">Small Model</text>
+  
+  <!-- Benefits -->
+  <rect x="770" y="200" width="260" height="60" fill="#ea4335" fill-opacity="0.1" stroke="#ea4335" rx="3"/>
+  <text x="900" y="220" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" font-weight="bold">Benefits</text>
+  <text x="900" y="235" text-anchor="middle" font-family="Arial, sans-serif" font-size="9">Compact High-Performance Models</text>
+  <text x="900" y="248" text-anchor="middle" font-family="Arial, sans-serif" font-size="9">Transfer Complex Knowledge</text>
+  
+  <!-- Mixed Precision -->
+  <rect x="1100" y="80" width="250" height="200" fill="#ff6f00" fill-opacity="0.1" stroke="#ff6f00" stroke-width="2" rx="10"/>
+  <text x="1225" y="110" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#ff6f00">
+    Mixed Precision
+  </text>
+  
+  <!-- Precision types -->
+  <rect x="1120" y="130" width="80" height="40" fill="#ff6f00" fill-opacity="0.2" stroke="#ff6f00" rx="3"/>
+  <text x="1160" y="155" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">FP16</text>
+  
+  <rect x="1210" y="130" width="80" height="40" fill="#ff6f00" fill-opacity="0.3" stroke="#ff6f00" rx="3"/>
+  <text x="1250" y="155" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">FP32</text>
+  
+  <!-- Benefits -->
+  <rect x="1120" y="180" width="210" height="80" fill="#ff6f00" fill-opacity="0.1" stroke="#ff6f00" rx="3"/>
+  <text x="1225" y="205" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" font-weight="bold">Benefits</text>
+  <text x="1225" y="220" text-anchor="middle" font-family="Arial, sans-serif" font-size="9">1.6x Speed Improvement</text>
+  <text x="1225" y="235" text-anchor="middle" font-family="Arial, sans-serif" font-size="9">50% Memory Reduction</text>
+  <text x="1225" y="248" text-anchor="middle" font-family="Arial, sans-serif" font-size="9">Automatic Loss Scaling</text>
+  
+  <!-- Hardware Acceleration -->
+  <rect x="50" y="320" width="650" height="220" fill="#9c27b0" fill-opacity="0.1" stroke="#9c27b0" stroke-width="2" rx="10"/>
+  <text x="375" y="350" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="#9c27b0">
+    Hardware Acceleration
+  </text>
+  
+  <!-- GPU Optimization -->
+  <rect x="70" y="370" width="180" height="120" fill="#9c27b0" fill-opacity="0.15" stroke="#9c27b0" rx="5"/>
+  <text x="160" y="395" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#9c27b0">
+    GPU Optimization
+  </text>
+  
+  <rect x="80" y="410" width="160" height="25" fill="#9c27b0" fill-opacity="0.3" stroke="#9c27b0" rx="2"/>
+  <text x="160" y="427" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">CUDA Kernels</text>
+  
+  <rect x="80" y="440" width="160" height="25" fill="#9c27b0" fill-opacity="0.3" stroke="#9c27b0" rx="2"/>
+  <text x="160" y="457" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">Memory Coalescing</text>
+  
+  <rect x="80" y="470" width="160" height="15" fill="#9c27b0" fill-opacity="0.3" stroke="#9c27b0" rx="2"/>
+  <text x="160" y="480" text-anchor="middle" font-family="Arial, sans-serif" font-size="9">Tensor Cores</text>
+  
+  <!-- TPU Optimization -->
+  <rect x="270" y="370" width="180" height="120" fill="#9c27b0" fill-opacity="0.15" stroke="#9c27b0" rx="5"/>
+  <text x="360" y="395" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#9c27b0">
+    TPU Optimization
+  </text>
+  
+  <rect x="280" y="410" width="160" height="25" fill="#9c27b0" fill-opacity="0.3" stroke="#9c27b0" rx="2"/>
+  <text x="360" y="427" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">XLA Compiler</text>
+  
+  <rect x="280" y="440" width="160" height="25" fill="#9c27b0" fill-opacity="0.3" stroke="#9c27b0" rx="2"/>
+  <text x="360" y="457" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">Matrix Units</text>
+  
+  <rect x="280" y="470" width="160" height="15" fill="#9c27b0" fill-opacity="0.3" stroke="#9c27b0" rx="2"/>
+  <text x="360" y="480" text-anchor="middle" font-family="Arial, sans-serif" font-size="9">Batch Processing</text>
+  
+  <!-- Edge Optimization -->
+  <rect x="470" y="370" width="180" height="120" fill="#9c27b0" fill-opacity="0.15" stroke="#9c27b0" rx="5"/>
+  <text x="560" y="395" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#9c27b0">
+    Edge Devices
+  </text>
+  
+  <rect x="480" y="410" width="160" height="25" fill="#9c27b0" fill-opacity="0.3" stroke="#9c27b0" rx="2"/>
+  <text x="560" y="427" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">TensorFlow Lite</text>
+  
+  <rect x="480" y="440" width="160" height="25" fill="#9c27b0" fill-opacity="0.3" stroke="#9c27b0" rx="2"/>
+  <text x="560" y="457" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">ARM NEON</text>
+  
+  <rect x="480" y="470" width="160" height="15" fill="#9c27b0" fill-opacity="0.3" stroke="#9c27b0" rx="2"/>
+  <text x="560" y="480" text-anchor="middle" font-family="Arial, sans-serif" font-size="9">Power Optimization</text>
+  
+  <!-- Graph Optimization -->
+  <rect x="750" y="320" width="600" height="220" fill="#00acc1" fill-opacity="0.1" stroke="#00acc1" stroke-width="2" rx="10"/>
+  <text x="1050" y="350" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="#00acc1">
+    Graph Optimization
+  </text>
+  
+  <!-- XLA Compiler -->
+  <rect x="770" y="370" width="180" height="120" fill="#00acc1" fill-opacity="0.15" stroke="#00acc1" rx="5"/>
+  <text x="860" y="395" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#00acc1">
+    XLA Compiler
+  </text>
+  
+  <rect x="780" y="410" width="160" height="20" fill="#00acc1" fill-opacity="0.3" stroke="#00acc1" rx="2"/>
+  <text x="860" y="425" text-anchor="middle" font-family="Arial, sans-serif" font-size="9">Operator Fusion</text>
+  
+  <rect x="780" y="435" width="160" height="20" fill="#00acc1" fill-opacity="0.3" stroke="#00acc1" rx="2"/>
+  <text x="860" y="450" text-anchor="middle" font-family="Arial, sans-serif" font-size="9">Memory Layout Optimization</text>
+  
+  <rect x="780" y="460" width="160" height="20" fill="#00acc1" fill-opacity="0.3" stroke="#00acc1" rx="2"/>
+  <text x="860" y="475" text-anchor="middle" font-family="Arial, sans-serif" font-size="9">Constant Folding</text>
+  
+  <!-- TensorRT -->
+  <rect x="970" y="370" width="180" height="120" fill="#00acc1" fill-opacity="0.15" stroke="#00acc1" rx="5"/>
+  <text x="1060" y="395" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#00acc1">
+    TensorRT
+  </text>
+  
+  <rect x="980" y="410" width="160" height="20" fill="#00acc1" fill-opacity="0.3" stroke="#00acc1" rx="2"/>
+  <text x="1060" y="425" text-anchor="middle" font-family="Arial, sans-serif" font-size="9">Layer Fusion</text>
+  
+  <rect x="980" y="435" width="160" height="20" fill="#00acc1" fill-opacity="0.3" stroke="#00acc1" rx="2"/>
+  <text x="1060" y="450" text-anchor="middle" font-family="Arial, sans-serif" font-size="9">Precision Calibration</text>
+  
+  <rect x="980" y="460" width="160" height="20" fill="#00acc1" fill-opacity="0.3" stroke="#00acc1" rx="2"/>
+  <text x="1060" y="475" text-anchor="middle" font-family="Arial, sans-serif" font-size="9">Kernel Auto-tuning</text>
+  
+  <!-- Graph Transformations -->
+  <rect x="1170" y="370" width="160" height="120" fill="#00acc1" fill-opacity="0.15" stroke="#00acc1" rx="5"/>
+  <text x="1250" y="395" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#00acc1">
+    Graph Transforms
+  </text>
+  
+  <rect x="1180" y="410" width="140" height="18" fill="#00acc1" fill-opacity="0.3" stroke="#00acc1" rx="2"/>
+  <text x="1250" y="423" text-anchor="middle" font-family="Arial, sans-serif" font-size="9">Dead Code Elimination</text>
+  
+  <rect x="1180" y="433" width="140" height="18" fill="#00acc1" fill-opacity="0.3" stroke="#00acc1" rx="2"/>
+  <text x="1250" y="446" text-anchor="middle" font-family="Arial, sans-serif" font-size="9">Common Subexpression</text>
+  
+  <rect x="1180" y="456" width="140" height="18" fill="#00acc1" fill-opacity="0.3" stroke="#00acc1" rx="2"/>
+  <text x="1250" y="469" text-anchor="middle" font-family="Arial, sans-serif" font-size="9">Loop Optimization</text>
+  
+  <!-- Model Serving Optimization -->
+  <rect x="50" y="580" width="1300" height="180" fill="#607d8b" fill-opacity="0.1" stroke="#607d8b" stroke-width="2" rx="10"/>
+  <text x="700" y="610" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="#607d8b">
+    Production Serving Optimization
+  </text>
+  
+  <!-- Batching strategies -->
+  <rect x="70" y="630" width="150" height="40" fill="#607d8b" fill-opacity="0.3" stroke="#607d8b" rx="3"/>
+  <text x="145" y="655" text-anchor="middle" font-family="Arial, sans-serif" font-size="11">Dynamic Batching</text>
+  
+  <rect x="240" y="630" width="150" height="40" fill="#607d8b" fill-opacity="0.3" stroke="#607d8b" rx="3"/>
+  <text x="315" y="655" text-anchor="middle" font-family="Arial, sans-serif" font-size="11">Model Parallel</text>
+  
+  <rect x="410" y="630" width="150" height="40" fill="#607d8b" fill-opacity="0.3" stroke="#607d8b" rx="3"/>
+  <text x="485" y="655" text-anchor="middle" font-family="Arial, sans-serif" font-size="11">Pipeline Parallel</text>
+  
+  <rect x="580" y="630" width="150" height="40" fill="#607d8b" fill-opacity="0.3" stroke="#607d8b" rx="3"/>
+  <text x="655" y="655" text-anchor="middle" font-family="Arial, sans-serif" font-size="11">Caching</text>
+  
+  <!-- Deployment platforms -->
+  <rect x="750" y="630" width="120" height="40" fill="#607d8b" fill-opacity="0.3" stroke="#607d8b" rx="3"/>
+  <text x="810" y="655" text-anchor="middle" font-family="Arial, sans-serif" font-size="11">TF Serving</text>
+  
+  <rect x="880" y="630" width="120" height="40" fill="#607d8b" fill-opacity="0.3" stroke="#607d8b" rx="3"/>
+  <text x="940" y="655" text-anchor="middle" font-family="Arial, sans-serif" font-size="11">Triton</text>
+  
+  <rect x="1010" y="630" width="120" height="40" fill="#607d8b" fill-opacity="0.3" stroke="#607d8b" rx="3"/>
+  <text x="1070" y="655" text-anchor="middle" font-family="Arial, sans-serif" font-size="11">TorchServe</text>
+  
+  <rect x="1140" y="630" width="120" height="40" fill="#607d8b" fill-opacity="0.3" stroke="#607d8b" rx="3"/>
+  <text x="1200" y="655" text-anchor="middle" font-family="Arial, sans-serif" font-size="11">MLflow</text>
+  
+  <!-- Monitoring and profiling -->
+  <rect x="70" y="690" width="200" height="50" fill="#607d8b" fill-opacity="0.2" stroke="#607d8b" rx="3"/>
+  <text x="170" y="710" text-anchor="middle" font-family="Arial, sans-serif" font-size="11">Performance Profiling</text>
+  <text x="170" y="725" text-anchor="middle" font-family="Arial, sans-serif" font-size="9">Latency, Throughput, Memory</text>
+  
+  <rect x="290" y="690" width="200" height="50" fill="#607d8b" fill-opacity="0.2" stroke="#607d8b" rx="3"/>
+  <text x="390" y="710" text-anchor="middle" font-family="Arial, sans-serif" font-size="11">A/B Testing</text>
+  <text x="390" y="725" text-anchor="middle" font-family="Arial, sans-serif" font-size="9">Model Comparison</text>
+  
+  <rect x="510" y="690" width="200" height="50" fill="#607d8b" fill-opacity="0.2" stroke="#607d8b" rx="3"/>
+  <text x="610" y="710" text-anchor="middle" font-family="Arial, sans-serif" font-size="11">Auto-scaling</text>
+  <text x="610" y="725" text-anchor="middle" font-family="Arial, sans-serif" font-size="9">Load-based Scaling</text>
+  
+  <rect x="730" y="690" width="200" height="50" fill="#607d8b" fill-opacity="0.2" stroke="#607d8b" rx="3"/>
+  <text x="830" y="710" text-anchor="middle" font-family="Arial, sans-serif" font-size="11">Model Versioning</text>
+  <text x="830" y="725" text-anchor="middle" font-family="Arial, sans-serif" font-size="9">Canary Deployments</text>
+  
+  <rect x="950" y="690" width="200" height="50" fill="#607d8b" fill-opacity="0.2" stroke="#607d8b" rx="3"/>
+  <text x="1050" y="710" text-anchor="middle" font-family="Arial, sans-serif" font-size="11">Resource Optimization</text>
+  <text x="1050" y="725" text-anchor="middle" font-family="Arial, sans-serif" font-size="9">CPU/GPU/Memory</text>
+  
+  <rect x="1170" y="690" width="160" height="50" fill="#607d8b" fill-opacity="0.2" stroke="#607d8b" rx="3"/>
+  <text x="1250" y="710" text-anchor="middle" font-family="Arial, sans-serif" font-size="11">Cost Optimization</text>
+  <text x="1250" y="725" text-anchor="middle" font-family="Arial, sans-serif" font-size="9">Cloud Resource Usage</text>
+  
+  <!-- Arrows showing optimization flow -->
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#333"/>
+    </marker>
+  </defs>
+  
+  <!-- Model size reduction arrow -->
+  <path d="M 190 190 L 270 190" stroke="#4285f4" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+  <text x="230" y="210" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#4285f4">4x smaller</text>
+  
+  <!-- Teacher to student arrow -->
+  <path d="M 870 155 L 930 155" stroke="#ea4335" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+  <text x="900" y="190" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#ea4335">Transfer Knowledge</text>
+  
+  <!-- Performance metrics -->
+  <rect x="50" y="800" width="1300" height="80" fill="#f5f5f5" stroke="#ddd" rx="5"/>
+  <text x="700" y="825" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold">
+    Performance Improvements Summary
+  </text>
+  
+  <text x="200" y="845" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#4285f4">
+    Quantization: 75% size ↓, 4x speed ↑
+  </text>
+  <text x="500" y="845" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#0f9d58">
+    Pruning: 90% sparsity, &lt;1% accuracy loss
+  </text>
+  <text x="800" y="845" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#ff6f00">
+    Mixed Precision: 1.6x speed ↑, 50% memory ↓
+  </text>
+  <text x="1100" y="845" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#00acc1">
+    XLA: 15-30% latency ↓
+  </text>
+  
+  <text x="350" y="865" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#ea4335">
+    Distillation: 10x model size ↓, similar accuracy
+  </text>
+  <text x="850" y="865" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#9c27b0">
+    Hardware Acceleration: 10-100x throughput ↑
+  </text>
+  
+  <!-- Version info -->
+  <text x="1350" y="890" text-anchor="end" font-family="Arial, sans-serif" font-size="10" fill="#999">
+    TensorFlow Model Optimization Toolkit
+  </text>
+</svg>
