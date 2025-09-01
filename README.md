@@ -386,7 +386,6 @@ TensorVerseHub builds upon the robust foundation of TensorFlow 2.15+ and tf.kera
 
 - **Issues**: [GitHub Issues](https://github.com/SatvikPraveen/TensorVerseHub/issues)
 - **Discussions**: [GitHub Discussions](https://github.com/SatvikPraveen/TensorVerseHub/discussions)
-- **Documentation**: [Project Wiki](https://github.com/SatvikPraveen/TensorVerseHub/wiki)
 
 ---
 
