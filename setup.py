@@ -13,7 +13,7 @@ setup(
     version="1.0.0",
     author="TensorVerseHub Contributors",
     author_email="contact@tensorversehub.com",
-    description="Comprehensive TensorFlow learning hub with 22+ hands-on notebooks and production utilities",
+    description="Comprehensive TensorFlow learning hub with 23+ hands-on notebooks and production utilities",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/SatvikPraveen/TensorVerseHub",
@@ -63,7 +63,7 @@ setup(
             "uvicorn>=0.24.0",
         ],
         "gpu": [
-            "tensorflow-gpu>=2.15.0",
+            "tensorflow-gpu>=2.13.0,<2.14.0",
         ],
     },
     entry_points={
