@@ -1,12 +1,11 @@
 # Location: /requirements.txt
 
 # Core TensorFlow and Keras
-tensorflow>=2.15.0
-tf-keras>=2.15.0
-tensorflow-hub>=0.16.0
-tensorflow-text>=2.15.0
-tensorflow-probability>=0.23.0
-tensorflow-model-optimization>=0.8.0
+tensorflow>=2.13.0,<2.14.0
+tensorflow-hub>=0.15.0
+tensorflow-text>=2.13.0
+tensorflow-probability>=0.22.0
+tensorflow-model-optimization>=0.7.0
 tensorflow-datasets>=4.9.0
 
 # Data Processing and Visualization  
@@ -56,7 +55,7 @@ sphinx>=7.2.0
 pyyaml>=6.0.0
 python-dotenv>=1.0.0
 wandb>=0.16.0
-tensorboard>=2.15.0
+tensorboard>=2.13.0,<2.14.0
 
 # Optional GPU Support
-# tensorflow-gpu>=2.15.0  # Uncomment if using dedicated GPU setup
+# tensorflow-gpu>=2.13.0  # Uncomment if using dedicated GPU setup
