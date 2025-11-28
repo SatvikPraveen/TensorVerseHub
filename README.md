@@ -1,6 +1,6 @@
 # TensorVerseHub
 
-![TensorFlow Version](https://img.shields.io/badge/TensorFlow-2.13%2B-orange?logo=tensorflow)
+![TensorFlow Version](https://img.shields.io/badge/TensorFlow-2.14%2B-orange?logo=tensorflow)
 ![Python Version](https://img.shields.io/badge/Python-3.8%2B-blue?logo=python)
 ![Keras](https://img.shields.io/badge/Keras-3.0%2B-red?logo=keras)
 ![CUDA](https://img.shields.io/badge/CUDA-11.8%2B-green?logo=nvidia)
@@ -11,7 +11,7 @@
 ![Issues](https://img.shields.io/github/issues/SatvikPraveen/TensorVerseHub?color=red)
 ![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)
 
-A comprehensive TensorFlow learning hub featuring 23+ core notebooks, supplementary materials on advanced topics, pre-trained models, and production-ready utilities. Built with TensorFlow 2.13+ and tf.keras integration for modern machine learning development.
+A comprehensive TensorFlow learning hub featuring 23+ core notebooks, supplementary materials on advanced topics, pre-trained models, and production-ready utilities. Built with TensorFlow 2.14+ and tf.keras integration for modern machine learning development.
 
 ## 🎯 Overview
 
