@@ -56,7 +56,6 @@ sphinx>=7.0.0
 pyyaml>=6.0.0
 python-dotenv>=1.0.0
 wandb>=0.15.0
-tensorboard>=2.13.0,<2.14.0
 
 # Optional GPU Support
 # tensorflow-gpu>=2.13.0  # Uncomment if using dedicated GPU setup
