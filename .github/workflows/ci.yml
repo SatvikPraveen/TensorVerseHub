@@ -169,7 +169,7 @@ jobs:
 
       - name: Upload notebook test results
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: notebook-test-results
           path: |
@@ -210,7 +210,7 @@ jobs:
         continue-on-error: true
 
       - name: Upload benchmark results
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: benchmark-results
           path: |
@@ -246,7 +246,7 @@ jobs:
         continue-on-error: true
 
       - name: Upload security scan results
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: security-reports
           path: |
@@ -423,7 +423,7 @@ jobs:
           git log --oneline --since="1 month ago" > CHANGELOG_LATEST.md
 
       - name: Upload release artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: release-artifacts
           path: |
