@@ -90,7 +90,7 @@ TensorVerseHub/
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐
-│                    TENSORVERSEHUB LEARNING PATHWAY                       │
+│                    TENSORVERSEHUB LEARNING PATHWAY                      │
 └─────────────────────────────────────────────────────────────────────────┘
 
                          ┌──────────────────────┐
@@ -112,8 +112,8 @@ TensorVerseHub/
          ┌──────────────────────────┼──────────────────────────┐
          │                          │                          │
     ┌────▼─────┐          ┌────────▼───────┐         ┌────────▼─┐
-    │ Sequential│          │  Functional    │         │ Subclass │
-    │   API     │          │    API         │         │  Models  │
+    │ Sequential│         │  Functional    │         │ Subclass │
+    │   API     │         │    API         │         │  Models  │
     └────┬─────┘          └────────┬───────┘         └────────┬─┘
          └──────────────────────────┼──────────────────────────┘
                                     │
@@ -122,21 +122,21 @@ TensorVerseHub/
               └─────────────────────┬──────────────────────┘
               
     ┌─────────┬──────────┬──────────┬──────────┬──────────┐
-    │          │          │          │          │          │
-┌───▼──┐  ┌────▼──┐  ┌────▼──┐  ┌──▼───┐  ┌──▼───┐  ┌──▼───┐
-│ CV   │  │ NLP   │  │ GANs  │  │ RL   │  │Time  │  │Federated
-│      │  │       │  │       │  │      │  │Series│  │Learning
-└───┬──┘  └────┬──┘  └────┬──┘  └──┬───┘  └──┬───┘  └──┬───┘
+    │         │          │          │          │          │
+┌───▼──┐  ┌────▼──┐  ┌────▼──┐  ┌──▼───┐  ┌──▼───┐   ┌──▼───┐
+│ CV   │  │ NLP   │  │ GANs  │  │ RL   │  │Time  │   │Federated
+│      │  │       │  │       │  │      │  │Series│   │Learning
+└───┬──┘  └────┬──┘  └────┬──┘  └──┬───┘  └──┬───┘   └──┬───┘
     └─────────────────────────────────────────────────┬─┘
                                                       │
                        ┌──────────────────────────────▼─┐
-                       │   Model Optimization          │
-                       │ (Quantization, Pruning, etc)  │
+                       │   Model Optimization           │
+                       │ (Quantization, Pruning, etc)   │
                        └──────────────────────────────┬─┘
                                                       │
                        ┌──────────────────────────────▼──┐
-                       │   Deployment & Serving         │
-                       │ (TFLite, SavedModel, REST API) │
+                       │   Deployment & Serving          │
+                       │ (TFLite, SavedModel, REST API)  │
                        └─────────────────────────────────┘
 ```
 
@@ -146,7 +146,7 @@ TensorVerseHub/
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐
-│                         DATA PIPELINE FLOW                               │
+│                         DATA PIPELINE FLOW                              │
 └─────────────────────────────────────────────────────────────────────────┘
 
 Raw Data Source
@@ -166,38 +166,38 @@ Raw Data Source
 ┌──────────────────────────────────┐
 │  Preprocessing & Normalization   │
 ├──────────────────────────────────┤
-│ • TextVectorization             │
-│ • Image Resizing & Normalization│
-│ • Value Scaling                 │
-│ • Handle Missing Values         │
+│ • TextVectorization              │
+│ • Image Resizing & Normalization │
+│ • Value Scaling                  │
+│ • Handle Missing Values          │
 └──────────────────────────────────┘
       │
       ▼
 ┌──────────────────────────────────┐
 │  Data Augmentation               │
 ├──────────────────────────────────┤
-│ • Random Flips & Rotations      │
-│ • Color Jittering               │
-│ • Mixup & Cutmix                │
-│ • Text Augmentation             │
+│ • Random Flips & Rotations       │
+│ • Color Jittering                │
+│ • Mixup & Cutmix                 │
+│ • Text Augmentation              │
 └──────────────────────────────────┘
       │
       ▼
 ┌──────────────────────────────────┐
 │  Batching & Shuffling            │
 ├──────────────────────────────────┤
-│ • Shuffle Buffer                │
-│ • Batch Size Configuration      │
-│ • Repeat for Multiple Epochs    │
+│ • Shuffle Buffer                 │
+│ • Batch Size Configuration       │
+│ • Repeat for Multiple Epochs     │
 └──────────────────────────────────┘
       │
       ▼
 ┌──────────────────────────────────┐
 │  Optimization                    │
 ├──────────────────────────────────┤
-│ • Caching                       │
-│ • Prefetching                   │
-│ • Parallelization               │
+│ • Caching                        │
+│ • Prefetching                    │
+│ • Parallelization                │
 └──────────────────────────────────┘
       │
       ▼
@@ -214,7 +214,7 @@ Raw Data Source
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                   MODEL DEFINITION APPROACHES                    │
+│                   MODEL DEFINITION APPROACHES                   │
 └─────────────────────────────────────────────────────────────────┘
 
 1. SEQUENTIAL API
@@ -258,29 +258,29 @@ Raw Data Source
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐
-│                    MODEL OPTIMIZATION WORKFLOW                           │
+│                    MODEL OPTIMIZATION WORKFLOW                          │
 └─────────────────────────────────────────────────────────────────────────┘
 
         Original Model (Large, Slow)
               │
-              ├─────────────────────────────────────────────────┐
-              │                                                 │
-        ┌─────▼────┐                                     ┌──────▼──┐
-        │Quantization                              Pruning│          │
-        │(Reduce precision)                         │        │
+              ├────────────────────────────────────────────┐
+              │                                            │
+        ┌─────▼────┐                                ┌──────▼──┐
+        │Quantization                               │Pruning  │
+        │(Reduce precision)                         │        
         ├─────────────────────┐              ┌──────┤────────┤
-        │ • INT8 Post-Training│              │Magnitude-based
-        │ • QAT (Int8)        │              │Structured │
-        │ • Float16           │              │Unstructured│
-        └─────────┬───────────┘              └──────┬──────┘
+        │ • INT8 Post-Training│              │Magnitude-based│
+        │ • QAT (Int8)        │              │Structured     │
+        │ • Float16           │              │Unstructured   │
+        └─────────┬───────────┘              └──────┬────────┘
                   │                                 │
-        3-4x     │                      20-80x    │
-        Smaller  │                      Smaller   │
+        3-4x      │                      20-80x     │
+        Smaller   │                      Smaller    │
                   │                                 │
                   └──────────┬──────────────────────┘
                              │
                         ┌────▼─────┐
-                        │Knowledge  │
+                        │Knowledge │
                         │Distillation
                         ├───────────┤
                         │ Student (Small)
@@ -302,37 +302,37 @@ Raw Data Source
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐
-│                   EXPORT & DEPLOYMENT ARCHITECTURE                       │
+│                   EXPORT & DEPLOYMENT ARCHITECTURE                      │
 └─────────────────────────────────────────────────────────────────────────┘
 
         Keras Model
              │
         ┌────┴─────┐
-        │           │
+        │          │
    ┌────▼────┐ ┌──▼────┐
-   │SavedModel│ │TFLite │
+   │SavedModel││TFLite │
    └────┬────┘ └──┬────┘
         │         │
    ┌────▼──────────▼────┐
-   │   Optimization      │
-   │ • Quantization      │
-   │ • Op Fusion         │
-   │ • Constant Folding  │
-   └────┬──────────────┘
+   │   Optimization     │
+   │ • Quantization     │
+   │ • Op Fusion        │
+   │ • Constant Folding │
+   └────┬───────────────┘
         │
    ┌────▼─────────────────────────────────┐
    │     Platform-Specific Export         │
    ├──────────────────────────────────────┤
    │                                      │
-   │  ┌──────────┐    ┌──────────┐      │
-   │  │  iOS     │    │ Android  │      │
-   │  │ (TFLite) │    │ (TFLite) │      │
-   │  └──────────┘    └──────────┘      │
+   │  ┌──────────┐    ┌──────────┐        │
+   │  │  iOS     │    │ Android  │        │
+   │  │ (TFLite) │    │ (TFLite) │        │
+   │  └──────────┘    └──────────┘        │
    │                                      │
-   │  ┌──────────┐    ┌──────────┐      │
-   │  │  Web     │    │  Server  │      │
-   │  │(TF.js)   │    │(TF Serving)     │
-   │  └──────────┘    └──────────┘      │
+   │  ┌──────────┐    ┌──────────┐        │
+   │  │  Web     │    │  Server  │        │
+   │  │(TF.js)   │    │(TF Serving)       │
+   │  └──────────┘    └──────────┘        │
    │                                      │
    └──────────────────────────────────────┘
         │
@@ -351,39 +351,39 @@ Raw Data Source
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐
-│                        TRAINING LOOP FLOW                                │
+│                        TRAINING LOOP FLOW                               │
 └─────────────────────────────────────────────────────────────────────────┘
 
 Initialize Model & Optimizer
         │
         ▼
-┌───────────────────────────────┐
-│  FOR EACH EPOCH:              │
-├───────────────────────────────┤
-│                               │
-│  FOR EACH BATCH:              │
-│    1. Forward Pass (Prediction)│
-│       │                        │
-│       └─→ Compute Loss         │
-│           │                    │
-│           └─→ Backpropagation  │
-│               (GradientTape)   │
-│               │                │
+┌─────────────────────────────────┐
+│  FOR EACH EPOCH:                │
+├─────────────────────────────────┤
+│                                 │
+│  FOR EACH BATCH:                │
+│    1. Forward Pass (Prediction) │
+│       │                         │
+│       └─→ Compute Loss          │
+│           │                     │
+│           └─→ Backpropagation   │
+│               (GradientTape)    │
+│               │                 │
 │               └─→ Update Weights│
-│                   (Optimizer)  │
-│                                │
-│  2. Validation Pass            │
-│     (Sample batches)           │
-│     │                          │
-│     └─→ Compute Val Loss       │
-│         & Metrics              │
-│                                │
-│  3. Callbacks                  │
-│     • EarlyStopping            │
-│     • ReduceLROnPlateau        │
-│     • Checkpointing            │
-│                                │
-└───────────────────────────────┘
+│                   (Optimizer)   │
+│                                 │
+│  2. Validation Pass             │
+│     (Sample batches)            │
+│     │                           │
+│     └─→ Compute Val Loss        │
+│         & Metrics               │
+│                                 │
+│  3. Callbacks                   │
+│     • EarlyStopping             │
+│     • ReduceLROnPlateau         │
+│     • Checkpointing             │
+│                                 │
+└─────────────────────────────────┘
         │
         ▼
 ┌──────────────────────┐
@@ -398,7 +398,7 @@ Initialize Model & Optimizer
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐
-│                 MULTI-HEAD ATTENTION MECHANISM                           │
+│                 MULTI-HEAD ATTENTION MECHANISM                          │
 └─────────────────────────────────────────────────────────────────────────┘
 
 Input Sequence
@@ -406,7 +406,7 @@ Input Sequence
     ├─→ Linear (Query) ──┐
     ├─→ Linear (Key)     ├─→ Split into Heads
     └─→ Linear (Value) ──┘         │
-                                    ▼
+                                   ▼
                         ┌────────────────────────┐
                         │  Head 1  Head 2 ... H  │
                         │                        │
@@ -435,7 +435,7 @@ Input Sequence
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐
-│                    PRODUCTION UTILITY MODULES                            │
+│                    PRODUCTION UTILITY MODULES                           │
 └─────────────────────────────────────────────────────────────────────────┘
 
 src/
@@ -526,7 +526,7 @@ src/
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐
-│                    COMPREHENSIVE TEST STRUCTURE                          │
+│                    COMPREHENSIVE TEST STRUCTURE                         │
 └─────────────────────────────────────────────────────────────────────────┘
 
 tests/
@@ -598,7 +598,7 @@ tests/
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐
-│                   PRODUCTION DEPLOYMENT OPTIONS                          │
+│                   PRODUCTION DEPLOYMENT OPTIONS                         │
 └─────────────────────────────────────────────────────────────────────────┘
 
 ┌──────────────────────────────────────────────────────────────────┐
@@ -611,10 +611,10 @@ tests/
 │  │   inference server)    │                                      │
 │  └────────────────────────┘                                      │
 │           │                                                      │
-│           ├─→ SavedModel Loading                                │
-│           ├─→ Batching & Optimization                           │
-│           ├─→ Model Versioning                                  │
-│           └─→ REST/gRPC API                                     │
+│           ├─→ SavedModel Loading                                 │
+│           ├─→ Batching & Optimization                            │
+│           ├─→ Model Versioning                                   │
+│           └─→ REST/gRPC API                                      │
 │                                                                  │
 └──────────────────────────────────────────────────────────────────┘
 
@@ -627,9 +627,9 @@ tests/
 │  │ (TFLite) │              │ (TFLite) │                          │
 │  └──────────┘              └──────────┘                          │
 │                                                                  │
-│  Performance: Edge Computing                                    │
-│  Latency: <100ms per inference                                  │
-│  Model Size: <50MB                                              │
+│  Performance: Edge Computing                                     │
+│  Latency: <100ms per inference                                   │
+│  Model Size: <50MB                                               │
 │                                                                  │
 └──────────────────────────────────────────────────────────────────┘
 
@@ -642,9 +642,9 @@ tests/
 │  │  (JavaScript runtime)  │                                      │
 │  └────────────────────────┘                                      │
 │           │                                                      │
-│           ├─→ Browser Inference                                 │
-│           ├─→ Privacy (On-device)                               │
-│           └─→ Real-time Processing                              │
+│           ├─→ Browser Inference                                  │
+│           ├─→ Privacy (On-device)                                │
+│           └─→ Real-time Processing                               │
 │                                                                  │
 └──────────────────────────────────────────────────────────────────┘
 
@@ -652,13 +652,13 @@ tests/
 │                    EDGE DEPLOYMENT                               │
 ├──────────────────────────────────────────────────────────────────┤
 │                                                                  │
-│  ┌──────────┐  ┌──────────┐  ┌──────────┐                       │
-│  │ Raspberry│  │  Jetson  │  │   IoT    │                       │
-│  │    Pi    │  │  Nano    │  │ Devices  │                       │
-│  └──────────┘  └──────────┘  └──────────┘                       │
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐                        │
+│  │ Raspberry│  │  Jetson  │  │   IoT    │                        │
+│  │    Pi    │  │  Nano    │  │ Devices  │                        │
+│  └──────────┘  └──────────┘  └──────────┘                        │
 │                                                                  │
-│  TFLite with INT8 Quantization                                  │
-│  Optimized for Embedded Inference                               │
+│  TFLite with INT8 Quantization                                   │
+│  Optimized for Embedded Inference                                │
 │                                                                  │
 └──────────────────────────────────────────────────────────────────┘
 ```
@@ -669,7 +669,7 @@ tests/
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐
-│              PERFORMANCE MATRIX: Architecture vs Requirements            │
+│              PERFORMANCE MATRIX: Architecture vs Requirements           │
 └─────────────────────────────────────────────────────────────────────────┘
 
 Architecture          Accuracy  Latency  Model Size  Training  Memory
