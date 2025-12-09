@@ -11,21 +11,21 @@
 ![Issues](https://img.shields.io/github/issues/SatvikPraveen/TensorVerseHub?color=red)
 ![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)
 
-A comprehensive TensorFlow learning hub featuring 23+ core notebooks, supplementary materials on advanced topics, pre-trained models, and production-ready utilities. Built with TensorFlow 2.13+ and tf.keras integration for modern machine learning development.
+A comprehensive TensorFlow learning hub featuring 27 high-quality Jupyter notebooks, production-ready utilities, and practical examples. Built with TensorFlow 2.13+ and tf.keras, this repository serves as a complete reference for learning TensorFlow from fundamentals to advanced implementations.
 
 ## 🎯 Overview
 
-TensorVerseHub serves as a complete learning and development ecosystem for TensorFlow practitioners. The repository combines theoretical understanding with practical implementation through progressive notebooks, optimized model architectures, and deployment-ready utilities. It covers the full spectrum of machine learning—from fundamentals to cutting-edge research.
+TensorVerseHub is a **focused, production-grade learning resource** for TensorFlow practitioners. It combines theoretical understanding with hands-on implementations through a progressive curriculum spanning computer vision, NLP, generative modeling, reinforcement learning, and advanced optimization techniques.
 
 ### Key Highlights
 
-- **23+ Core Notebooks** covering fundamentals to advanced research implementations
-- **Supplementary Materials** on meta-learning, federated learning, and time series forecasting
-- **Multi-Domain Coverage** spanning computer vision, NLP, generative modeling, and reinforcement learning
-- **Production-Ready Tools** for model optimization, deployment, and monitoring
-- **Cross-Platform Support** with TFLite, ONNX, and SavedModel formats
-- **Automated Testing** ensuring notebook reliability and code quality
-- **Comprehensive Documentation** with architectural diagrams and best practices
+- **27 Comprehensive Notebooks** - Core curriculum (23) + advanced supplementary materials (4)
+- **Multi-Domain Coverage** - Computer vision, NLP, GANs, diffusion models, RL, time series, federated learning
+- **Production Utilities** - Ready-to-use helper functions in `src/` folder
+- **Practical Deployment Examples** - Flask APIs, Streamlit demos, TFLite inference
+- **Model Optimization** - Quantization, pruning, distillation with real examples
+- **Quality Testing** - Automated tests ensuring code reliability
+- **Essential Documentation** - Best practices, quick reference, troubleshooting guides
 
 ## 🚀 Quick Start
 
@@ -43,9 +43,9 @@ TensorVerseHub serves as a complete learning and development ecosystem for Tenso
 git clone https://github.com/SatvikPraveen/TensorVerseHub.git
 cd TensorVerseHub
 
-# Setup environment (automated script)
-chmod +x scripts/setup_environment.sh
-./scripts/setup_environment.sh
+# Create virtual environment
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
 
 # Install dependencies
 pip install -r requirements.txt
@@ -53,18 +53,19 @@ pip install -r requirements.txt
 # Verify installation
 python -c "import tensorflow as tf; print(f'TensorFlow {tf.__version__} installed successfully')"
 
-# Launch Jupyter environment
-jupyter lab notebooks/
+# Launch Jupyter
+jupyter lab
 ```
 
-### Docker Setup
+### Quick Navigation
 
-```bash
-# Build container
-docker-compose up --build
+Start your learning journey:
 
-# Access Jupyter Lab at http://localhost:8888
-```
+1. **Fundamentals** → `notebooks/01_tensorflow_foundations/01_tensors_operations_execution.ipynb`
+2. **Keras Models** → `notebooks/02_neural_networks_with_keras/04_keras_sequential_functional_apis.ipynb`
+3. **Your Domain** → Choose Computer Vision, NLP, or Generative Models
+4. **Optimization** → `notebooks/06_model_optimization/16_tensorflow_model_optimization.ipynb`
+5. **Capstone** → `notebooks/capstone_projects/22_end_to_end_ml_pipeline.ipynb`
 
 ## 📚 Learning Curriculum
 
@@ -135,290 +136,154 @@ docker-compose up --build
 - `federated_learning.ipynb` - Privacy-preserving federated learning, differential privacy, distributed training
 - `reinforcement_learning.ipynb` - Comprehensive RL algorithms (in development)
 
-## 🏗️ Architecture Overview
+## 🏗️ Project Structure
 
 ```
 TensorVerseHub/
-├── 📔 notebooks/              # Progressive learning curriculum
-│   ├── 01_tensorflow_foundations/
-│   ├── 02_neural_networks_with_keras/
-│   ├── 03_computer_vision/
-│   ├── 04_natural_language_processing/
-│   ├── 05_generative_models/
-│   ├── 06_model_optimization/
-│   ├── 07_advanced_topics/
-│   ├── 08_reinforcement_learning/      # ⭐ NEW
-│   ├── capstone_projects/
-│   └── supplementary/                   # ⭐ NEW - Advanced topics
-│       ├── meta_learning_fewshot.ipynb
-│       ├── time_series_forecasting.ipynb
-│       └── federated_learning.ipynb
-├── 📚 docs/                  # Comprehensive documentation
-│   ├── CONTRIBUTING.md               # Development guidelines
-│   ├── PROJECT_STRUCTURE.md          # Detailed repo structure
-│   ├── COMPREHENSIVE_PROJECT_REVIEW.md  # Full project analysis
-│   ├── WHAT_NEEDS_TO_BE_ADDED.md    # Enhancement roadmap
-│   ├── REVIEW_SUMMARY.md            # Quick assessment summary
-│   ├── CONCEPT_MAP.md               # Topic relationship diagram
-│   ├── QUICK_REFERENCE.md           # Essential commands and APIs
-│   ├── TENSORFLOW_KERAS_BEST_PRACTICES.md  # Production standards
-│   ├── MODEL_OPTIMIZATION_GUIDE.md  # Compression and acceleration
-│   ├── TROUBLESHOOTING.md           # Common issues and solutions
-│   └── assets/                      # Diagrams and visual resources
-├── 🤖 models/                 # Pre-trained and checkpoint storage
-│   ├── checkpoints/           # Training state preservation
-│   ├── saved_models/         # TensorFlow SavedModel format
-│   ├── tflite/              # Mobile-optimized models
-│   └── onnx/                # Cross-platform model format
-├── 🔧 src/                   # Core utility modules
-│   ├── data_utils.py        # Data preprocessing and pipeline tools
-│   ├── model_utils.py       # Model architecture utilities
-│   ├── optimization_utils.py # Model compression and optimization
-│   ├── export_utils.py      # Multi-format model export
-│   └── visualization.py     # Metrics and result visualization
-├── 📊 data/                  # Sample datasets and examples
-│   ├── sample_images/       # Computer vision datasets
-│   ├── sample_text/         # NLP corpora
-│   ├── synthetic/           # Generated training data
-│   └── tfrecords_examples/  # Optimized data format examples
-├── 🚀 examples/              # Production deployment patterns
-│   ├── serving_examples/    # Model serving implementations
-│   ├── optimization_examples/ # Model compression demos
-│   └── docker/             # Containerization setup
-├── ⚗️ benchmarks/            # Performance evaluation tools
-├── 🧪 tests/                 # Automated testing suite
-└── 📝 logs/                  # Training and experiment logs
+├── notebooks/                    # 27 comprehensive learning notebooks
+│   ├── 01_tensorflow_foundations/        # Tensors, operations, execution modes
+│   ├── 02_neural_networks_with_keras/   # Model building paradigms
+│   ├── 03_computer_vision/               # CNNs, transfer learning, segmentation
+│   ├── 04_natural_language_processing/  # Text processing, transformers, NLP
+│   ├── 05_generative_models/            # GANs, VAEs, diffusion models
+│   ├── 06_model_optimization/           # Quantization, pruning, distillation
+│   ├── 07_advanced_topics/              # Distributed training, research implementations
+│   ├── 08_reinforcement_learning/       # Deep Q-Learning, Policy Gradients, Actor-Critic
+│   ├── capstone_projects/               # End-to-end ML pipelines
+│   └── supplementary/                   # Advanced topics beyond core curriculum
+│       ├── federated_learning.ipynb     # Privacy-preserving distributed learning
+│       ├── meta_learning_fewshot.ipynb  # Few-shot learning with metric learning
+│       ├── time_series_forecasting.ipynb # LSTM/Transformer time series
+│       └── reinforcement_learning.ipynb # Advanced RL implementations
+├── src/                          # Production utility modules
+│   ├── data_utils.py            # Data preprocessing and tf.data pipelines
+│   ├── model_utils.py           # Model building and architecture helpers
+│   ├── optimization_utils.py    # Model compression utilities
+│   ├── export_utils.py          # Multi-format model export (SavedModel, TFLite, ONNX)
+│   └── visualization.py         # Visualization and metrics plotting
+├── examples/                     # Practical deployment patterns
+│   ├── serving_examples/        # Flask API, Streamlit, TFLite inference
+│   └── optimization_examples/   # Quantization, pruning, distillation demos
+├── docs/                         # Essential documentation
+│   ├── QUICK_REFERENCE.md       # Essential TensorFlow commands and APIs
+│   ├── TENSORFLOW_KERAS_BEST_PRACTICES.md  # Production coding standards
+│   ├── MODEL_OPTIMIZATION_GUIDE.md         # Compression techniques
+│   ├── TROUBLESHOOTING.md       # Common issues and solutions
+│   └── assets/                  # Architecture diagrams
+├── tests/                        # Automated testing suite
+│   ├── test_model_utils.py
+│   ├── test_data_utils.py
+│   ├── test_optimization.py
+│   └── test_notebooks.py        # Notebook execution verification
+├── requirements.txt             # Python dependencies
+├── setup.py                     # Package installation config
+└── LICENSE                      # MIT License
 ```
 
-## 🔧 Core Components
+## 🔧 Core Features
 
-### Model Architectures
+### Complete Learning Path
 
-**Computer Vision Models**
+| Track | Notebooks | Coverage |
+|-------|-----------|----------|
+| **Fundamentals** | 01-06 | Tensors, Keras APIs, optimization |
+| **Computer Vision** | 07-09 | CNNs, transfer learning, segmentation |
+| **Natural Language Processing** | 10-12 | Text processing, transformers, embeddings |
+| **Generative Models** | 13-15 | GANs, VAEs, diffusion models |
+| **Optimization** | 16-18 | Quantization, pruning, export formats |
+| **Advanced** | 19-22 | Distributed training, research, capstones |
+| **Reinforcement Learning** | 23 | DQN, policy gradients, actor-critic |
+| **Supplementary** | 24-27 | Federated learning, meta-learning, time series |
 
-- ResNet, EfficientNet, and Vision Transformer implementations
-- U-Net and Mask R-CNN for segmentation tasks
-- Object detection with YOLO and SSD architectures
-- Style transfer and image enhancement networks
+### Production Utilities
 
-**Natural Language Processing**
-
-- LSTM/GRU recurrent architectures
-- Transformer encoder-decoder models
-- BERT-based classification and embedding models
-- Sequence-to-sequence translation systems
-
-**Generative Models**
-
-- DCGAN, StyleGAN, and conditional GAN variants
-- Variational Autoencoders for latent space modeling
-- Diffusion models for high-quality image generation
-- Text-to-image and multimodal generation systems
-
-### Optimization Toolkit
-
-**Model Compression**
-
-```python
-from src.optimization_utils import (
-    quantize_model_int8,
-    prune_structured,
-    knowledge_distillation
-)
-
-# Post-training quantization
-quantized_model = quantize_model_int8(model, representative_dataset)
-
-# Structured pruning for hardware efficiency
-pruned_model = prune_structured(model, sparsity=0.5, block_size=4)
-
-# Knowledge distillation for model compression
-student_model = knowledge_distillation(
-    teacher_model=large_model,
-    student_architecture=compact_architecture,
-    temperature=3.0,
-    alpha=0.7
-)
-```
-
-**Cross-Platform Export**
-
-```python
-from src.export_utils import export_multi_format
-
-# Export to multiple formats simultaneously
-export_multi_format(
-    model=trained_model,
-    output_dir="models/exports/",
-    formats=["savedmodel", "tflite", "onnx"],
-    optimization_flags=["quantize", "optimize_for_size"]
-)
-```
-
-### Data Pipeline Utilities
-
-**Efficient Data Loading**
-
+**Data Pipelines**
 ```python
 from src.data_utils import create_tfrecord_dataset, augmentation_pipeline
 
-# TFRecord-based data pipeline
+# Efficient data loading
 dataset = create_tfrecord_dataset(
     tfrecord_paths=["data/train/*.tfrecord"],
     batch_size=32,
-    shuffle_buffer=10000,
-    num_parallel_reads=tf.data.AUTOTUNE
-)
-
-# Advanced augmentation pipeline
-augmented_dataset = augmentation_pipeline(
-    dataset,
-    augmentations=["random_crop", "color_jitter", "mixup"],
-    severity=0.3
+    shuffle_buffer=10000
 )
 ```
 
-## 🚀 Deployment Examples
-
-### TensorFlow Serving
-
+**Model Optimization**
 ```python
-# Deploy SavedModel with TensorFlow Serving
-import tensorflow as tf
+from src.optimization_utils import quantize_model_int8, prune_structured
 
-# Model serving with REST API
-serving_config = {
-    "model_name": "image_classifier",
-    "model_base_path": "/models/saved_models/image_classifier",
-    "rest_api_port": 8501,
-    "grpc_api_port": 8500
-}
+# Post-training quantization
+quantized = quantize_model_int8(model, representative_data)
+
+# Structured pruning
+pruned = prune_structured(model, sparsity=0.5)
 ```
 
-### Mobile Deployment
-
+**Multi-Format Export**
 ```python
-from examples.serving_examples.tflite_inference_example import TFLiteInference
+from src.export_utils import export_multi_format
 
-# Initialize mobile-optimized inference
-mobile_classifier = TFLiteInference(
-    model_path="models/tflite/optimized_classifier.tflite",
-    num_threads=4
-)
-
-# Real-time inference
-predictions = mobile_classifier.predict(
-    input_data=preprocessed_image,
-    top_k=5
+# Export to SavedModel, TFLite, ONNX
+export_multi_format(
+    model=trained_model,
+    output_dir="models/exports/",
+    formats=["savedmodel", "tflite", "onnx"]
 )
 ```
 
-### Flask API Integration
+### Deployment Examples
 
-```python
-from examples.serving_examples.flask_tensorflow_api import TensorFlowAPI
+- **Flask API** - RESTful endpoints for model serving
+- **Streamlit** - Interactive web interfaces for demos
+- **TFLite** - Mobile and edge device inference
+- **Optimization** - Quantization and pruning demonstrations
 
-# Production-ready API wrapper
-api = TensorFlowAPI(
-    model_path="models/saved_models/text_classifier",
-    preprocessing_config="config/preprocessing.yaml"
-)
+## 🧪 Quality Assurance
 
-# RESTful endpoint with automatic scaling
-app.run(host='0.0.0.0', port=5000, threaded=True)
-```
-
-## 📊 Performance Benchmarks
-
-The repository includes comprehensive benchmarking tools for evaluating model performance across different hardware configurations:
-
-- **Training Benchmarks**: Multi-GPU scaling efficiency and memory utilization
-- **Inference Benchmarks**: Latency and throughput measurements across formats
-- **Memory Profiling**: RAM and VRAM usage optimization analysis
-- **Mobile Performance**: Edge device compatibility and battery consumption
-
-## 🧪 Testing Framework
-
-Automated testing ensures code reliability and notebook execution:
+Automated tests ensure reliability and code quality:
 
 ```bash
-# Run complete test suite
+# Run all tests
 python -m pytest tests/ -v
 
-# Test specific components
+# Run specific test module
 python -m pytest tests/test_model_utils.py -v
 
-# Notebook execution testing
-python tests/test_notebooks.py --notebook-dir notebooks/01_tensorflow_foundations/
-
-# Integration testing with sample data
-python tests/test_integration.py --use-gpu
+# Test notebook execution
+python -m pytest tests/test_notebooks.py -v
 ```
 
 ## 📚 Documentation
 
-### Quick References
+Essential guides for learning and production use:
 
-- **[Quick Reference Guide](docs/QUICK_REFERENCE.md)** - Essential commands and APIs
+- **[Quick Reference Guide](docs/QUICK_REFERENCE.md)** - Essential TensorFlow commands and APIs
 - **[Best Practices](docs/TENSORFLOW_KERAS_BEST_PRACTICES.md)** - Production-ready coding standards
-- **[Model Optimization Guide](docs/MODEL_OPTIMIZATION_GUIDE.md)** - Compression and acceleration techniques
+- **[Model Optimization](docs/MODEL_OPTIMIZATION_GUIDE.md)** - Compression and acceleration techniques
 - **[Troubleshooting](docs/TROUBLESHOOTING.md)** - Common issues and solutions
-- **[Project Structure](docs/PROJECT_STRUCTURE.md)** - Detailed repository organization
-- **[Comprehensive Review](docs/COMPREHENSIVE_PROJECT_REVIEW.md)** - Full project analysis and coverage assessment
-- **[Enhancement Roadmap](docs/WHAT_NEEDS_TO_BE_ADDED.md)** - Future improvements and gap analysis
-
-### Architecture Diagrams
-
-- TensorFlow ecosystem overview and component interactions
-- Neural network architecture visualization
-- Distributed training strategy illustrations
-- MLOps pipeline workflow diagrams
-- Model optimization technique comparisons
-
-## 🔄 Continuous Integration
-
-The project includes automated CI/CD workflows:
-
-- **Code Quality**: Linting, formatting, and style checking
-- **Automated Testing**: Unit tests, integration tests, and notebook execution
-- **Documentation**: Automatic documentation generation and deployment
-- **Performance Monitoring**: Benchmark regression detection
-- **Security Scanning**: Dependency vulnerability assessment
-
-## 🤝 Contributing
-
-Contributions are welcome! The project follows standard open-source practices:
-
-1. **Fork** the repository
-2. **Create** a feature branch (`git checkout -b feature/enhancement-name`)
-3. **Implement** changes with appropriate tests
-4. **Commit** with descriptive messages (`git commit -m 'Add feature: enhancement description'`)
-5. **Push** to the branch (`git push origin feature/enhancement-name`)
-6. **Submit** a Pull Request with detailed description
-
-### Development Guidelines
-
-- Follow PEP 8 style guidelines
-- Include unit tests for new functionality
-- Update documentation for API changes
-- Ensure notebook execution compatibility
-- Maintain backward compatibility where possible
-
-See [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md) for detailed development guidelines and coding standards.
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for complete terms and conditions.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 🌟 Acknowledgments
+## 🌟 Why This Project?
 
-TensorVerseHub builds upon the robust foundation of TensorFlow 2.15+ and tf.keras, incorporating community best practices and state-of-the-art research implementations. The project aims to bridge the gap between academic research and production deployment in modern machine learning workflows.
+TensorVerseHub provides:
+
+✅ **Complete curriculum** - From basics to research-grade implementations  
+✅ **Production focus** - Real-world patterns and best practices  
+✅ **Multi-domain** - Computer vision, NLP, generative models, RL, time series  
+✅ **Hands-on learning** - Executable notebooks with real datasets  
+✅ **Modern stack** - TensorFlow 2.13+, tf.keras, and latest ML research  
+✅ **Practical utilities** - Copy-paste ready code for common tasks  
+✅ **Portfolio value** - Demonstrates mastery across TensorFlow ecosystem  
 
 ## 📞 Support
 
 - **Issues**: [GitHub Issues](https://github.com/SatvikPraveen/TensorVerseHub/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/SatvikPraveen/TensorVerseHub/discussions)
+- **Questions**: [GitHub Discussions](https://github.com/SatvikPraveen/TensorVerseHub/discussions)
 
 ---
 
-**Built with ❤️ using TensorFlow 2.15+ and tf.keras for the machine learning community.**
+**Built with ❤️ for the TensorFlow and machine learning community.**
