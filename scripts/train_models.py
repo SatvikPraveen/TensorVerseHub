@@ -174,6 +174,7 @@ def load_config(config_path: str) -> dict:
 def build_model(args):
     """Build a tf.keras model according to the parsed arguments."""
     import tensorflow as tf
+
     from model_utils import ModelBuilders
 
     image_size = tuple(args.image_size)
@@ -182,14 +183,18 @@ def build_model(args):
         model = ModelBuilders.create_cnn_classifier(
             input_shape=(*image_size, 3),
             num_classes=args.num_classes,
-            architecture=args.architecture if args.architecture in ("simple", "vgg", "resnet") else "resnet",
+            architecture=(
+                args.architecture if args.architecture in ("simple", "vgg", "resnet") else "resnet"
+            ),
         )
     elif args.task == "text_classification":
         model = ModelBuilders.create_text_classifier(
             vocab_size=10000,
             max_length=128,
             num_classes=args.num_classes,
-            architecture=args.architecture if args.architecture in ("lstm", "gru", "transformer") else "lstm",
+            architecture=(
+                args.architecture if args.architecture in ("lstm", "gru", "transformer") else "lstm"
+            ),
         )
     elif args.task == "autoencoder":
         model, _, _ = ModelBuilders.create_autoencoder(
@@ -254,8 +259,8 @@ def create_synthetic_dataset(args):
     Create a small synthetic dataset for demonstration when no data directory
     is found. In production, replace this with a real data loader.
     """
-    import tensorflow as tf
     import numpy as np
+    import tensorflow as tf
 
     if args.task == "classification":
         h, w = args.image_size
@@ -331,7 +336,9 @@ def main():
         train_ds, val_ds = create_synthetic_dataset(args)
     else:
         if not args.quiet:
-            print(f"\nData directory '{args.data}' not found — using synthetic data for demonstration.")
+            print(
+                f"\nData directory '{args.data}' not found — using synthetic data for demonstration."
+            )
         train_ds, val_ds = create_synthetic_dataset(args)
 
     # Train

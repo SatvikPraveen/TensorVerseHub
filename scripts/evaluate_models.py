@@ -177,9 +177,7 @@ def evaluate_tflite(interpreter, dataset, args):
     y_pred_list, y_true_list = [], []
     for x_batch, y_batch in dataset:
         for i in range(len(x_batch)):
-            sample = np.expand_dims(x_batch[i].numpy(), axis=0).astype(
-                input_details[0]["dtype"]
-            )
+            sample = np.expand_dims(x_batch[i].numpy(), axis=0).astype(input_details[0]["dtype"])
             interpreter.set_tensor(input_details[0]["index"], sample)
             interpreter.invoke()
             output = interpreter.get_tensor(output_details[0]["index"])
@@ -207,6 +205,7 @@ def save_results(results, y_pred, y_true, args):
         if args.report:
             try:
                 from sklearn.metrics import classification_report
+
                 report = classification_report(
                     y_true_labels,
                     y_pred_labels,
@@ -225,10 +224,11 @@ def save_results(results, y_pred, y_true, args):
         if args.confusion_matrix:
             try:
                 import matplotlib
+
                 matplotlib.use("Agg")
                 import matplotlib.pyplot as plt
-                from sklearn.metrics import confusion_matrix
                 import seaborn as sns
+                from sklearn.metrics import confusion_matrix
 
                 cm = confusion_matrix(y_true_labels, y_pred_labels)
                 fig, ax = plt.subplots(figsize=(8, 6))

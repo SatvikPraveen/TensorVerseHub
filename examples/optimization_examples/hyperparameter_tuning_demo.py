@@ -3,23 +3,26 @@ Hyperparameter tuning demonstration using Keras Tuner.
 Covers RandomSearch, Hyperband, and BayesianOptimization strategies.
 """
 
-import tensorflow as tf
-import numpy as np
-import matplotlib.pyplot as plt
 import argparse
-import os
 import json
-from typing import Tuple, Dict, Any, Optional
+import os
+from typing import Any, Dict, Optional, Tuple
+
+import matplotlib.pyplot as plt
+import numpy as np
+import tensorflow as tf
 
 # Optional integration with TensorVerseHub utilities
 try:
     from src.visualization import setup_plotting_style
+
     _HAS_TVH = True
 except ImportError:
     _HAS_TVH = False
 
 try:
     import keras_tuner as kt
+
     _HAS_KERAS_TUNER = True
 except ImportError:
     _HAS_KERAS_TUNER = False
@@ -161,7 +164,8 @@ class HyperparameterTuningDemo:
 
         callbacks = [tf.keras.callbacks.EarlyStopping(monitor="val_accuracy", patience=3)]
         tuner.search(
-            x_train, y_train,
+            x_train,
+            y_train,
             validation_data=(x_val, y_val),
             epochs=15,
             batch_size=64,
@@ -198,7 +202,9 @@ class HyperparameterTuningDemo:
 
         print("\n⚡ Hyperband Hyperparameter Tuning")
         print("=" * 50)
-        print("Strategy: Successive halving with random configurations — much faster than RandomSearch.")
+        print(
+            "Strategy: Successive halving with random configurations — much faster than RandomSearch."
+        )
 
         tuner = kt.Hyperband(
             hypermodel=self.build_cnn,
@@ -213,7 +219,8 @@ class HyperparameterTuningDemo:
 
         callbacks = [tf.keras.callbacks.EarlyStopping(monitor="val_accuracy", patience=3)]
         tuner.search(
-            x_train, y_train,
+            x_train,
+            y_train,
             validation_data=(x_val, y_val),
             batch_size=64,
             callbacks=callbacks,
@@ -263,7 +270,8 @@ class HyperparameterTuningDemo:
 
         callbacks = [tf.keras.callbacks.EarlyStopping(monitor="val_accuracy", patience=3)]
         tuner.search(
-            x_train, y_train,
+            x_train,
+            y_train,
             validation_data=(x_val, y_val),
             epochs=15,
             batch_size=64,
@@ -350,7 +358,8 @@ class HyperparameterTuningDemo:
         x_v, y_v = x_train[val_split:], y_train[val_split:]
 
         history = model.fit(
-            x_tr, y_tr,
+            x_tr,
+            y_tr,
             validation_data=(x_v, y_v),
             epochs=epochs,
             batch_size=64,
@@ -396,7 +405,9 @@ class HyperparameterTuningDemo:
                 bar.get_x() + bar.get_width() / 2,
                 bar.get_height() + 0.002,
                 f"{score:.4f}",
-                ha="center", va="bottom", fontsize=10,
+                ha="center",
+                va="bottom",
+                fontsize=10,
             )
 
         ax.set_xlabel("Tuning Strategy", fontsize=12)
@@ -425,6 +436,7 @@ class HyperparameterTuningDemo:
 # ---------------------------------------------------------------------------
 # CLI entry point
 # ---------------------------------------------------------------------------
+
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
@@ -475,7 +487,9 @@ def main() -> None:
     args = parse_args()
 
     if not _HAS_KERAS_TUNER:
-        print("ERROR: keras-tuner is required. Install it with:\n  pip install 'keras-tuner>=1.3.5,<1.4.0'")
+        print(
+            "ERROR: keras-tuner is required. Install it with:\n  pip install 'keras-tuner>=1.3.5,<1.4.0'"
+        )
         return
 
     strategies = args.strategies
@@ -506,8 +520,7 @@ def main() -> None:
     # Compare strategies
     if len(demo.results) > 1:
         save_path = (
-            os.path.join(args.output_dir, "strategy_comparison.png")
-            if args.save_plot else None
+            os.path.join(args.output_dir, "strategy_comparison.png") if args.save_plot else None
         )
         demo.plot_comparison(save_path=save_path)
 
