@@ -116,5 +116,6 @@ nav:
       - Flask API: deployment/flask.md
       - Streamlit: deployment/streamlit.md
       - TFLite: deployment/tflite.md
-  - Contributing: CONTRIBUTING.md
+  - Contributing: contributing.md
   - Changelog: CHANGELOG.md
+  - Security: SECURITY.md
