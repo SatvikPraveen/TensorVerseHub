@@ -1,0 +1,99 @@
+name: 🐛 Bug Report
+description: Report a bug or unexpected behaviour
+labels: ["bug", "needs-triage"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to file a bug report! Please fill in as much detail as possible.
+
+  - type: input
+    id: tensorflow-version
+    attributes:
+      label: TensorFlow Version
+      description: Output of `python -c "import tensorflow as tf; print(tf.__version__)"`
+      placeholder: "2.13.0"
+    validations:
+      required: true
+
+  - type: input
+    id: python-version
+    attributes:
+      label: Python Version
+      description: Output of `python --version`
+      placeholder: "3.10.12"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: os
+    attributes:
+      label: Operating System
+      options:
+        - Linux
+        - macOS
+        - Windows
+        - Other
+    validations:
+      required: true
+
+  - type: dropdown
+    id: component
+    attributes:
+      label: Affected Component
+      description: Which part of TensorVerseHub is affected?
+      options:
+        - Notebook
+        - src/data_utils.py
+        - src/model_utils.py
+        - src/optimization_utils.py
+        - src/export_utils.py
+        - src/visualization.py
+        - examples/
+        - Docker / docker-compose
+        - Documentation
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Bug Description
+      description: A clear and concise description of what the bug is.
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to Reproduce
+      description: Steps to reproduce the behaviour.
+      placeholder: |
+        1. Import '...'
+        2. Call '...'
+        3. See error
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Behaviour
+      description: What you expected to happen.
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual Behaviour
+      description: What actually happened. Include the full traceback if applicable.
+      render: text
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Additional Environment Details
+      description: Output of `pip list | grep -E "tensorflow|keras|numpy"`
+      render: text

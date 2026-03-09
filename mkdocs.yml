@@ -1,0 +1,120 @@
+site_name: TensorVerseHub
+site_description: Comprehensive TensorFlow learning hub — 27 notebooks, production utilities, and deployment examples
+site_author: Satvik Praveen
+site_url: https://satvikpraveen.github.io/TensorVerseHub
+repo_url: https://github.com/SatvikPraveen/TensorVerseHub
+repo_name: SatvikPraveen/TensorVerseHub
+edit_uri: edit/main/docs/
+
+copyright: "Copyright &copy; 2025 Satvik Praveen — MIT License"
+
+theme:
+  name: material
+  palette:
+    - scheme: default
+      primary: deep orange
+      accent: orange
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+    - scheme: slate
+      primary: deep orange
+      accent: orange
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to light mode
+  font:
+    text: Roboto
+    code: Roboto Mono
+  icon:
+    repo: fontawesome/brands/github
+    logo: material/brain
+  features:
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - navigation.footer
+    - search.highlight
+    - search.share
+    - content.code.copy
+    - content.code.annotate
+    - toc.follow
+
+plugins:
+  - search:
+      lang: en
+  - mkdocstrings:
+      handlers:
+        python:
+          options:
+            show_source: true
+            show_root_heading: true
+            heading_level: 3
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.tabbed:
+      alternate_style: true
+  - attr_list
+  - md_in_html
+  - tables
+  - footnotes
+  - toc:
+      permalink: true
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/SatvikPraveen/TensorVerseHub
+  analytics:
+    provider: google
+    property: ""
+
+nav:
+  - Home: index.md
+  - Getting Started:
+      - Installation: installation.md
+      - Quick Reference: QUICK_REFERENCE.md
+  - Curriculum:
+      - Overview: curriculum.md
+      - "01 — TF Foundations": notebooks/01_foundations.md
+      - "02 — Keras APIs": notebooks/02_keras.md
+      - "03 — Computer Vision": notebooks/03_vision.md
+      - "04 — NLP": notebooks/04_nlp.md
+      - "05 — Generative Models": notebooks/05_generative.md
+      - "06 — Optimization": notebooks/06_optimization.md
+      - "07 — Advanced Topics": notebooks/07_advanced.md
+      - "08 — Reinforcement Learning": notebooks/08_rl.md
+      - Capstone Projects: notebooks/capstone.md
+      - Supplementary: notebooks/supplementary.md
+  - Guides:
+      - Best Practices: TENSORFLOW_KERAS_BEST_PRACTICES.md
+      - Model Optimization: MODEL_OPTIMIZATION_GUIDE.md
+      - Architecture Diagrams: ARCHITECTURE_DIAGRAMS.md
+      - Practical Examples: PRACTICAL_EXAMPLES.md
+      - Troubleshooting: TROUBLESHOOTING.md
+  - API Reference:
+      - data_utils: api/data_utils.md
+      - model_utils: api/model_utils.md
+      - optimization_utils: api/optimization_utils.md
+      - export_utils: api/export_utils.md
+      - visualization: api/visualization.md
+  - Deployment:
+      - Docker: deployment/docker.md
+      - Flask API: deployment/flask.md
+      - Streamlit: deployment/streamlit.md
+      - TFLite: deployment/tflite.md
+  - Contributing: CONTRIBUTING.md
+  - Changelog: CHANGELOG.md

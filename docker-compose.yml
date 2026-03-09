@@ -1,0 +1,130 @@
+# ============================================================
+# TensorVerseHub - docker-compose.yml
+# Multi-service orchestration for all TensorVerseHub components
+# ============================================================
+
+version: "3.9"
+
+# ── Shared environment block ─────────────────────────────────
+x-common-env: &common-env
+  TF_CPP_MIN_LOG_LEVEL: "2"
+  PYTHONUNBUFFERED: "1"
+  PYTHONDONTWRITEBYTECODE: "1"
+  PYTHONPATH: /app/src:/app
+
+# ── Shared volume block ──────────────────────────────────────
+x-common-volumes: &common-volumes
+  - ./notebooks:/app/notebooks
+  - ./src:/app/src
+  - ./examples:/app/examples
+  - ./docs:/app/docs
+  - models_cache:/app/models
+  - data_cache:/app/data
+
+services:
+
+  # ── Jupyter Lab ────────────────────────────────────────────
+  jupyter:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: jupyter
+    container_name: tensorversehub-jupyter
+    ports:
+      - "8888:8888"
+    environment:
+      <<: *common-env
+      JUPYTER_ENABLE_LAB: "yes"
+    volumes:
+      <<: *common-volumes
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8888/api"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  # ── Flask REST API ─────────────────────────────────────────
+  flask-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: flask-api
+    container_name: tensorversehub-flask
+    ports:
+      - "5000:5000"
+    environment:
+      <<: *common-env
+      FLASK_ENV: production
+      FLASK_DEBUG: "0"
+    volumes:
+      - ./examples/serving_examples:/app/examples/serving_examples
+      - models_cache:/app/models
+    depends_on:
+      - tensorboard
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  # ── Streamlit Dashboard ────────────────────────────────────
+  streamlit:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: runtime
+    container_name: tensorversehub-streamlit
+    command: >
+      streamlit run examples/serving_examples/streamlit_tensorflow_demo.py
+      --server.port=8501
+      --server.address=0.0.0.0
+      --server.headless=true
+    ports:
+      - "8501:8501"
+    environment:
+      <<: *common-env
+    volumes:
+      - ./examples/serving_examples:/app/examples/serving_examples
+      - models_cache:/app/models
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8501/healthz"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 45s
+
+  # ── TensorBoard ────────────────────────────────────────────
+  tensorboard:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: runtime
+    container_name: tensorversehub-tensorboard
+    command: tensorboard --logdir=/app/logs --host=0.0.0.0 --port=6006
+    ports:
+      - "6006:6006"
+    environment:
+      <<: *common-env
+    volumes:
+      - tensorboard_logs:/app/logs
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:6006"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+
+# ── Named volumes ──────────────────────────────────────────
+volumes:
+  models_cache:
+    driver: local
+  data_cache:
+    driver: local
+  tensorboard_logs:
+    driver: local
