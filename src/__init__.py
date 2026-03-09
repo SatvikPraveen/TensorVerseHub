@@ -28,6 +28,7 @@ from . import model_utils
 from . import visualization
 from . import optimization_utils
 from . import export_utils
+from . import training_utils
 
 # Import key classes and functions for convenient access
 from .data_utils import (
@@ -75,13 +76,22 @@ from .export_utils import (
     create_deployment_package
 )
 
+from .training_utils import (
+    WarmupCosineSchedule,
+    GradientClipping,
+    MetricsTracker,
+    EarlyStoppingHandler,
+    LearningRateFinder,
+    CustomTrainingLoop,
+)
+
 # Configure TensorFlow settings for optimal performance
 def configure_tensorflow(memory_growth: bool = True,
                          mixed_precision: bool = False,
                          xla: bool = False) -> None:
     """
     Configure TensorFlow settings for optimal performance.
-    
+
     Args:
         memory_growth: Enable GPU memory growth
         mixed_precision: Enable mixed precision training
@@ -97,13 +107,13 @@ def configure_tensorflow(memory_growth: bool = True,
             print(f"Configured {len(gpus)} GPU(s) with memory growth: {memory_growth}")
         except RuntimeError as e:
             print(f"GPU configuration error: {e}")
-    
+
     # Mixed precision
     if mixed_precision:
         policy = tf.keras.mixed_precision.Policy('mixed_float16')
         tf.keras.mixed_precision.set_global_policy(policy)
         print("Mixed precision enabled")
-    
+
     # XLA compilation
     if xla:
         tf.config.optimizer.set_jit(True)
@@ -125,17 +135,17 @@ __all__ = [
     '__version__',
     '__author__',
     '__email__',
-    
+
     # Configuration
     'configure_tensorflow',
-    
+
     # Data utilities
     'DataPipeline',
-    'TFRecordHandler', 
+    'TFRecordHandler',
     'DataAugmentation',
     'create_image_classification_pipeline',
     'create_text_classification_pipeline',
-    
+
     # Model utilities
     'ModelBuilders',
     'CustomLayers',
@@ -143,15 +153,15 @@ __all__ = [
     'ModelAnalysis',
     'create_classification_model',
     'create_transfer_learning_model',
-    
+
     # Visualization
     'ModelVisualization',
     'TrainingVisualization',
-    'DataVisualization', 
+    'DataVisualization',
     'AdvancedVisualization',
     'quick_model_analysis',
     'setup_plotting_style',
-    
+
     # Optimization
     'ModelQuantization',
     'ModelPruning',
@@ -159,10 +169,10 @@ __all__ = [
     'MixedPrecisionOptimization',
     'optimize_for_mobile',
     'create_inference_optimized_model',
-    
+
     # Export utilities
     'SavedModelExporter',
-    'TFLiteExporter', 
+    'TFLiteExporter',
     'ONNXExporter',
     'TensorFlowJSExporter',
     'MultiFormatExporter',
