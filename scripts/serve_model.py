@@ -112,8 +112,8 @@ def build_app(model_path: str, class_names: Optional[List[str]],
     via --factory mode and by unit tests.
     """
     try:
-        from fastapi import FastAPI, HTTPException
-        from fastapi.responses import JSONResponse
+        from fastapi import FastAPI, HTTPException  # type: ignore[import]
+        from fastapi.responses import JSONResponse  # type: ignore[import]
         import numpy as np
     except ImportError as exc:
         logger.error("fastapi or numpy not installed: %s", exc)
@@ -275,7 +275,7 @@ def main():
         sys.exit(1)
 
     try:
-        import uvicorn
+        import uvicorn  # type: ignore[import]
     except ImportError:
         logger.error("uvicorn not installed. Run: pip install uvicorn")
         sys.exit(1)
