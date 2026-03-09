@@ -1,6 +1,6 @@
 # Location: /setup.py
 
-from setuptools import setup, find_packages
+from setuptools import setup
 
 with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
@@ -22,8 +22,8 @@ setup(
         "Documentation": "https://tensorversehub.readthedocs.io/",
         "Source Code": "https://github.com/SatvikPraveen/TensorVerseHub",
     },
-    packages=find_packages(where="src"),
-    package_dir={"": "src"},
+    packages=["tensorversehub", "scripts"],
+    package_dir={"tensorversehub": "src", "scripts": "scripts"},
     classifiers=[
         "Development Status :: 5 - Production/Stable",
         "Intended Audience :: Developers",
@@ -71,7 +71,7 @@ setup(
             "tensorverse-train=scripts.train_models:main",
             "tensorverse-evaluate=scripts.evaluate_models:main",
             "tensorverse-convert=scripts.convert_models:main",
-            "tensorverse-serve=examples.serving_examples.flask_tensorflow_api:main",
+            "tensorverse-serve=scripts.serve_model:main",
         ],
     },
     include_package_data=True,
@@ -79,7 +79,6 @@ setup(
         "tensorversehub": [
             "data/**/*",
             "models/**/*",
-            "docs/**/*",
         ],
     },
     keywords="tensorflow keras machine-learning deep-learning computer-vision nlp generative-models model-optimization",
