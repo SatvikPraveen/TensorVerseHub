@@ -1,42 +1,48 @@
 # TensorVerseHub
 
 ![TensorFlow Version](https://img.shields.io/badge/TensorFlow-2.13%2B-orange?logo=tensorflow)
-![Python Version](https://img.shields.io/badge/Python-3.8%2B-blue?logo=python)
+![Python Version](https://img.shields.io/badge/Python-3.9%2B-blue?logo=python)
 ![Keras](https://img.shields.io/badge/Keras-3.0%2B-red?logo=keras)
 ![CUDA](https://img.shields.io/badge/CUDA-11.8%2B-green?logo=nvidia)
 ![License](https://img.shields.io/badge/License-MIT-green)
+![CI](https://img.shields.io/github/actions/workflow/status/SatvikPraveen/TensorVerseHub/ci.yml?label=CI&logo=github-actions)
 ![Docker](https://img.shields.io/badge/Docker-Ready-blue?logo=docker)
 ![Jupyter](https://img.shields.io/badge/Jupyter-Lab%20%26%20Notebook-orange?logo=jupyter)
 ![Platform](https://img.shields.io/badge/Platform-Linux%20%7C%20macOS%20%7C%20Windows-lightgrey?logo=windows)
 ![Issues](https://img.shields.io/github/issues/SatvikPraveen/TensorVerseHub?color=red)
 ![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)
+[![Docs](https://img.shields.io/badge/docs-mkdocs-blue)](https://satvikpraveen.github.io/TensorVerseHub)
 
 A comprehensive TensorFlow learning hub featuring 27 high-quality Jupyter notebooks, production-ready utilities, and practical examples. Built with TensorFlow 2.13+ and tf.keras, this repository serves as a complete reference for learning TensorFlow from fundamentals to advanced implementations.
 
 ## 🎯 Overview
 
-TensorVerseHub is a **focused, production-grade learning resource** for TensorFlow practitioners. It combines theoretical understanding with hands-on implementations through a progressive curriculum spanning computer vision, NLP, generative modeling, reinforcement learning, and advanced optimization techniques. The project is **100% complete and production-ready**.
+TensorVerseHub is a **focused, production-grade learning resource** for TensorFlow practitioners. It combines theoretical understanding with hands-on implementations through a progressive curriculum spanning computer vision, NLP, generative modeling, reinforcement learning, and advanced optimization techniques.
 
 ### Key Highlights
 
 - **27 Comprehensive Notebooks** - Core curriculum (23) + advanced supplementary materials (4)
 - **Multi-Domain Coverage** - Computer vision, NLP, GANs, diffusion models, RL, time series, federated learning
 - **Production Utilities** - 3,700+ lines of ready-to-use helper functions in `src/` folder
+- **CLI Tools** - `tensorverse-train`, `tensorverse-evaluate`, `tensorverse-convert` for automation
 - **Production-Grade Serving** - Flask API, Streamlit dashboard, Docker deployment, TFLite inference
 - **Model Optimization** - Quantization, pruning, distillation with real examples
 - **Comprehensive Testing** - 1,800+ lines of edge case, stress, and export tests
+- **CI/CD Pipeline** - GitHub Actions for automated testing and publishing
 - **Rich Documentation** - Architecture diagrams, practical examples, best practices, troubleshooting guides
 
 ## 🏆 Project Status
 
-**A Production-Ready Approach**
+**Production-Ready**
 
-- All 27 notebooks functional and polished (no TODOs)
-- 3,720 lines of production utilities
+- All 27 notebooks complete with no placeholders
+- 3,720+ lines of production utilities (`src/`)
 - 1,800+ lines of comprehensive test coverage
 - 3,300+ lines of architecture diagrams and practical examples
 - 800+ lines of production-grade serving code
-- 5 organized commits with clear change tracking
+- Full CI/CD via GitHub Actions
+- Docker multi-service deployment (Jupyter, Flask, Streamlit, TensorBoard)
+- MkDocs documentation site
 
 ## 🚀 Quick Start
 
@@ -54,8 +60,8 @@ TensorVerseHub is a **focused, production-grade learning resource** for TensorFl
 git clone https://github.com/SatvikPraveen/TensorVerseHub.git
 cd TensorVerseHub
 
-# Create virtual environment
-python -m venv venv
+# Create virtual environment inside the project
+python3 -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
 
 # Install dependencies
@@ -66,6 +72,35 @@ python -c "import tensorflow as tf; print(f'TensorFlow {tf.__version__} installe
 
 # Launch Jupyter
 jupyter lab
+```
+
+### Docker Quick Start
+
+```bash
+# Start Jupyter Lab only
+docker compose up -d jupyter
+# → http://localhost:8888
+
+# Start all services (Jupyter + Flask API + Streamlit + TensorBoard)
+docker compose up -d
+```
+
+### CLI Tools
+
+```bash
+# Train a model
+tensorverse-train --task classification --epochs 20 --architecture resnet
+
+# Evaluate a saved model
+tensorverse-evaluate --model ./models/final_model --confusion-matrix --report
+
+# Convert to TFLite with INT8 quantization
+tensorverse-convert --model ./models/final_model --to tflite --quantize int8 --benchmark
+
+# Or use the Makefile for common tasks
+make test          # run test suite
+make format        # auto-format code
+make docs-serve    # live-preview documentation
 ```
 
 ### Quick Navigation
@@ -186,9 +221,25 @@ TensorVerseHub/
 │   ├── test_data_utils.py
 │   ├── test_optimization.py
 │   └── test_notebooks.py        # Notebook execution verification
-├── requirements.txt             # Python dependencies
-├── setup.py                     # Package installation config
-└── LICENSE                      # MIT License
+├── scripts/                      # CLI entry points
+│   ├── train_models.py          # tensorverse-train
+│   ├── evaluate_models.py       # tensorverse-evaluate
+│   └── convert_models.py        # tensorverse-convert
+├── .github/                      # CI/CD and community files
+│   ├── workflows/ci.yml         # GitHub Actions CI pipeline
+│   ├── workflows/publish.yml    # PyPI + Docker publishing
+│   └── ISSUE_TEMPLATE/          # Bug report & feature request forms
+├── Dockerfile                    # Multi-stage Docker image
+├── docker-compose.yml            # Multi-service orchestration
+├── Makefile                      # Developer task automation
+├── pyproject.toml                # Modern Python packaging (PEP 518)
+├── mkdocs.yml                    # Documentation site config
+├── requirements.txt              # Python dependencies
+├── setup.py                      # Package installation config
+├── CONTRIBUTING.md               # Contribution guidelines
+├── CHANGELOG.md                  # Version history
+├── SECURITY.md                   # Security policy
+└── LICENSE                       # MIT License
 ```
 
 ## 🔧 Core Features
@@ -247,7 +298,7 @@ export_multi_format(
 
 - **Flask API** - Production-grade server with batch processing, GPU management, request queuing, health checks, metrics, and rate limiting
 - **Streamlit Dashboard** - Interactive inference UI with performance monitoring, multiple input methods, and Plotly visualizations
-- **Docker Deployment** - Production-ready Dockerfile with health checks and optimized base images
+- **Docker Deployment** - Multi-stage `Dockerfile` + `docker-compose.yml` for Jupyter, Flask, Streamlit, and TensorBoard
 - **TFLite** - Mobile and edge device inference examples
 - **Optimization** - Quantization and pruning demonstrations with real-world patterns
 
@@ -262,25 +313,28 @@ Comprehensive test suite with 1,800+ new test lines ensuring reliability:
 - **Performance Testing** - Inference speed benchmarks, training throughput, model load time, memory profiling
 
 ```bash
-# Run all tests
-python -m pytest tests/ -v
+# Fast unit tests (recommended for development)
+make test
 
-# Run edge case tests
+# All tests
+make test-all
+
+# With HTML coverage report
+make test-coverage
+
+# Individual test files
 python -m pytest tests/test_edge_cases.py -v
-
-# Run stress and performance tests
-python -m pytest tests/test_stress_and_performance.py -v
-
-# Run export tests
 python -m pytest tests/test_export_comprehensive.py -v
-
-# Test notebook execution
 python -m pytest tests/test_notebooks.py -v
 ```
 
 ## 📚 Documentation
 
 Comprehensive guides for learning and production use:
+
+**Online Documentation Site**
+- Built with MkDocs Material — run `make docs-serve` to preview locally
+- Run `make docs-deploy` to publish to GitHub Pages
 
 **Core Documentation**
 - **[Quick Reference Guide](docs/QUICK_REFERENCE.md)** - Essential TensorFlow commands and APIs
@@ -289,8 +343,8 @@ Comprehensive guides for learning and production use:
 - **[Troubleshooting](docs/TROUBLESHOOTING.md)** - Common issues and solutions
 
 **Advanced Documentation**
-- **[Architecture Diagrams](docs/ARCHITECTURE_DIAGRAMS.md)** - 12 visual diagrams covering project structure, data pipelines, model definitions, optimization workflows, and deployment architectures (2,000+ lines)
-- **[Practical Examples](docs/PRACTICAL_EXAMPLES.md)** - 10 complete, copy-paste-ready code examples with best practices and common pitfalls guide (1,000+ lines)
+- **[Architecture Diagrams](docs/ARCHITECTURE_DIAGRAMS.md)** - Visual diagrams covering project structure, data pipelines, model definitions, optimization workflows, and deployment architectures
+- **[Practical Examples](docs/PRACTICAL_EXAMPLES.md)** - Complete, copy-paste-ready code examples with best practices and common pitfalls
 
 ## 📄 License
 
@@ -300,15 +354,18 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 TensorVerseHub provides:
 
-✅ **Complete curriculum** - From basics to research-grade implementations  
-✅ **Production focus** - Real-world patterns, best practices, and deployment examples  
-✅ **Multi-domain** - Computer vision, NLP, generative models, RL, time series, federated learning  
-✅ **Hands-on learning** - Executable notebooks with real datasets  
-✅ **Modern stack** - TensorFlow 2.13+, tf.keras, and latest ML research  
-✅ **Practical utilities** - 3,700+ lines of copy-paste ready production code  
-✅ **Comprehensive testing** - 1,800+ lines of edge case, stress, and export tests  
-✅ **Rich documentation** - Architecture diagrams, practical examples, and best practices  
-✅ **Portfolio value** - Demonstrates mastery across TensorFlow ecosystem  
+✅ **Complete curriculum** - From basics to research-grade implementations
+✅ **Production focus** - Real-world patterns, best practices, and deployment examples
+✅ **Multi-domain** - Computer vision, NLP, generative models, RL, time series, federated learning
+✅ **Hands-on learning** - Executable notebooks with no placeholders
+✅ **Modern stack** - TensorFlow 2.13+, tf.keras, and latest ML research
+✅ **Practical utilities** - 3,700+ lines of copy-paste ready production code
+✅ **CLI automation** - Train, evaluate, and convert models from the command line
+✅ **Docker-ready** - One-command multi-service deployment
+✅ **CI/CD pipeline** - Automated testing and publishing via GitHub Actions
+✅ **Comprehensive testing** - 1,800+ lines of edge case, stress, and export tests
+✅ **Rich documentation** - Architecture diagrams, practical examples, best practices, and MkDocs site
+✅ **Portfolio value** - Demonstrates mastery across TensorFlow ecosystem
 
 ## 📞 Support
 

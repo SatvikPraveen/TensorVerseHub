@@ -1,0 +1,188 @@
+# ============================================================
+# TensorVerseHub - CI Pipeline (GitHub Actions)
+# Runs on every push and pull request to main/develop
+# ============================================================
+
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PYTHON_VERSION: "3.10"
+
+jobs:
+
+  # ── Lint & Format ──────────────────────────────────────────
+  lint:
+    name: Lint & Format
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+
+      - name: Install lint tools
+        run: pip install black flake8 mypy isort
+
+      - name: Check code formatting (black)
+        run: black --check --diff src/ tests/ examples/ scripts/
+
+      - name: Check import order (isort)
+        run: isort --check-only --diff src/ tests/ examples/ scripts/
+
+      - name: Lint with flake8
+        run: |
+          flake8 src/ tests/ examples/ scripts/ \
+            --max-line-length=100 \
+            --extend-ignore=E203,W503,E501 \
+            --count --statistics
+
+      - name: Type check with mypy
+        run: |
+          mypy src/ \
+            --ignore-missing-imports \
+            --no-strict-optional \
+            --python-version=3.10
+        continue-on-error: true
+
+  # ── Unit Tests ─────────────────────────────────────────────
+  test:
+    name: Unit Tests (Python ${{ matrix.python-version }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+        python-version: ["3.9", "3.10", "3.11"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          # Install CPU-only tensorflow to keep CI fast
+          pip install tensorflow-cpu==2.13.0
+          pip install -r requirements.txt --no-deps \
+            --ignore-requires-python \
+            || pip install --requirement requirements.txt
+          pip install pytest pytest-cov
+
+      - name: Run unit tests
+        run: |
+          pytest tests/ \
+            -v \
+            --tb=short \
+            --cov=src \
+            --cov-report=xml \
+            --cov-report=term-missing \
+            --ignore=tests/test_notebooks.py \
+            --ignore=tests/test_stress_and_performance.py \
+            -m "not slow and not gpu"
+
+      - name: Upload coverage to Codecov
+        if: matrix.python-version == '3.10'
+        uses: codecov/codecov-action@v4
+        with:
+          file: ./coverage.xml
+          flags: unittests
+          name: codecov-umbrella
+          fail_ci_if_error: false
+
+  # ── Integration Tests ──────────────────────────────────────
+  integration:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install tensorflow-cpu==2.13.0
+          pip install pytest pytest-cov nbformat
+
+      - name: Run integration tests
+        run: |
+          pytest tests/test_integration.py \
+            -v --tb=short \
+            -m "not slow and not gpu"
+
+  # ── Notebook Syntax Check ──────────────────────────────────
+  notebooks:
+    name: Notebook Syntax Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+
+      - name: Install nbformat
+        run: pip install nbformat
+
+      - name: Validate notebook JSON
+        run: |
+          python - <<'EOF'
+          import json, pathlib, sys
+          errors = []
+          for nb in pathlib.Path("notebooks").rglob("*.ipynb"):
+              try:
+                  with open(nb) as f:
+                      json.load(f)
+              except json.JSONDecodeError as e:
+                  errors.append(f"{nb}: {e}")
+          if errors:
+              for err in errors:
+                  print(f"ERROR: {err}")
+              sys.exit(1)
+          print(f"All {len(list(pathlib.Path('notebooks').rglob('*.ipynb')))} notebooks are valid JSON.")
+          EOF
+
+  # ── Docker Build Check ─────────────────────────────────────
+  docker:
+    name: Docker Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker image (jupyter target)
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          target: runtime
+          push: false
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          tags: tensorversehub:ci-test

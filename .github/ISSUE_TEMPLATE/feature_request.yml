@@ -1,0 +1,58 @@
+name: ✨ Feature Request
+description: Suggest a new feature or enhancement
+labels: ["enhancement", "needs-triage"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for suggesting an improvement to TensorVerseHub!
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Feature Area
+      options:
+        - New Notebook
+        - Utility Enhancement (src/)
+        - New Example
+        - Documentation
+        - Docker / Deployment
+        - Testing
+        - CI/CD
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: summary
+    attributes:
+      label: Feature Summary
+      description: A concise description of the feature you'd like.
+    validations:
+      required: true
+
+  - type: textarea
+    id: motivation
+    attributes:
+      label: Motivation & Use Case
+      description: Why would this feature be useful? What problem does it solve?
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed Implementation
+      description: If you have an idea how to implement it, describe it here (optional).
+
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: Checklist
+      options:
+        - label: I searched existing issues and this is not a duplicate.
+          required: true
+        - label: I am willing to contribute a pull request for this feature.
+          required: false
