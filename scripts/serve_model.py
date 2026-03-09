@@ -11,12 +11,12 @@ Usage
 
 import argparse
 import json
+import logging
 import os
 import sys
 import time
-import logging
 from pathlib import Path
-from typing import Optional, List
+from typing import List, Optional
 
 # Ensure src/ is importable when running as a script
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
@@ -32,7 +32,8 @@ def parse_args() -> argparse.Namespace:
         epilog=__doc__,
     )
     parser.add_argument(
-        "--model", "-m",
+        "--model",
+        "-m",
         type=str,
         required=True,
         help="Path to a SavedModel directory, .h5 file, or .tflite file",
@@ -44,7 +45,8 @@ def parse_args() -> argparse.Namespace:
         help="Host address to bind (default: 0.0.0.0)",
     )
     parser.add_argument(
-        "--port", "-p",
+        "--port",
+        "-p",
         type=int,
         default=8000,
         help="Port to listen on (default: 8000)",
@@ -103,8 +105,12 @@ def _detect_model_type(model_path: str) -> str:
     return "saved_model"
 
 
-def build_app(model_path: str, class_names: Optional[List[str]],
-              input_shape: Optional[List[int]], max_batch_size: int):
+def build_app(
+    model_path: str,
+    class_names: Optional[List[str]],
+    input_shape: Optional[List[int]],
+    max_batch_size: int,
+):
     """
     Build and return the FastAPI application.
 
@@ -112,9 +118,9 @@ def build_app(model_path: str, class_names: Optional[List[str]],
     via --factory mode and by unit tests.
     """
     try:
+        import numpy as np
         from fastapi import FastAPI, HTTPException  # type: ignore[import]
         from fastapi.responses import JSONResponse  # type: ignore[import]
-        import numpy as np
     except ImportError as exc:
         logger.error("fastapi or numpy not installed: %s", exc)
         logger.error("Install with: pip install fastapi uvicorn numpy")
@@ -135,7 +141,7 @@ def build_app(model_path: str, class_names: Optional[List[str]],
             sys.exit(1)
         tflite_interpreter = tf.lite.Interpreter(model_path=model_path)
         tflite_interpreter.allocate_tensors()
-        input_details  = tflite_interpreter.get_input_details()
+        input_details = tflite_interpreter.get_input_details()
         output_details = tflite_interpreter.get_output_details()
         logger.info("TFLite model loaded. Input shape: %s", input_details[0]["shape"])
     else:
@@ -183,10 +189,10 @@ def build_app(model_path: str, class_names: Optional[List[str]],
             "requests_errors": request_count["errors"],
         }
         if model_type == "tflite":
-            meta["input_shape"]  = tflite_interpreter.get_input_details()[0]["shape"].tolist()
+            meta["input_shape"] = tflite_interpreter.get_input_details()[0]["shape"].tolist()
             meta["output_shape"] = tflite_interpreter.get_output_details()[0]["shape"].tolist()
         elif model is not None and hasattr(model, "input_shape"):
-            meta["input_shape"]  = list(model.input_shape)
+            meta["input_shape"] = list(model.input_shape)
             meta["output_shape"] = list(model.output_shape)
         return meta
 
@@ -249,7 +255,7 @@ def build_app(model_path: str, class_names: Optional[List[str]],
         # Build response
         if class_names and preds.ndim == 2:
             top_classes = [class_names[int(p.argmax())] for p in preds]
-            top_scores  = [float(p.max()) for p in preds]
+            top_scores = [float(p.max()) for p in preds]
             result = [
                 {"class": cls, "score": score, "probabilities": prob.tolist()}
                 for cls, score, prob in zip(top_classes, top_scores, preds)
@@ -257,10 +263,12 @@ def build_app(model_path: str, class_names: Optional[List[str]],
         else:
             result = preds.tolist()
 
-        return JSONResponse({
-            "predictions": result,
-            "latency_ms": round(latency_ms, 3),
-        })
+        return JSONResponse(
+            {
+                "predictions": result,
+                "latency_ms": round(latency_ms, 3),
+            }
+        )
 
     return app
 
@@ -282,9 +290,11 @@ def main():
 
     # Write a temp config file so uvicorn can find the app factory
     # (needed because build_app requires runtime arguments)
-    import tempfile, textwrap
+    import tempfile
+    import textwrap
 
-    launcher = textwrap.dedent(f"""
+    launcher = textwrap.dedent(
+        f"""
         import sys
         sys.path.insert(0, {str(Path(__file__).resolve().parent.parent / "src")!r})
         sys.path.insert(0, {str(Path(__file__).resolve().parent)!r})
@@ -295,7 +305,8 @@ def main():
             input_shape={args.input_shape!r},
             max_batch_size={args.max_batch_size},
         )
-    """).strip()
+    """
+    ).strip()
 
     tmp_dir = Path(tempfile.mkdtemp())
     launcher_path = tmp_dir / "_tv_serve_app.py"

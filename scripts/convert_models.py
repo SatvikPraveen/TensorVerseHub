@@ -125,6 +125,7 @@ def convert_to_tflite(model, output_dir: str, quantize: str, quiet: bool) -> str
 def benchmark_tflite(tflite_path: str, input_shape, quiet: bool):
     """Run a simple latency benchmark on the TFLite model."""
     import time
+
     import numpy as np
     import tensorflow as tf
 
@@ -156,8 +157,8 @@ def benchmark_tflite(tflite_path: str, input_shape, quiet: bool):
 def convert_to_onnx(model, output_dir: str, opset: int, quiet: bool) -> str:
     """Convert model to ONNX format via tf2onnx."""
     try:
-        import tf2onnx  # type: ignore[import]
         import tensorflow as tf
+        import tf2onnx  # type: ignore[import]
     except ImportError:
         print("tf2onnx is not installed. Run: pip install tf2onnx")
         return ""
@@ -166,7 +167,9 @@ def convert_to_onnx(model, output_dir: str, opset: int, quiet: bool) -> str:
     out_path = os.path.join(output_dir, "model.onnx")
 
     spec = (tf.TensorSpec(model.input_shape, tf.float32, name="input"),)
-    _, _ = tf2onnx.convert.from_keras(model, input_signature=spec, opset=opset, output_path=out_path)
+    _, _ = tf2onnx.convert.from_keras(
+        model, input_signature=spec, opset=opset, output_path=out_path
+    )
 
     if not quiet:
         size_mb = os.path.getsize(out_path) / 1024 / 1024

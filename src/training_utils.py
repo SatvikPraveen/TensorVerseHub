@@ -10,15 +10,16 @@ Advanced custom training loop components for TensorFlow 2.x / tf.keras:
   - CustomTrainingLoop      : GradientTape-based training engine
 """
 
-import tensorflow as tf
-import numpy as np
-from typing import Callable, Dict, List, Optional, Tuple, Union
 import math
+from typing import Callable, Dict, List, Optional, Tuple, Union
 
+import numpy as np
+import tensorflow as tf
 
 # ---------------------------------------------------------------------------
 # LR Schedule utilities
 # ---------------------------------------------------------------------------
+
 
 class WarmupCosineSchedule(tf.keras.optimizers.schedules.LearningRateSchedule):
     """
@@ -78,6 +79,7 @@ class WarmupCosineSchedule(tf.keras.optimizers.schedules.LearningRateSchedule):
 # Gradient clipping helpers
 # ---------------------------------------------------------------------------
 
+
 class GradientClipping:
     """
     Gradient clipping utilities.
@@ -106,8 +108,7 @@ class GradientClipping:
     ) -> List[Optional[tf.Tensor]]:
         """Clips every gradient tensor element-wise between clip_min and clip_max."""
         return [
-            tf.clip_by_value(g, clip_min, clip_max) if g is not None else None
-            for g in gradients
+            tf.clip_by_value(g, clip_min, clip_max) if g is not None else None for g in gradients
         ]
 
     @staticmethod
@@ -119,9 +120,7 @@ class GradientClipping:
         Clips gradients to the *percentile*-th percentile of their combined
         absolute values.  Useful when gradient magnitudes vary across runs.
         """
-        flat = tf.concat(
-            [tf.reshape(g, [-1]) for g in gradients if g is not None], axis=0
-        )
+        flat = tf.concat([tf.reshape(g, [-1]) for g in gradients if g is not None], axis=0)
         threshold = float(np.percentile(np.abs(flat.numpy()), percentile))
         return GradientClipping.clip_by_value(gradients, -threshold, threshold)
 
@@ -129,6 +128,7 @@ class GradientClipping:
 # ---------------------------------------------------------------------------
 # Metrics tracking
 # ---------------------------------------------------------------------------
+
 
 class MetricsTracker:
     """
@@ -193,6 +193,7 @@ class MetricsTracker:
 # Early stopping
 # ---------------------------------------------------------------------------
 
+
 class EarlyStoppingHandler:
     """
     Reusable early stopping with delta and optional best-weights restoration.
@@ -224,8 +225,8 @@ class EarlyStoppingHandler:
         self.mode = mode
         self.restore_best = restore_best
 
-        self._best = baseline if baseline is not None else (
-            float("inf") if mode == "min" else float("-inf")
+        self._best = (
+            baseline if baseline is not None else (float("inf") if mode == "min" else float("-inf"))
         )
         self._wait = 0
         self._best_weights: Optional[List[np.ndarray]] = None
@@ -279,6 +280,7 @@ class EarlyStoppingHandler:
 # ---------------------------------------------------------------------------
 # LR range finder
 # ---------------------------------------------------------------------------
+
 
 class LearningRateFinder:
     """
@@ -358,9 +360,7 @@ class LearningRateFinder:
                     loss = self.model.compiled_loss(y_batch, y_pred)
 
             gradients = tape.gradient(loss, self.model.trainable_variables)
-            self.model.optimizer.apply_gradients(
-                zip(gradients, self.model.trainable_variables)
-            )
+            self.model.optimizer.apply_gradients(zip(gradients, self.model.trainable_variables))
 
             loss_val = float(loss)
             avg_loss = self.beta * avg_loss + (1 - self.beta) * loss_val
@@ -388,8 +388,8 @@ class LearningRateFinder:
         """Plot the LR vs loss curve (requires matplotlib)."""
         import matplotlib.pyplot as plt
 
-        lrs = self.lrs[skip_start: len(self.lrs) - skip_end]
-        losses = self.losses[skip_start: len(self.losses) - skip_end]
+        lrs = self.lrs[skip_start : len(self.lrs) - skip_end]
+        losses = self.losses[skip_start : len(self.losses) - skip_end]
 
         if not lrs:
             print("Not enough data to plot. Try running find() first.")
@@ -409,6 +409,7 @@ class LearningRateFinder:
 # ---------------------------------------------------------------------------
 # Custom training loop
 # ---------------------------------------------------------------------------
+
 
 class CustomTrainingLoop:
     """
@@ -454,9 +455,7 @@ class CustomTrainingLoop:
 
     # ------------------------------------------------------------------
     @tf.function
-    def _train_step(
-        self, x: tf.Tensor, y: tf.Tensor
-    ) -> Tuple[tf.Tensor, List[tf.Tensor]]:
+    def _train_step(self, x: tf.Tensor, y: tf.Tensor) -> Tuple[tf.Tensor, List[tf.Tensor]]:
         with tf.GradientTape() as tape:
             y_pred = self.model(x, training=True)
             loss = self.loss_fn(y, y_pred)
@@ -525,7 +524,9 @@ class CustomTrainingLoop:
                 cb_list.on_train_batch_begin(step)
                 loss, _ = self._train_step(x_batch, y_batch)
                 train_kv = {m.name: m.result() for m in self.train_metrics}
-                self.tracker.update_train(loss=float(loss), **{k: float(v) for k, v in train_kv.items()})
+                self.tracker.update_train(
+                    loss=float(loss), **{k: float(v) for k, v in train_kv.items()}
+                )
 
                 if verbose >= 2:
                     print(
@@ -539,7 +540,9 @@ class CustomTrainingLoop:
                 for x_batch, y_batch in val_ds:
                     val_loss = self._val_step(x_batch, y_batch)
                     val_kv = {m.name: m.result() for m in self.val_metrics}
-                    self.tracker.update_val(loss=float(val_loss), **{k: float(v) for k, v in val_kv.items()})
+                    self.tracker.update_val(
+                        loss=float(val_loss), **{k: float(v) for k, v in val_kv.items()}
+                    )
 
             epoch_summary = self.tracker.commit_epoch()
             cb_list.on_epoch_end(epoch, logs=epoch_summary)

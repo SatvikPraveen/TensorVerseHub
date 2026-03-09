@@ -23,72 +23,70 @@ if tf.__version__ < MIN_TF_VERSION:
     )
 
 # Import main modules
-from . import data_utils
-from . import model_utils
-from . import visualization
-from . import optimization_utils
-from . import export_utils
-from . import training_utils
+from . import (
+    data_utils,
+    export_utils,
+    model_utils,
+    optimization_utils,
+    training_utils,
+    visualization,
+)
 
 # Import key classes and functions for convenient access
 from .data_utils import (
+    DataAugmentation,
     DataPipeline,
     TFRecordHandler,
-    DataAugmentation,
     create_image_classification_pipeline,
-    create_text_classification_pipeline
+    create_text_classification_pipeline,
 )
-
+from .export_utils import (
+    MultiFormatExporter,
+    ONNXExporter,
+    SavedModelExporter,
+    TensorFlowJSExporter,
+    TFLiteExporter,
+    create_deployment_package,
+    quick_export,
+)
 from .model_utils import (
-    ModelBuilders,
     CustomLayers,
-    TrainingUtilities,
     ModelAnalysis,
+    ModelBuilders,
+    TrainingUtilities,
     create_classification_model,
-    create_transfer_learning_model
+    create_transfer_learning_model,
 )
-
-from .visualization import (
-    ModelVisualization,
-    TrainingVisualization,
-    DataVisualization,
-    AdvancedVisualization,
-    quick_model_analysis,
-    setup_plotting_style
-)
-
 from .optimization_utils import (
-    ModelQuantization,
-    ModelPruning,
     KnowledgeDistillation,
     MixedPrecisionOptimization,
+    ModelPruning,
+    ModelQuantization,
+    create_inference_optimized_model,
     optimize_for_mobile,
-    create_inference_optimized_model
 )
-
-from .export_utils import (
-    SavedModelExporter,
-    TFLiteExporter,
-    ONNXExporter,
-    TensorFlowJSExporter,
-    MultiFormatExporter,
-    quick_export,
-    create_deployment_package
-)
-
 from .training_utils import (
-    WarmupCosineSchedule,
-    GradientClipping,
-    MetricsTracker,
-    EarlyStoppingHandler,
-    LearningRateFinder,
     CustomTrainingLoop,
+    EarlyStoppingHandler,
+    GradientClipping,
+    LearningRateFinder,
+    MetricsTracker,
+    WarmupCosineSchedule,
 )
+from .visualization import (
+    AdvancedVisualization,
+    DataVisualization,
+    ModelVisualization,
+    TrainingVisualization,
+    quick_model_analysis,
+    setup_plotting_style,
+)
+
 
 # Configure TensorFlow settings for optimal performance
-def configure_tensorflow(memory_growth: bool = True,
-                         mixed_precision: bool = False,
-                         xla: bool = False) -> None:
+def configure_tensorflow(
+    memory_growth: bool = True, mixed_precision: bool = False, xla: bool = False
+) -> None:
     """
     Configure TensorFlow settings for optimal performance.
 
@@ -98,7 +96,7 @@ def configure_tensorflow(memory_growth: bool = True,
         xla: Enable XLA compilation
     """
     # GPU configuration
-    gpus = tf.config.experimental.list_physical_devices('GPU')
+    gpus = tf.config.experimental.list_physical_devices("GPU")
     if gpus:
         try:
             for gpu in gpus:
@@ -110,7 +108,7 @@ def configure_tensorflow(memory_growth: bool = True,
 
     # Mixed precision
     if mixed_precision:
-        policy = tf.keras.mixed_precision.Policy('mixed_float16')
+        policy = tf.keras.mixed_precision.Policy("mixed_float16")
         tf.keras.mixed_precision.set_global_policy(policy)
         print("Mixed precision enabled")
 
@@ -132,52 +130,46 @@ except Exception:
 # Package information
 __all__ = [
     # Version info
-    '__version__',
-    '__author__',
-    '__email__',
-
+    "__version__",
+    "__author__",
+    "__email__",
     # Configuration
-    'configure_tensorflow',
-
+    "configure_tensorflow",
     # Data utilities
-    'DataPipeline',
-    'TFRecordHandler',
-    'DataAugmentation',
-    'create_image_classification_pipeline',
-    'create_text_classification_pipeline',
-
+    "DataPipeline",
+    "TFRecordHandler",
+    "DataAugmentation",
+    "create_image_classification_pipeline",
+    "create_text_classification_pipeline",
     # Model utilities
-    'ModelBuilders',
-    'CustomLayers',
-    'TrainingUtilities',
-    'ModelAnalysis',
-    'create_classification_model',
-    'create_transfer_learning_model',
-
+    "ModelBuilders",
+    "CustomLayers",
+    "TrainingUtilities",
+    "ModelAnalysis",
+    "create_classification_model",
+    "create_transfer_learning_model",
     # Visualization
-    'ModelVisualization',
-    'TrainingVisualization',
-    'DataVisualization',
-    'AdvancedVisualization',
-    'quick_model_analysis',
-    'setup_plotting_style',
-
+    "ModelVisualization",
+    "TrainingVisualization",
+    "DataVisualization",
+    "AdvancedVisualization",
+    "quick_model_analysis",
+    "setup_plotting_style",
     # Optimization
-    'ModelQuantization',
-    'ModelPruning',
-    'KnowledgeDistillation',
-    'MixedPrecisionOptimization',
-    'optimize_for_mobile',
-    'create_inference_optimized_model',
-
+    "ModelQuantization",
+    "ModelPruning",
+    "KnowledgeDistillation",
+    "MixedPrecisionOptimization",
+    "optimize_for_mobile",
+    "create_inference_optimized_model",
     # Export utilities
-    'SavedModelExporter',
-    'TFLiteExporter',
-    'ONNXExporter',
-    'TensorFlowJSExporter',
-    'MultiFormatExporter',
-    'quick_export',
-    'create_deployment_package'
+    "SavedModelExporter",
+    "TFLiteExporter",
+    "ONNXExporter",
+    "TensorFlowJSExporter",
+    "MultiFormatExporter",
+    "quick_export",
+    "create_deployment_package",
 ]
 
 print(f"TensorVerseHub v{__version__} loaded successfully!")
@@ -185,7 +177,7 @@ print(f"TensorFlow version: {tf.__version__}")
 print(f"Keras version: {tf.keras.__version__}")
 
 # Display GPU information
-gpus = tf.config.experimental.list_physical_devices('GPU')
+gpus = tf.config.experimental.list_physical_devices("GPU")
 if gpus:
     print(f"GPUs available: {len(gpus)}")
     for i, gpu in enumerate(gpus):
@@ -196,18 +188,21 @@ else:
 # Check for additional TensorFlow components
 try:
     import tensorflow_hub
+
     print(f"TensorFlow Hub available: {tensorflow_hub.__version__}")
 except ImportError:
     pass
 
 try:
     import tensorflow_model_optimization
+
     print(f"TensorFlow Model Optimization available: {tensorflow_model_optimization.__version__}")
 except ImportError:
     pass
 
 try:
     import tensorflowjs
+
     print(f"TensorFlow.js available: {tensorflowjs.__version__}")
 except ImportError:
     pass
