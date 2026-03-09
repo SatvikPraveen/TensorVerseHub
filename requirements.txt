@@ -9,7 +9,7 @@ tensorflow-probability>=0.21.0,<0.22.0
 tensorflow-model-optimization>=0.7.0,<0.8.0
 tensorflow-datasets>=4.9.0
 
-# Data Processing and Visualization  
+# Data Processing and Visualization
 numpy>=1.24.0,<1.25.0
 pandas>=2.0.0
 matplotlib>=3.7.0
@@ -24,6 +24,9 @@ jupyter>=1.0.0
 jupyterlab>=4.0.0
 ipywidgets>=8.0.0
 tqdm>=4.66.0
+
+# Hyperparameter Tuning
+keras-tuner>=1.4.0
 
 # Model Export and Optimization
 onnx>=1.14.0
