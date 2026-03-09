@@ -14,8 +14,11 @@ on:
       dry_run:
         description: "Dry run (skip actual publishing)"
         required: false
-        default: true
-        type: boolean
+        default: "true"
+        type: choice
+        options:
+          - "true"
+          - "false"
 
 env:
   PYTHON_VERSION: "3.10"
