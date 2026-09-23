@@ -1,12 +1,9 @@
-# optimization_utils — API Reference
+# `tensorversehub.optimization_utils`
 
-::: src.optimization_utils
+::: tensorversehub.optimization_utils
     options:
       show_source: true
       heading_level: 2
-      members:
-        - ModelQuantization
-        - ModelPruning
-        - KnowledgeDistillation
-        - MixedPrecisionOptimization
-        - ModelCompression
+      members_order: source
+      show_root_heading: false
+      docstring_style: google

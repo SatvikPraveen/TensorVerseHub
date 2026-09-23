@@ -1,6 +1,6 @@
-# `tensorversehub.export_utils`
+# `tensorversehub.training_utils`
 
-::: tensorversehub.export_utils
+::: tensorversehub.training_utils
     options:
       show_source: true
       heading_level: 2

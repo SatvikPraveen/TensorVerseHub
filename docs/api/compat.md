@@ -1,6 +1,6 @@
-# `tensorversehub.export_utils`
+# `tensorversehub.compat`
 
-::: tensorversehub.export_utils
+::: tensorversehub.compat
     options:
       show_source: true
       heading_level: 2

@@ -464,7 +464,7 @@ def compare_model_sizes(models_dict):
         params = model.count_params()
 
         # Save model to get file size
-        temp_path = f"/tmp/{name}_temp.h5"
+        temp_path = f"/tmp/{name}_temp.keras"
         model.save(temp_path)
         file_size_mb = os.path.getsize(temp_path) / (1024 * 1024)
         os.remove(temp_path)

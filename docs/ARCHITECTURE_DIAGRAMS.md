@@ -53,23 +53,21 @@ TensorVerseHub/
 │       ├── Time Series Forecasting
 │       └── Advanced RL
 │
-├── Production Utilities (src/)
-│   ├── data_utils.py (581 lines)
-│   ├── model_utils.py (786 lines)
-│   ├── optimization_utils.py (795 lines)
-│   ├── export_utils.py (659 lines)
-│   └── visualization.py (695 lines)
+├── Production Package (tensorversehub/)
+│   ├── compat.py              Keras 2 / Keras 3 bridge
+│   ├── data_utils.py          TFRecords, tf.data, MixUp / CutMix / Random Erasing
+│   ├── model_utils.py         attention layers, model builders, FLOP analysis
+│   ├── training_utils.py      custom training engine, schedules, LR finder
+│   ├── optimization_utils.py  quantisation, pruning, distillation
+│   ├── export_utils.py        SavedModel / TFLite / ONNX / TF.js / Core ML
+│   ├── visualization.py       headless-safe plots and dashboards
+│   └── cli/                   `tensorverse` train / evaluate / convert / serve
 │
-├── Comprehensive Testing (tests/)
-│   ├── test_data_utils.py
-│   ├── test_model_utils.py
-│   ├── test_optimization.py
-│   ├── test_tensorflow_keras_layers.py
-│   ├── test_notebooks.py
-│   ├── test_integration.py
-│   ├── test_edge_cases.py (NEW)
-│   ├── test_stress_and_performance.py (NEW)
-│   └── test_export_comprehensive.py (NEW)
+├── Test Suite (tests/)  — runs on Keras 3 and legacy Keras
+│   ├── test_compat.py, test_data_utils.py, test_model_utils.py
+│   ├── test_training_utils.py, test_optimization_utils.py, test_export_utils.py
+│   ├── test_visualization.py, test_cli.py, test_package.py
+│   └── test_notebooks.py (structural validation of all 27 notebooks)
 │
 ├── Documentation (docs/)
 │   ├── QUICK_REFERENCE.md
@@ -79,8 +77,9 @@ TensorVerseHub/
 │   └── ARCHITECTURE_DIAGRAMS.md (THIS FILE)
 │
 └── Configuration
-    ├── setup.py
-    ├── requirements.txt
+    ├── pyproject.toml (packaging, ruff, mypy, pytest, coverage)
+    ├── requirements.txt (full notebook environment)
+    ├── Dockerfile · docker-compose.yml · Makefile
     └── README.md
 ```
 
@@ -438,86 +437,57 @@ Input Sequence
 │                    PRODUCTION UTILITY MODULES                           │
 └─────────────────────────────────────────────────────────────────────────┘
 
-src/
-├── data_utils.py (581 lines)
-│   ├── DataPipeline
-│   │   ├── create_tfrecord_dataset()
-│   │   ├── create_augmentation_pipeline()
-│   │   └── preprocess_images()
-│   │
+tensorversehub/
+├── compat.py
+│   ├── IS_KERAS_3 / IS_LEGACY_KERAS / require_legacy_keras()
+│   ├── save_model() · load_model() · export_saved_model() · SavedModelPredictor
+│   ├── checkpoint_filepath() · count_params() · layer_output_shape() · input_signature()
+│   └── wrap_loss_scale_optimizer() · scale_loss() · unscale_gradients() · compute_loss()
+│
+├── data_utils.py
 │   ├── TFRecordHandler
-│   │   ├── write_tfrecord()
-│   │   ├── read_tfrecord()
-│   │   └── serialize_example()
-│   │
-│   └── DataAugmentation
-│       ├── random_flip()
-│       ├── random_rotation()
-│       ├── color_jitter()
-│       └── mixup()
+│   │   ├── to_feature() · serialize_image/text/array_example()
+│   │   └── write_tfrecord() · write_sharded() · count_records()
+│   ├── DataPipeline
+│   │   ├── create_image_dataset() · create_text_dataset() · create_tfrecord_dataset()
+│   │   └── from_arrays() · finalize() · create_mixed_precision_dataset()
+│   ├── DataAugmentation
+│   │   ├── create_augmentation_layer()
+│   │   └── mixup() · cutmix() · random_erasing()
+│   └── rotate_image() · augment_image() · split_dataset() · compute_class_weights()
 │
-├── model_utils.py (786 lines)
-│   ├── ModelBuilders
-│   │   ├── create_cnn_classifier()
-│   │   ├── create_rnn_classifier()
-│   │   ├── create_transformer()
-│   │   └── create_transfer_learning_model()
-│   │
-│   ├── CustomLayers
-│   │   ├── MultiHeadAttention
-│   │   ├── PositionalEncoding
-│   │   └── FeedForward
-│   │
-│   └── TrainingUtilities
-│       ├── create_callbacks()
-│       ├── setup_distributed_training()
-│       └── mixed_precision_setup()
+├── model_utils.py
+│   ├── CustomLayers: MultiHeadAttention · PositionalEncoding · TransformerEncoderBlock
+│   ├── ModelBuilders: create_cnn_classifier() · create_text_classifier() · create_mlp()
+│   │                  create_autoencoder() · create_gan()
+│   ├── TrainingUtilities: create_callbacks() · create_custom_training_step() · ValidationMonitor
+│   ├── ModelAnalysis: analyze_model_architecture() · compute_model_flops() · create_model_summary_report()
+│   └── create_classification_model() · create_transfer_learning_model() · save/load_model_with_metadata()
 │
-├── optimization_utils.py (795 lines)
-│   ├── ModelQuantization
-│   │   ├── quantize_post_training()
-│   │   ├── quantization_aware_training()
-│   │   └── convert_to_tflite()
-│   │
-│   ├── ModelPruning
-│   │   ├── magnitude_pruning()
-│   │   ├── structured_pruning()
-│   │   └── pruning_aware_training()
-│   │
-│   ├── KnowledgeDistillation
-│   │   ├── train_student()
-│   │   └── compute_distillation_loss()
-│   │
-│   └── MixedPrecisionOptimization
-│       └── enable_mixed_precision()
+├── training_utils.py
+│   ├── WarmupCosineSchedule · GradientClipping · MetricsTracker · EarlyStoppingHandler
+│   ├── LearningRateFinder (find() · suggest() · plot())
+│   └── CustomTrainingLoop (mixed precision · gradient accumulation · clipping · XLA · callbacks)
 │
-├── export_utils.py (659 lines)
-│   ├── ModelExporter
-│   │   ├── export_saved_model()
-│   │   ├── export_tflite()
-│   │   └── export_onnx()
-│   │
-│   ├── TFLiteConverter
-│   │   ├── convert_keras_model()
-│   │   ├── add_metadata()
-│   │   └── validate_model()
-│   │
-│   └── SavedModelHandler
-│       ├── save_with_metadata()
-│       ├── load_with_preprocessing()
-│       └── create_serving_signature()
+├── optimization_utils.py
+│   ├── ModelQuantization: quantize_model_post_training() · quantize_model_qat() · convert_qat_to_tflite()
+│   ├── ModelPruning: create_pruning_schedule() · create_pruned_model() · train_pruned_model()
+│   │                 finalize_pruned_model() · compute_sparsity()
+│   ├── KnowledgeDistillation · distillation_loss()
+│   ├── MixedPrecisionOptimization · ModelCompression · TensorRTOptimization
+│   └── optimize_for_mobile() · create_inference_optimized_model() · benchmark_model_performance()
 │
-└── visualization.py (695 lines)
-    ├── MetricsVisualizer
-    │   ├── plot_training_history()
-    │   ├── plot_confusion_matrix()
-    │   ├── plot_roc_curve()
-    │   └── plot_embedding_space()
-    │
-    └── ModelVisualizer
-        ├── plot_model_architecture()
-        ├── plot_layer_outputs()
-        └── visualize_attention_weights()
+├── export_utils.py
+│   ├── SavedModelExporter · TFLiteExporter (export · run · benchmark · validate)
+│   ├── ONNXExporter (export · validate) · TensorFlowJSExporter · CoreMLExporter
+│   └── MultiFormatExporter · quick_export() · create_deployment_package() · make_interpreter()
+│
+├── visualization.py
+│   ├── ModelVisualization · TrainingVisualization · DataVisualization · AdvancedVisualization
+│   └── quick_model_analysis() · setup_plotting_style() · use_headless_backend()
+│
+└── cli/
+    └── tensorverse train | evaluate | convert | serve | info
 ```
 
 ---

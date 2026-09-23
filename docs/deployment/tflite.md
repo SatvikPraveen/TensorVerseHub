@@ -1,29 +1,33 @@
 # TFLite Inference
 
-TFLite models are optimised for edge devices and mobile platforms. TensorVerseHub provides utilities to export, benchmark, and run TFLite models.
+TFLite models are optimised for edge devices and mobile platforms. TensorVerseHub provides utilities to export, validate, benchmark, and run TFLite models. Post-training quantisation works on Keras 3 out of the box — no legacy Keras stack needed.
 
 ---
 
 ## Converting a Model
 
 ```python
-from src.optimization_utils import ModelQuantization
+from tensorversehub.compat import load_model
+from tensorversehub.export_utils import TFLiteExporter
 
-# Post-training INT8 quantization
-tflite_bytes = ModelQuantization.quantize_model_post_training(
-    model=my_model,
+model = load_model("models/final_model.keras")
+
+# Post-training INT8 quantization (representative dataset required for int8)
+result = TFLiteExporter.export_tflite(
+    model,
+    "model_int8.tflite",
+    quantization_type="int8",          # "float32" | "dynamic" | "float16" | "int8"
     representative_dataset=calibration_ds,
-    optimization_type="int8",
 )
-
-with open("model_int8.tflite", "wb") as f:
-    f.write(tflite_bytes)
+print(result["size_mb"])
 ```
+
+If you want the raw bytes instead of a file, `ModelQuantization.quantize_model_post_training(model, calibration_ds, "int8")` in `tensorversehub.optimization_utils` returns them.
 
 Or with the CLI:
 
 ```bash
-tensorverse-convert --model ./models/final_model --to tflite --quantize int8
+tensorverse convert --model ./models/final_model.keras --to tflite --quantize int8
 ```
 
 ---
@@ -31,10 +35,12 @@ tensorverse-convert --model ./models/final_model --to tflite --quantize int8
 ## Running Inference
 
 ```python
-import tensorflow as tf
 import numpy as np
+from tensorversehub.export_utils import make_interpreter
 
-interpreter = tf.lite.Interpreter(model_path="model_int8.tflite")
+# Uses the standalone LiteRT runtime (`pip install ai-edge-litert`) when installed,
+# otherwise falls back to tf.lite.Interpreter.
+interpreter = make_interpreter("model_int8.tflite")
 interpreter.allocate_tensors()
 
 input_details  = interpreter.get_input_details()
@@ -48,13 +54,24 @@ interpreter.invoke()
 output = interpreter.get_tensor(output_details[0]["index"])
 ```
 
+`TFLiteExporter.run_tflite(interpreter, batch)` wraps the set/invoke/get sequence and handles int8 input/output scaling for you.
+
 ---
 
-## Benchmarking
+## Validating and Benchmarking
+
+```python
+# Compare Keras vs TFLite predictions on a few samples
+report = TFLiteExporter.validate_tflite(model, "model_int8.tflite", sample_inputs)
+print(report["max_abs_diff"], report["argmax_agreement"])
+
+# Latency statistics
+stats = TFLiteExporter.benchmark_tflite_model("model_int8.tflite", sample_inputs[:1], num_runs=100)
+```
 
 ```bash
-tensorverse-convert \
-  --model ./models/final_model \
+tensorverse convert \
+  --model ./models/final_model.keras \
   --to tflite \
   --quantize int8 \
   --benchmark

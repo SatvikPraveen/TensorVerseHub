@@ -1,11 +1,9 @@
-# visualization — API Reference
+# `tensorversehub.visualization`
 
-::: src.visualization
+::: tensorversehub.visualization
     options:
       show_source: true
       heading_level: 2
-      members:
-        - ModelVisualization
-        - TrainingVisualization
-        - DataVisualization
-        - AdvancedVisualization
+      members_order: source
+      show_root_heading: false
+      docstring_style: google

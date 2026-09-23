@@ -188,7 +188,7 @@ early_stopping = callbacks.EarlyStopping(
 
 # Model checkpoint
 checkpoint = callbacks.ModelCheckpoint(
-    'best_model.h5',
+    'best_model.keras',
     monitor='val_accuracy',
     save_best_only=True
 )
@@ -229,15 +229,15 @@ single_pred = model(tf.expand_dims(sample, 0))
 
 ```python
 # Save entire model
-model.save('my_model.h5')                # HDF5 format
-model.save('my_model')                   # SavedModel format
+model.save('my_model.keras')             # native Keras format (recommended)
+model.export('my_model_savedmodel')      # inference-only SavedModel (TF Serving, TFLite, ONNX)
 
 # Load model
-loaded_model = keras.models.load_model('my_model.h5')
+loaded_model = keras.models.load_model('my_model.keras')
 
 # Save/load weights only
-model.save_weights('model_weights.h5')
-model.load_weights('model_weights.h5')
+model.save_weights('model.weights.h5')
+model.load_weights('model.weights.h5')
 
 # Save architecture
 with open('model_config.json', 'w') as json_file:

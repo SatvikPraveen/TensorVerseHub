@@ -1,13 +1,9 @@
-# model_utils — API Reference
+# `tensorversehub.model_utils`
 
-::: src.model_utils
+::: tensorversehub.model_utils
     options:
       show_source: true
       heading_level: 2
-      members:
-        - CustomLayers
-        - ModelBuilders
-        - TrainingUtilities
-        - ModelAnalysis
-        - create_classification_model
-        - create_transfer_learning_model
+      members_order: source
+      show_root_heading: false
+      docstring_style: google

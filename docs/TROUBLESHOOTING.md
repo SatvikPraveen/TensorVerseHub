@@ -427,7 +427,7 @@ def create_tensorboard_callback():
 pip install tensorflow
 
 # Error: TF version compatibility
-pip install tensorflow==2.13.0  # Use specific version
+pip install "tensorflow>=2.16,<2.22"  # supported range (Keras 3)
 
 # Check TF version
 python -c "import tensorflow as tf; print(tf.__version__)"
@@ -450,7 +450,7 @@ python -c "import tensorflow as tf; print(tf.config.list_physical_devices('GPU')
 ```python
 # Try different loading methods
 try:
-    model = tf.keras.models.load_model('model.h5')
+    model = tf.keras.models.load_model('model.keras')
 except Exception as e1:
     try:
         model = tf.saved_model.load('model')
@@ -461,7 +461,7 @@ except Exception as e1:
 import os
 if os.path.isdir('model') and 'saved_model.pb' in os.listdir('model'):
     print("SavedModel format detected")
-elif 'model.h5' in os.listdir('.'):
+elif 'model.keras' in os.listdir('.'):
     print("HDF5 format detected")
 ```
 

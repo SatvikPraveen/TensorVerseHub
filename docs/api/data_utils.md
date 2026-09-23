@@ -1,12 +1,9 @@
-# data_utils — API Reference
+# `tensorversehub.data_utils`
 
-::: src.data_utils
+::: tensorversehub.data_utils
     options:
       show_source: true
       heading_level: 2
-      members:
-        - TFRecordHandler
-        - DataPipeline
-        - DataAugmentation
-        - create_image_classification_pipeline
-        - create_text_classification_pipeline
+      members_order: source
+      show_root_heading: false
+      docstring_style: google

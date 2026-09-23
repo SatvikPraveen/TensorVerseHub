@@ -202,7 +202,7 @@ callbacks = [
         verbose=1
     ),
     tf.keras.callbacks.ModelCheckpoint(
-        'best_model.h5',
+        'best_model.keras',
         monitor='val_accuracy',
         save_best_only=True,
         save_weights_only=False
@@ -473,7 +473,7 @@ metadata = {
 save_model_with_metadata(model, 'model_v1', metadata)
 
 # ❌ AVOID - No versioning
-model.save('model.h5')  # Overwritten every time
+model.save('model.keras')  # Overwritten every time
 ```
 
 ### Model Optimization for Deployment
@@ -494,7 +494,7 @@ with open('model.tflite', 'wb') as f:
     f.write(tflite_model)
 
 # ❌ AVOID - No optimization
-model.save('model_for_mobile.h5')  # Too large for mobile
+model.save('model_for_mobile.keras')  # Too large for mobile
 ```
 
 ## ⚡ Common Anti-Patterns to Avoid

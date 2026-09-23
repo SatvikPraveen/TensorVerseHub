@@ -223,11 +223,12 @@ vae.compile(optimizer='adam', loss='binary_crossentropy')
 ### Example 5: Model Quantization for Mobile
 
 ```python
+import os
 import tensorflow as tf
 import numpy as np
 
 # Load a trained model
-model = tf.keras.models.load_model('trained_model.h5')
+model = tf.keras.models.load_model('trained_model.keras')
 
 # Post-training quantization
 converter = tf.lite.TFLiteConverter.from_keras_model(model)
@@ -253,7 +254,7 @@ tflite_quantized_model = converter.convert()
 with open('model_quantized.tflite', 'wb') as f:
     f.write(tflite_quantized_model)
 
-print(f"Original model size: {len(open('trained_model.h5', 'rb').read()) / 1024 / 1024:.1f} MB")
+print(f"Original model size: {os.path.getsize('trained_model.keras') / 1024 / 1024:.1f} MB")
 print(f"Quantized model size: {len(tflite_quantized_model) / 1024 / 1024:.1f} MB")
 ```
 
@@ -414,7 +415,7 @@ model.compile(
 callbacks = [
     # Save best model
     tf.keras.callbacks.ModelCheckpoint(
-        filepath='best_model.h5',
+        filepath='best_model.keras',
         monitor='val_loss',
         save_best_only=True,
         verbose=1

@@ -1,12 +1,12 @@
 site_name: TensorVerseHub
-site_description: Comprehensive TensorFlow learning hub — 27 notebooks, production utilities, and deployment examples
+site_description: TensorFlow 2.16+ / Keras 3 learning hub — 27 notebooks, a typed utility package, CLI and deployment examples
 site_author: Satvik Praveen
 site_url: https://satvikpraveen.github.io/TensorVerseHub
 repo_url: https://github.com/SatvikPraveen/TensorVerseHub
 repo_name: SatvikPraveen/TensorVerseHub
 edit_uri: edit/main/docs/
 
-copyright: "Copyright &copy; 2025 Satvik Praveen — MIT License"
+copyright: "Copyright &copy; 2025–2026 Satvik Praveen — MIT License"
 
 theme:
   name: material
@@ -48,10 +48,15 @@ plugins:
   - mkdocstrings:
       handlers:
         python:
+          paths: ["."]
           options:
             show_source: true
             show_root_heading: true
             heading_level: 3
+            docstring_style: google
+            merge_init_into_class: true
+            show_signature_annotations: true
+            separate_signature: true
 
 markdown_extensions:
   - admonition
@@ -78,9 +83,6 @@ extra:
   social:
     - icon: fontawesome/brands/github
       link: https://github.com/SatvikPraveen/TensorVerseHub
-  analytics:
-    provider: google
-    property: ""
 
 nav:
   - Home: index.md
@@ -106,8 +108,11 @@ nav:
       - Practical Examples: PRACTICAL_EXAMPLES.md
       - Troubleshooting: TROUBLESHOOTING.md
   - API Reference:
+      - CLI: api/cli.md
+      - compat: api/compat.md
       - data_utils: api/data_utils.md
       - model_utils: api/model_utils.md
+      - training_utils: api/training_utils.md
       - optimization_utils: api/optimization_utils.md
       - export_utils: api/export_utils.md
       - visualization: api/visualization.md
