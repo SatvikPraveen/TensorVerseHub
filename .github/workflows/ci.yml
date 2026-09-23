@@ -82,7 +82,8 @@ jobs:
           # 'tensorflow>=2.16' requirement cannot pull a second, newer wheel
           # on top of the matrix version (mixed binaries -> undefined symbols).
           echo "tensorflow==${{ matrix.tensorflow }}" > /tmp/constraints.txt
-          for c in ${{ matrix.constraints }}; do echo "$c" >> /tmp/constraints.txt; done
+          echo "${{ matrix.constraints }}" | tr ' ' '\n' >> /tmp/constraints.txt
+          cat /tmp/constraints.txt
           pip install -c /tmp/constraints.txt "tensorflow==${{ matrix.tensorflow }}"
           pip install -c /tmp/constraints.txt -e ".[dev,export]" fastapi httpx
           if [ "${{ matrix.legacy-keras }}" = "1" ]; then pip install -c /tmp/constraints.txt -e ".[optimization]"; fi
