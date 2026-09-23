@@ -1,413 +1,223 @@
-# Location: /tests/test_data_utils.py
-
-"""
-Test tf.data pipelines and tf.keras preprocessing utilities.
-Comprehensive tests for data_utils module functionality.
-"""
-
-import os
-import tempfile
-from unittest.mock import MagicMock, patch
-
 import numpy as np
 import pytest
 import tensorflow as tf
 
-from data_utils import (
-    DataAugmentation,
-    DataPipeline,
-    TFRecordHandler,
-    create_feature_description_image,
-    create_feature_description_text,
-    create_image_classification_pipeline,
-    create_text_classification_pipeline,
-)
-from tests import TEST_CONFIG
+from tensorversehub import data_utils as du
+from tensorversehub.compat import keras
 
 
 class TestTFRecordHandler:
-    """Test TFRecord creation and parsing utilities."""
+    @pytest.mark.parametrize(
+        "value, kind",
+        [
+            (3, "int64_list"),
+            (True, "int64_list"),
+            (np.int32(4), "int64_list"),
+            (1.5, "float_list"),
+            (np.float32(2.5), "float_list"),
+            ("text", "bytes_list"),
+            (b"raw", "bytes_list"),
+            ([1, 2, 3], "int64_list"),
+            ([0.1, 0.2], "float_list"),
+            (["a", "b"], "bytes_list"),
+            (np.zeros((2, 2), np.float32), "float_list"),
+            (tf.constant([1, 2]), "int64_list"),
+        ],
+    )
+    def test_to_feature_dispatch(self, value, kind):
+        feature = du.TFRecordHandler.to_feature(value)
+        assert feature.HasField(kind)
 
-    def setup_method(self):
-        """Setup for each test method."""
-        self.handler = TFRecordHandler()
+    def test_to_feature_rejects_unknown(self):
+        with pytest.raises(TypeError):
+            du.TFRecordHandler.to_feature(object())
 
-    def test_bytes_feature(self):
-        """Test bytes feature creation."""
-        # Test with string
-        feature = self.handler._bytes_feature("test_string")
-        assert isinstance(feature, tf.train.Feature)
-        assert len(feature.bytes_list.value) == 1
+    def test_text_roundtrip(self, tmp_path):
+        handler = du.TFRecordHandler()
+        examples = [
+            handler.serialize_text_example(f"hello world {i}", i % 2, {"score": 0.5})
+            for i in range(6)
+        ]
+        path = tmp_path / "text.tfrecord"
+        assert handler.write_tfrecord(examples, path, compression="GZIP") == 6
+        assert du.TFRecordHandler.count_records(path, compression="GZIP") == 6
+        ds = tf.data.TFRecordDataset(str(path), compression_type="GZIP").map(du.parse_text_tfrecord)
+        text, label = next(iter(ds))
+        assert text.numpy().startswith(b"hello world") and int(label) == 0
 
-        # Test with bytes
-        feature = self.handler._bytes_feature(b"test_bytes")
-        assert isinstance(feature, tf.train.Feature)
-        assert len(feature.bytes_list.value) == 1
+    def test_array_roundtrip_sharded(self, tmp_path):
+        handler = du.TFRecordHandler()
+        arrays = [np.random.rand(4, 4, 3).astype("float32") for _ in range(7)]
+        examples = [
+            handler.serialize_array_example(a, i, {"aux": [1, 2]}) for i, a in enumerate(arrays)
+        ]
+        paths = handler.write_sharded(examples, tmp_path / "shards", prefix="arr", num_shards=3)
+        assert len(paths) == 3 and len(du.expand_paths(tmp_path / "shards")) == 3
+        assert len(du.expand_paths(str(tmp_path / "shards" / "arr-*.tfrecord"))) == 3
+        ds = du.create_tfrecord_dataset(
+            paths,
+            batch_size=7,
+            shuffle_buffer=0,
+            parse_fn=lambda p: du.parse_array_tfrecord(p, tf.float32),
+        )
+        x, y = next(iter(ds))
+        assert x.shape == (7, 4, 4, 3)
+        assert sorted(y.numpy().tolist()) == list(range(7))
+        with pytest.raises(ValueError):
+            handler.write_sharded(examples, tmp_path, num_shards=0)
 
-    def test_float_feature(self):
-        """Test float feature creation."""
-        # Test with single float
-        feature = self.handler._float_feature(3.14)
-        assert isinstance(feature, tf.train.Feature)
-        assert len(feature.float_list.value) == 1
-        assert feature.float_list.value[0] == 3.14
+    def test_image_roundtrip(self, tmp_path):
+        img = (np.random.rand(8, 6, 3) * 255).astype("uint8")
+        png = tmp_path / "img.png"
+        tf.io.write_file(str(png), tf.io.encode_png(img))
+        handler = du.TFRecordHandler()
+        example = handler.serialize_image_example(png, 2, {"source": "unit-test"})
+        parsed = tf.io.parse_single_example(example, du.create_feature_description_image())
+        assert int(parsed["height"]) == 8 and int(parsed["width"]) == 6
+        image, label = du.parse_image_tfrecord(tf.constant(example), image_size=(4, 4))
+        assert image.shape == (4, 4, 3) and int(label) == 2 and float(tf.reduce_max(image)) <= 1.0
 
-        # Test with list of floats
-        feature = self.handler._float_feature([1.0, 2.0, 3.0])
-        assert len(feature.float_list.value) == 3
+    def test_missing_files(self):
+        with pytest.raises(FileNotFoundError):
+            du.DataPipeline().create_tfrecord_dataset(
+                ["/nonexistent/*.tfrecord"], parse_fn=lambda p: p
+            )
+        with pytest.raises(ValueError):
+            du.DataPipeline().create_tfrecord_dataset(["x.tfrecord"])
 
-    def test_int64_feature(self):
-        """Test int64 feature creation."""
-        # Test with single int
-        feature = self.handler._int64_feature(42)
-        assert isinstance(feature, tf.train.Feature)
-        assert len(feature.int64_list.value) == 1
-        assert feature.int64_list.value[0] == 42
 
-        # Test with list of ints
-        feature = self.handler._int64_feature([1, 2, 3])
-        assert len(feature.int64_list.value) == 3
+class TestImageOps:
+    def test_rotate_identity_and_shapes(self):
+        img = tf.random.uniform((12, 10, 3))
+        out = du.rotate_image(img, 0.0)
+        assert out.shape == img.shape
+        np.testing.assert_allclose(out.numpy(), img.numpy(), atol=1e-5)
+        batch = du.rotate_image(tf.random.uniform((2, 12, 10, 1)), 0.5)
+        assert batch.shape == (2, 12, 10, 1)
+        rotated = du.rotate_image(img, 1.0)
+        assert not np.allclose(rotated.numpy(), img.numpy())
+        assert du.rotate_image(tf.cast(img * 255, tf.uint8), 0.2).dtype == tf.uint8
 
-    def test_serialize_text_example(self):
-        """Test text example serialization."""
-        text = "This is a test sentence"
-        label = 1
-
-        serialized = self.handler.serialize_text_example(text, label)
-        assert isinstance(serialized, bytes)
-        assert len(serialized) > 0
-
-        # Test with additional features
-        additional_features = {"sentiment": "positive", "score": 0.85}
-        serialized = self.handler.serialize_text_example(text, label, additional_features)
-        assert isinstance(serialized, bytes)
-
-    def test_write_tfrecord(self, temp_dir):
-        """Test TFRecord writing."""
-        # Create sample examples
-        examples = []
-        for i in range(5):
-            example = self.handler.serialize_text_example(f"text_{i}", i)
-            examples.append(example)
-
-        # Write to TFRecord
-        tfrecord_path = os.path.join(temp_dir, "test.tfrecord")
-        self.handler.write_tfrecord(examples, tfrecord_path)
-
-        # Verify file exists and has content
-        assert os.path.exists(tfrecord_path)
-        assert os.path.getsize(tfrecord_path) > 0
+    def test_augment_image_range(self):
+        img = tf.random.uniform((16, 16, 3))
+        out = du.augment_image(img)
+        assert out.shape == (16, 16, 3)
+        assert float(tf.reduce_min(out)) >= 0.0 and float(tf.reduce_max(out)) <= 1.0
+        gray = du.augment_image(tf.random.uniform((16, 16, 1)))
+        assert gray.shape == (16, 16, 1)
 
 
 class TestDataPipeline:
-    """Test data pipeline creation and optimization."""
+    def test_invalid_batch_size(self):
+        with pytest.raises(ValueError):
+            du.DataPipeline(batch_size=0)
 
-    def setup_method(self):
-        """Setup for each test method."""
-        self.pipeline = DataPipeline(batch_size=TEST_CONFIG["batch_size"])
+    def test_from_arrays(self, images, labels):
+        pipe = du.DataPipeline(batch_size=8, shuffle_buffer=10, drop_remainder=True)
+        ds = pipe.from_arrays(images, labels, map_fn=lambda x, y: (x * 2, y))
+        x, y = next(iter(ds))
+        assert x.shape == (8, 16, 16, 3) and y.shape == (8,)
+        assert float(tf.reduce_max(x)) <= 2.0
+        assert int(ds.cardinality()) == 3
 
-    def test_initialization(self):
-        """Test DataPipeline initialization."""
-        assert self.pipeline.batch_size == TEST_CONFIG["batch_size"]
-        assert self.pipeline.shuffle_buffer == 1000  # default
-        assert isinstance(self.pipeline.tfrecord_handler, TFRecordHandler)
+    def test_image_dataset_from_files(self, tmp_path):
+        paths = []
+        for i in range(6):
+            img = (np.random.rand(10, 10, 3) * 255).astype("uint8")
+            p = tmp_path / f"{i}.png"
+            tf.io.write_file(str(p), tf.io.encode_png(img))
+            paths.append(str(p))
+        pipe = du.DataPipeline(batch_size=3, shuffle_buffer=6)
+        ds = pipe.create_image_dataset(paths, [0, 1, 0, 1, 0, 1], image_size=(8, 8), augment=True)
+        x, y = next(iter(ds))
+        assert x.shape == (3, 8, 8, 3) and x.dtype == tf.float32
+        with pytest.raises(ValueError):
+            pipe.create_image_dataset(paths, [0])
 
-    @patch("tensorflow.io.read_file")
-    @patch("tensorflow.io.decode_image")
-    def test_create_image_dataset(self, mock_decode, mock_read):
-        """Test image dataset creation."""
-        # Mock file operations
-        mock_read.return_value = b"fake_image_data"
-        mock_decode.return_value = tf.random.normal(TEST_CONFIG["image_shape"])
+    def test_text_dataset(self):
+        pipe = du.DataPipeline(batch_size=4, shuffle_buffer=0)
+        texts = ["the cat sat", "a dog ran fast", "hello"] * 4
+        ds, vectorizer = pipe.create_text_dataset(texts, [0, 1, 2] * 4, max_length=6, vocab_size=50)
+        x, y = next(iter(ds))
+        assert x.shape == (4, 6) and isinstance(vectorizer, keras.layers.TextVectorization)
+        ds2, same = pipe.create_text_dataset(texts, [0] * 12, max_length=6, vectorizer=vectorizer)
+        assert same is vectorizer
 
-        # Create fake paths and labels
-        image_paths = [f"image_{i}.jpg" for i in range(10)]
-        labels = list(range(10))
+    def test_mixed_precision_dataset(self, image_dataset):
+        x, _ = next(iter(du.DataPipeline.create_mixed_precision_dataset(image_dataset)))
+        assert x.dtype == tf.float16
+        dict_ds = image_dataset.map(lambda x, y: ({"a": x, "b": tf.cast(y, tf.int32)}, y))
+        feats, _ = next(iter(du.DataPipeline.create_mixed_precision_dataset(dict_ds)))
+        assert feats["a"].dtype == tf.float16 and feats["b"].dtype == tf.int32
 
-        dataset = self.pipeline.create_image_dataset(
-            image_paths, labels, image_size=(64, 64), augment=False, cache=False
+
+class TestAugmentation:
+    def test_augmentation_layer(self, images):
+        layer = du.DataAugmentation.create_augmentation_layer(seed=1)
+        out = layer(images, training=True)
+        assert out.shape == images.shape
+
+    def test_mixup_and_cutmix(self, images, labels):
+        for fn in (du.DataAugmentation.mixup_batch, du.DataAugmentation.cutmix_batch):
+            x, y = fn(images, labels, num_classes=3)
+            assert x.shape == images.shape and y.shape == (len(labels), 3)
+            np.testing.assert_allclose(tf.reduce_sum(y, axis=1).numpy(), 1.0, atol=1e-5)
+            assert float(tf.reduce_min(x)) >= 0.0 and float(tf.reduce_max(x)) <= 1.0
+        with pytest.raises(ValueError):
+            du.DataAugmentation.mixup_batch(images, labels)  # sparse labels need num_classes
+        one_hot = tf.one_hot(labels, 3)
+        _, y = du.DataAugmentation.cutmix_batch(images, one_hot)
+        assert y.shape == (len(labels), 3)
+
+    def test_dataset_wrappers(self, image_dataset):
+        for wrapped in (
+            du.DataAugmentation.mixup(image_dataset, num_classes=3),
+            du.DataAugmentation.cutmix(image_dataset, num_classes=3),
+        ):
+            x, y = next(iter(wrapped))
+            assert x.shape[1:] == (16, 16, 3) and y.shape[1] == 3
+
+    def test_random_erasing(self):
+        img = tf.ones((16, 16, 3))
+        erased = du.DataAugmentation.random_erasing(img, probability=1.0)
+        assert float(tf.reduce_min(erased)) == 0.0 and erased.shape == img.shape
+        same = du.DataAugmentation.random_erasing(img, probability=0.0)
+        np.testing.assert_array_equal(same.numpy(), img.numpy())
+
+
+class TestConvenience:
+    def test_image_classification_pipeline(self, tmp_path):
+        for cls in ("cat", "dog"):
+            (tmp_path / cls).mkdir()
+            for i in range(5):
+                img = (np.random.rand(12, 12, 3) * 255).astype("uint8")
+                tf.io.write_file(str(tmp_path / cls / f"{i}.png"), tf.io.encode_png(img))
+        train_ds, val_ds = du.create_image_classification_pipeline(
+            tmp_path, batch_size=4, image_size=(8, 8), validation_split=0.2, cache=False
         )
+        x, y = next(iter(train_ds))
+        assert x.shape[1:] == (8, 8, 3) and float(tf.reduce_max(x)) <= 1.0
+        assert int(val_ds.cardinality()) >= 1
 
-        assert isinstance(dataset, tf.data.Dataset)
-
-        # Check dataset structure
-        for batch_images, batch_labels in dataset.take(1):
-            assert batch_images.shape[0] <= TEST_CONFIG["batch_size"]
-            assert len(batch_images.shape) == 4  # (batch, height, width, channels)
-            assert batch_labels.shape[0] <= TEST_CONFIG["batch_size"]
-
-    def test_create_text_dataset(self):
-        """Test text dataset creation."""
-        texts = [f"This is sample text number {i}" for i in range(20)]
-        labels = [i % TEST_CONFIG["num_classes"] for i in range(20)]
-
-        dataset, vectorizer = self.pipeline.create_text_dataset(
-            texts, labels, max_length=32, vocab_size=100
+    def test_text_classification_pipeline(self):
+        texts = [f"sample text number {i}" for i in range(20)]
+        labels = [i % 2 for i in range(20)]
+        train, val, vec = du.create_text_classification_pipeline(
+            texts, labels, batch_size=4, sequence_length=5
         )
-
-        assert isinstance(dataset, tf.data.Dataset)
-        assert isinstance(vectorizer, tf.keras.layers.TextVectorization)
-
-        # Check dataset structure
-        for batch_texts, batch_labels in dataset.take(1):
-            assert batch_texts.shape[0] <= TEST_CONFIG["batch_size"]
-            assert len(batch_texts.shape) == 2  # (batch, sequence_length)
-            assert batch_labels.shape[0] <= TEST_CONFIG["batch_size"]
-
-    def test_create_tfrecord_dataset(self, temp_dir):
-        """Test TFRecord dataset creation."""
-        # Create a sample TFRecord file
-        handler = TFRecordHandler()
-        examples = []
-        for i in range(10):
-            example = handler.serialize_text_example(f"text_{i}", i)
-            examples.append(example)
-
-        tfrecord_path = os.path.join(temp_dir, "test.tfrecord")
-        handler.write_tfrecord(examples, tfrecord_path)
-
-        # Create feature description
-        feature_description = create_feature_description_text()
-
-        # Create dataset
-        dataset = self.pipeline.create_tfrecord_dataset([tfrecord_path], feature_description)
-
-        assert isinstance(dataset, tf.data.Dataset)
-
-        # Check dataset can be iterated
-        count = 0
-        for batch in dataset.take(2):
-            count += 1
-        assert count <= 2
-
-    def test_mixed_precision_dataset(self, sample_dataset):
-        """Test mixed precision dataset configuration."""
-        mixed_dataset = self.pipeline.create_mixed_precision_dataset(sample_dataset)
-        assert isinstance(mixed_dataset, tf.data.Dataset)
-
-        # Check data types
-        for features, labels in mixed_dataset.take(1):
-            # Note: In practice, you'd check dtype conversion
-            assert features is not None
-            assert labels is not None
-
-
-class TestDataAugmentation:
-    """Test data augmentation utilities."""
-
-    def test_create_augmentation_layer(self):
-        """Test augmentation layer creation."""
-        aug_layer = DataAugmentation.create_augmentation_layer()
-
-        assert isinstance(aug_layer, tf.keras.Sequential)
-        assert len(aug_layer.layers) > 0
-
-        # Test layer application
-        test_images = tf.random.normal([4] + list(TEST_CONFIG["image_shape"]))
-        augmented = aug_layer(test_images, training=True)
-
-        assert augmented.shape == test_images.shape
-
-    def test_mixup(self, sample_dataset):
-        """Test MixUp augmentation."""
-        mixup_dataset = DataAugmentation.mixup(sample_dataset, alpha=0.2)
-        assert isinstance(mixup_dataset, tf.data.Dataset)
-
-        # Check mixed data
-        for mixed_x, mixed_y in mixup_dataset.take(1):
-            assert mixed_x.shape[1:] == TEST_CONFIG["image_shape"]
-            assert len(mixed_y.shape) == 1  # Mixed labels should be 1D
-
-    def test_cutmix(self, sample_dataset):
-        """Test CutMix augmentation."""
-        cutmix_dataset = DataAugmentation.cutmix(sample_dataset, alpha=1.0)
-        assert isinstance(cutmix_dataset, tf.data.Dataset)
-
-        # Check dataset structure
-        for mixed_x, mixed_y in cutmix_dataset.take(1):
-            assert mixed_x.shape[1:] == TEST_CONFIG["image_shape"]
-            assert len(mixed_y.shape) == 1
-
-
-class TestFeatureDescriptions:
-    """Test feature description utilities."""
-
-    def test_create_feature_description_image(self):
-        """Test image feature description creation."""
-        desc = create_feature_description_image()
-
-        assert isinstance(desc, dict)
-        required_keys = ["image", "label", "height", "width", "channels", "filename"]
-        for key in required_keys:
-            assert key in desc
-            assert isinstance(desc[key], tf.io.FixedLenFeature)
-
-    def test_create_feature_description_text(self):
-        """Test text feature description creation."""
-        desc = create_feature_description_text()
-
-        assert isinstance(desc, dict)
-        required_keys = ["text", "label", "text_length"]
-        for key in required_keys:
-            assert key in desc
-            assert isinstance(desc[key], tf.io.FixedLenFeature)
-
-
-class TestConvenienceFunctions:
-    """Test high-level convenience functions."""
-
-    @patch("tensorflow.keras.utils.image_dataset_from_directory")
-    def test_create_image_classification_pipeline(self, mock_dataset_func):
-        """Test image classification pipeline creation."""
-        # Mock the dataset creation
-        mock_dataset = tf.data.Dataset.from_tensor_slices(
-            (
-                tf.random.normal([20] + list(TEST_CONFIG["image_shape"])),
-                tf.random.uniform([20], 0, TEST_CONFIG["num_classes"], dtype=tf.int32),
-            )
-        ).batch(TEST_CONFIG["batch_size"])
-
-        mock_dataset_func.return_value = mock_dataset
-
-        train_ds, val_ds = create_image_classification_pipeline(
-            "fake_directory", batch_size=TEST_CONFIG["batch_size"], validation_split=0.2
-        )
-
-        assert isinstance(train_ds, tf.data.Dataset)
-        assert isinstance(val_ds, tf.data.Dataset)
-
-    def test_create_text_classification_pipeline(self):
-        """Test text classification pipeline creation."""
-        texts = [f"Sample text {i}" for i in range(50)]
-        labels = [i % TEST_CONFIG["num_classes"] for i in range(50)]
-
-        train_ds, val_ds, vectorizer = create_text_classification_pipeline(
-            texts, labels, batch_size=TEST_CONFIG["batch_size"], validation_split=0.2
-        )
-
-        assert isinstance(train_ds, tf.data.Dataset)
-        assert isinstance(val_ds, tf.data.Dataset)
-        assert isinstance(vectorizer, tf.keras.layers.TextVectorization)
-
-        # Check datasets have correct structure
-        for batch_x, batch_y in train_ds.take(1):
-            assert len(batch_x.shape) == 2  # (batch, sequence)
-            assert len(batch_y.shape) == 1  # (batch,)
-
-
-class TestDataPipelineIntegration:
-    """Integration tests for data pipeline components."""
-
-    def test_end_to_end_image_pipeline(self, temp_dir):
-        """Test complete image data pipeline."""
-        # Create fake image files (just empty files for testing)
-        image_dir = os.path.join(temp_dir, "images")
-        os.makedirs(image_dir)
-
-        for i in range(5):
-            with open(os.path.join(image_dir, f"image_{i}.jpg"), "w") as f:
-                f.write("fake_image_content")
-
-        # This would normally fail with real images, but tests file handling
-        try:
-            pipeline = DataPipeline()
-            # We can't actually test with fake files, so just test the object creation
-            assert pipeline is not None
-        except Exception:
-            # Expected to fail with fake image files
-            pass
-
-    def test_end_to_end_text_pipeline(self):
-        """Test complete text data pipeline."""
-        pipeline = DataPipeline(batch_size=4)
-
-        texts = [
-            "This is a positive review",
-            "This product is terrible",
-            "Average quality product",
-            "Excellent service and quality",
-            "Would not recommend",
-        ]
-        labels = [1, 0, 1, 1, 0]  # Binary sentiment
-
-        dataset, vectorizer = pipeline.create_text_dataset(
-            texts, labels, max_length=16, vocab_size=50
-        )
-
-        # Verify dataset works end-to-end
-        total_batches = 0
-        total_samples = 0
-
-        for batch_x, batch_y in dataset:
-            total_batches += 1
-            total_samples += batch_x.shape[0]
-
-            # Check data types and shapes
-            assert batch_x.dtype == tf.int64  # Tokenized text
-            assert batch_y.dtype == tf.int32  # Labels
-            assert batch_x.shape[1] == 16  # Sequence length
-
-        assert total_batches > 0
-        assert total_samples == len(texts)
-
-    def test_pipeline_performance(self):
-        """Test pipeline performance optimizations."""
-        # Create a larger dataset for performance testing
-        images = tf.random.normal([100] + list(TEST_CONFIG["image_shape"]))
-        labels = tf.random.uniform([100], 0, TEST_CONFIG["num_classes"], dtype=tf.int32)
-
-        dataset = tf.data.Dataset.from_tensor_slices((images, labels))
-
-        # Test different optimization strategies
-        basic_dataset = dataset.batch(TEST_CONFIG["batch_size"])
-
-        optimized_dataset = (
-            dataset.cache().shuffle(50).batch(TEST_CONFIG["batch_size"]).prefetch(tf.data.AUTOTUNE)
-        )
-
-        # Both should be iterable
-        assert sum(1 for _ in basic_dataset.take(5)) <= 5
-        assert sum(1 for _ in optimized_dataset.take(5)) <= 5
-
-
-# Pytest configuration for this test file
-def pytest_configure(config):
-    """Configure pytest for data utils tests."""
-    config.addinivalue_line(
-        "markers", "slow: marks tests as slow (deselect with '-m \"not slow\"')"
-    )
-
-
-# Performance tests (marked as slow)
-@pytest.mark.slow
-class TestDataPipelinePerformance:
-    """Performance tests for data pipelines (marked as slow)."""
-
-    def test_large_dataset_performance(self):
-        """Test performance with larger datasets."""
-        # Create larger synthetic dataset
-        num_samples = 1000
-        images = tf.random.normal([num_samples] + list(TEST_CONFIG["image_shape"]))
-        labels = tf.random.uniform([num_samples], 0, TEST_CONFIG["num_classes"], dtype=tf.int32)
-
-        dataset = tf.data.Dataset.from_tensor_slices((images, labels))
-        dataset = dataset.batch(32).prefetch(tf.data.AUTOTUNE)
-
-        import time
-
-        start_time = time.time()
-
-        # Iterate through dataset
-        for batch in dataset:
-            pass
-
-        elapsed = time.time() - start_time
-
-        # Should process 1000 samples reasonably quickly
-        assert elapsed < 10.0  # Adjust threshold as needed
-
-        print(f"Processed {num_samples} samples in {elapsed:.2f} seconds")
-
-
-if __name__ == "__main__":
-    pytest.main([__file__])
+        x, y = next(iter(train))
+        assert x.shape == (4, 5)
+        assert sum(int(b[0].shape[0]) for b in val) == 4
+        with pytest.raises(ValueError):
+            du.create_text_classification_pipeline(texts, labels[:-1])
+
+    def test_split_dataset_and_class_weights(self):
+        ds = tf.data.Dataset.range(10)
+        a, b, c = du.split_dataset(ds, (0.5, 0.3, 0.2))
+        assert [int(s.cardinality()) for s in (a, b, c)] == [5, 3, 2]
+        with pytest.raises(ValueError):
+            du.split_dataset(ds, (0.5, 0.6))
+        with pytest.raises(ValueError):
+            du.split_dataset(ds.repeat(), (0.5, 0.5))
+        weights = du.compute_class_weights([0, 0, 0, 1])
+        assert weights[1] > weights[0] and pytest.approx(weights[0]) == 4 / (2 * 3)

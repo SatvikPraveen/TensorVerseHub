@@ -1,590 +1,212 @@
-# Location: /tests/test_model_utils.py
-
-"""
-Test tf.keras model creation and training utilities.
-Comprehensive tests for model_utils module functionality.
-"""
-
-import json
-import os
-import tempfile
-from unittest.mock import MagicMock, patch
-
 import numpy as np
 import pytest
 import tensorflow as tf
 
-from model_utils import (
-    CustomLayers,
-    ModelAnalysis,
-    ModelBuilders,
-    TrainingUtilities,
-    create_classification_model,
-    create_transfer_learning_model,
-    load_model_with_metadata,
-    save_model_with_metadata,
-)
-from tests import TEST_CONFIG
+from tensorversehub import compat
+from tensorversehub import model_utils as mu
+from tensorversehub.compat import keras
 
 
 class TestCustomLayers:
-    """Test custom tf.keras layers."""
+    def test_multi_head_attention_shapes_and_mask(self):
+        mha = mu.CustomLayers.MultiHeadAttention(16, 4)
+        x = tf.random.normal((2, 5, 16))
+        mask = mu.CustomLayers.create_look_ahead_mask(5)
+        out, weights = mha(x, attention_mask=mask, return_attention_scores=True)
+        assert out.shape == (2, 5, 16) and weights.shape == (2, 4, 5, 5)
+        upper = np.triu(np.ones((5, 5)), k=1).astype(bool)
+        assert np.all(weights.numpy()[:, :, upper] < 1e-6)
+        np.testing.assert_allclose(tf.reduce_sum(weights, -1).numpy(), 1.0, atol=1e-5)
+        cross = mha(x, tf.random.normal((2, 7, 16)))
+        assert cross.shape == (2, 5, 16)
 
-    def test_multi_head_attention(self):
-        """Test MultiHeadAttention layer."""
-        d_model = 64
-        num_heads = 8
-        seq_len = 10
-        batch_size = 2
+    def test_multi_head_attention_validation_and_config(self):
+        with pytest.raises(ValueError):
+            mu.CustomLayers.MultiHeadAttention(10, 4)
+        layer = mu.CustomLayers.MultiHeadAttention(8, 2, dropout=0.1)
+        clone = mu.CustomLayers.MultiHeadAttention.from_config(layer.get_config())
+        assert clone.num_heads == 2 and clone.dropout_rate == 0.1
 
-        attention_layer = CustomLayers.MultiHeadAttention(d_model, num_heads)
-
-        # Test input
-        inputs = tf.random.normal([batch_size, seq_len, d_model])
-
-        # Apply attention (self-attention)
-        output = attention_layer(inputs, inputs, inputs)
-
-        assert output.shape == (batch_size, seq_len, d_model)
-        assert isinstance(output, tf.Tensor)
-
-    def test_multi_head_attention_with_mask(self):
-        """Test MultiHeadAttention with mask."""
-        d_model = 32
-        num_heads = 4
-        seq_len = 5
-        batch_size = 1
-
-        attention_layer = CustomLayers.MultiHeadAttention(d_model, num_heads)
-
-        inputs = tf.random.normal([batch_size, seq_len, d_model])
-        mask = tf.random.uniform([batch_size, num_heads, seq_len, seq_len]) > 0.5
-
-        output = attention_layer(inputs, inputs, inputs, mask=mask)
-        assert output.shape == (batch_size, seq_len, d_model)
+    def test_padding_mask(self):
+        mask = mu.CustomLayers.create_padding_mask(tf.constant([[1, 2, 0], [3, 0, 0]]))
+        assert mask.shape == (2, 1, 1, 3)
+        assert mask.numpy()[0, 0, 0].tolist() == [True, True, False]
 
     def test_positional_encoding(self):
-        """Test PositionalEncoding layer."""
-        position = 50
-        d_model = 64
-        batch_size = 2
-        seq_len = 20
+        pe = mu.CustomLayers.PositionalEncoding(10, 8)
+        enc = pe.pos_encoding.numpy()
+        assert enc.shape == (1, 10, 8) and np.abs(enc).max() <= 1.0
+        x = tf.zeros((2, 6, 8))
+        out = pe(x)
+        assert out.shape == (2, 6, 8)
+        np.testing.assert_allclose(out.numpy()[0], enc[0, :6], atol=1e-6)
+        with pytest.raises(tf.errors.InvalidArgumentError):
+            pe(tf.zeros((1, 11, 8)))
+        assert mu.PositionalEncoding.from_config(pe.get_config()).position == 10
 
-        pos_encoding = CustomLayers.PositionalEncoding(position, d_model)
-
-        inputs = tf.random.normal([batch_size, seq_len, d_model])
-        output = pos_encoding(inputs)
-
-        assert output.shape == inputs.shape
-        assert not tf.reduce_all(tf.equal(output, inputs))  # Should be different
+    def test_transformer_block_and_serialization(self, tmp_path):
+        inputs = keras.Input((6,), dtype="int32")
+        x = keras.layers.Embedding(30, 8)(inputs)
+        x = mu.CustomLayers.PositionalEncoding(6, 8)(x)
+        x = mu.CustomLayers.TransformerEncoderBlock(8, 2, ff_dim=16, dropout=0.0)(x)
+        out = keras.layers.Dense(2, activation="softmax")(keras.layers.GlobalAveragePooling1D()(x))
+        model = keras.Model(inputs, out)
+        tokens = np.random.randint(0, 30, (3, 6))
+        preds = model.predict(tokens, verbose=0)
+        path = tmp_path / "transformer.keras"
+        model.save(path)
+        reloaded = keras.models.load_model(path)
+        np.testing.assert_allclose(reloaded.predict(tokens, verbose=0), preds, atol=1e-5)
 
 
 class TestModelBuilders:
-    """Test model building utilities."""
+    @pytest.mark.parametrize("arch", mu.ModelBuilders.CNN_ARCHITECTURES)
+    def test_cnn_classifier(self, arch, images, labels):
+        model = mu.ModelBuilders.create_cnn_classifier((16, 16, 3), 3, arch)
+        assert model.output_shape == (None, 3)
+        model.compile("adam", "sparse_categorical_crossentropy")
+        model.fit(images, labels, epochs=1, batch_size=8, verbose=0)
+        assert np.allclose(model.predict(images[:2], verbose=0).sum(axis=1), 1.0, atol=1e-5)
 
-    def test_create_cnn_classifier_simple(self):
-        """Test simple CNN classifier creation."""
-        model = ModelBuilders.create_cnn_classifier(
-            input_shape=TEST_CONFIG["image_shape"],
-            num_classes=TEST_CONFIG["num_classes"],
-            architecture="simple",
+    def test_cnn_validation(self):
+        with pytest.raises(ValueError):
+            mu.ModelBuilders.create_cnn_classifier((8, 8, 3), 3, "unknown")
+        with pytest.raises(ValueError):
+            mu.ModelBuilders.create_cnn_classifier((8, 8, 3), 0)
+
+    @pytest.mark.parametrize("arch", mu.ModelBuilders.TEXT_ARCHITECTURES)
+    def test_text_classifier(self, arch):
+        model = mu.ModelBuilders.create_text_classifier(
+            50, 8, 2, embedding_dim=16, architecture=arch, num_heads=2, num_layers=1
+        )
+        tokens = np.random.randint(0, 50, (4, 8))
+        assert model.predict(tokens, verbose=0).shape == (4, 2)
+        with pytest.raises(ValueError):
+            mu.ModelBuilders.create_text_classifier(50, 8, 2, architecture="cnn")
+
+    def test_mlp(self):
+        model = mu.ModelBuilders.create_mlp(10, 4, hidden_units=(8,))
+        assert model.predict(np.zeros((2, 10), np.float32), verbose=0).shape == (2, 4)
+
+    @pytest.mark.parametrize("arch", ["dense", "conv"])
+    def test_autoencoder(self, arch, images):
+        ae, enc, dec = mu.ModelBuilders.create_autoencoder((16, 16, 3), 8, arch)
+        assert enc.output_shape == (None, 8) and ae.output_shape == (None, 16, 16, 3)
+        np.testing.assert_allclose(
+            ae.predict(images[:2], verbose=0),
+            dec.predict(enc.predict(images[:2], verbose=0), verbose=0),
+            atol=1e-5,
         )
 
-        assert isinstance(model, tf.keras.Model)
-        assert model.input_shape == (None,) + TEST_CONFIG["image_shape"]
-        assert model.output_shape == (None, TEST_CONFIG["num_classes"])
+    def test_autoencoder_validation(self):
+        with pytest.raises(ValueError):
+            mu.ModelBuilders.create_autoencoder((15, 15, 3), 8, "conv")
+        with pytest.raises(ValueError):
+            mu.ModelBuilders.create_autoencoder((16, 16, 3), 8, "vae")
 
-        # Test model can make predictions
-        test_input = tf.random.normal([1] + list(TEST_CONFIG["image_shape"]))
-        output = model(test_input)
-        assert output.shape == (1, TEST_CONFIG["num_classes"])
-
-    def test_create_cnn_classifier_vgg(self):
-        """Test VGG-like CNN classifier."""
-        model = ModelBuilders.create_cnn_classifier(
-            input_shape=TEST_CONFIG["image_shape"],
-            num_classes=TEST_CONFIG["num_classes"],
-            architecture="vgg",
-        )
-
-        assert isinstance(model, tf.keras.Model)
-        assert model.count_params() > 10000  # VGG should have many parameters
-
-        # Test forward pass
-        test_input = tf.random.normal([2] + list(TEST_CONFIG["image_shape"]))
-        output = model(test_input)
-        assert output.shape == (2, TEST_CONFIG["num_classes"])
-
-    def test_create_cnn_classifier_resnet(self):
-        """Test ResNet-like CNN classifier."""
-        model = ModelBuilders.create_cnn_classifier(
-            input_shape=TEST_CONFIG["image_shape"],
-            num_classes=TEST_CONFIG["num_classes"],
-            architecture="resnet",
-        )
-
-        assert isinstance(model, tf.keras.Model)
-
-        # Test forward pass
-        test_input = tf.random.normal([1] + list(TEST_CONFIG["image_shape"]))
-        output = model(test_input)
-        assert output.shape == (1, TEST_CONFIG["num_classes"])
-
-    def test_create_text_classifier_lstm(self):
-        """Test LSTM text classifier creation."""
-        vocab_size = 1000
-        embedding_dim = 64
-        max_length = 32
-
-        model = ModelBuilders.create_text_classifier(
-            vocab_size=vocab_size,
-            embedding_dim=embedding_dim,
-            max_length=max_length,
-            num_classes=TEST_CONFIG["num_classes"],
-            architecture="lstm",
-        )
-
-        assert isinstance(model, tf.keras.Model)
-        assert model.input_shape == (None, max_length)
-        assert model.output_shape == (None, TEST_CONFIG["num_classes"])
-
-        # Test forward pass
-        test_input = tf.random.uniform([2, max_length], 0, vocab_size, dtype=tf.int32)
-        output = model(test_input)
-        assert output.shape == (2, TEST_CONFIG["num_classes"])
-
-    def test_create_text_classifier_gru(self):
-        """Test GRU text classifier creation."""
-        model = ModelBuilders.create_text_classifier(
-            vocab_size=500, embedding_dim=32, max_length=16, num_classes=3, architecture="gru"
-        )
-
-        assert isinstance(model, tf.keras.Model)
-
-        # Test forward pass
-        test_input = tf.random.uniform([1, 16], 0, 500, dtype=tf.int32)
-        output = model(test_input)
-        assert output.shape == (1, 3)
-
-    def test_create_text_classifier_transformer(self):
-        """Test transformer text classifier creation."""
-        model = ModelBuilders.create_text_classifier(
-            vocab_size=1000,
-            embedding_dim=64,
-            max_length=32,
-            num_classes=TEST_CONFIG["num_classes"],
-            architecture="transformer",
-        )
-
-        assert isinstance(model, tf.keras.Model)
-
-        # Test forward pass
-        test_input = tf.random.uniform([2, 32], 0, 1000, dtype=tf.int32)
-        output = model(test_input)
-        assert output.shape == (2, TEST_CONFIG["num_classes"])
-
-    def test_create_autoencoder_dense(self):
-        """Test dense autoencoder creation."""
-        input_shape = (784,)  # Flattened 28x28 image
-        encoding_dim = 64
-
-        autoencoder, encoder, decoder = ModelBuilders.create_autoencoder(
-            input_shape=input_shape, encoding_dim=encoding_dim, architecture="dense"
-        )
-
-        assert isinstance(autoencoder, tf.keras.Model)
-        assert isinstance(encoder, tf.keras.Model)
-        assert isinstance(decoder, tf.keras.Model)
-
-        # Test shapes
-        test_input = tf.random.normal([2] + list(input_shape))
-
-        encoded = encoder(test_input)
-        assert encoded.shape == (2, encoding_dim)
-
-        decoded = decoder(encoded)
-        assert decoded.shape == test_input.shape
-
-        reconstructed = autoencoder(test_input)
-        assert reconstructed.shape == test_input.shape
-
-    def test_create_autoencoder_conv(self):
-        """Test convolutional autoencoder creation."""
-        autoencoder, encoder, decoder = ModelBuilders.create_autoencoder(
-            input_shape=TEST_CONFIG["image_shape"], encoding_dim=128, architecture="conv"
-        )
-
-        assert isinstance(autoencoder, tf.keras.Model)
-
-        # Test forward pass
-        test_input = tf.random.normal([1] + list(TEST_CONFIG["image_shape"]))
-        reconstructed = autoencoder(test_input)
-        assert reconstructed.shape == test_input.shape
-
-    def test_create_gan(self):
-        """Test GAN creation."""
-        latent_dim = 100
-        output_shape = (28, 28, 1)
-
-        gan, generator, discriminator = ModelBuilders.create_gan(
-            latent_dim=latent_dim,
-            output_shape=output_shape,
-            generator_architecture="dense",
-            discriminator_architecture="dense",
-        )
-
-        assert isinstance(gan, tf.keras.Model)
-        assert isinstance(generator, tf.keras.Model)
-        assert isinstance(discriminator, tf.keras.Model)
-
-        # Test generator
-        noise = tf.random.normal([2, latent_dim])
-        generated = generator(noise)
-        assert generated.shape == (2,) + output_shape
-
-        # Test discriminator
-        validity = discriminator(generated)
-        assert validity.shape == (2, 1)
-
-        # Test GAN
-        gan_output = gan(noise)
-        assert gan_output.shape == (2, 1)
+    @pytest.mark.parametrize("g,d", [("dense", "dense"), ("conv", "conv")])
+    def test_gan(self, g, d):
+        gan, gen, disc = mu.ModelBuilders.create_gan(8, (16, 16, 1), g, d)
+        z = np.random.randn(2, 8).astype("float32")
+        fake = gen.predict(z, verbose=0)
+        assert fake.shape == (2, 16, 16, 1) and disc.predict(fake, verbose=0).shape == (2, 1)
+        assert gan.predict(z, verbose=0).shape == (2, 1)
+        assert disc.trainable  # restored after GAN assembly
+        with pytest.raises(ValueError):
+            mu.ModelBuilders.create_gan(8, (15, 15, 1), "conv")
 
 
 class TestTrainingUtilities:
-    """Test training utilities and callbacks."""
-
-    def test_create_callbacks(self, temp_dir):
-        """Test callback creation."""
-        callbacks = TrainingUtilities.create_callbacks(model_name="test_model", patience=5)
-
-        assert isinstance(callbacks, list)
-        assert len(callbacks) > 0
-
-        # Check callback types
-        callback_types = [type(cb).__name__ for cb in callbacks]
-        assert "ModelCheckpoint" in callback_types
-        assert "EarlyStopping" in callback_types
-
-    def test_custom_training_step(self):
-        """Test custom training step creation."""
-        # Create simple model
-        model = tf.keras.Sequential(
-            [tf.keras.layers.Dense(10, input_shape=(5,)), tf.keras.layers.Dense(1)]
+    def test_create_callbacks(self, tmp_path):
+        callbacks = mu.TrainingUtilities.create_callbacks(
+            "unit", patience=2, checkpoint_dir=tmp_path / "ck", log_dir=tmp_path / "logs"
         )
+        types = {type(c).__name__ for c in callbacks}
+        assert {"ModelCheckpoint", "EarlyStopping", "ReduceLROnPlateau", "TensorBoard"} <= types
+        ckpt = next(c for c in callbacks if type(c).__name__ == "ModelCheckpoint")
+        assert str(ckpt.filepath).endswith("best_model.keras")
+        minimal = mu.TrainingUtilities.create_callbacks(
+            "u2", reduce_lr=False, tensorboard=False, checkpoint_dir=tmp_path
+        )
+        assert len(minimal) == 2
 
-        loss_fn = tf.keras.losses.MeanSquaredError()
-        optimizer = tf.keras.optimizers.Adam()
+    def test_custom_training_step_reduces_loss(self, images, labels):
+        model = mu.ModelBuilders.create_cnn_classifier((16, 16, 3), 3, "simple", dropout_rate=0.0)
+        step = mu.TrainingUtilities.create_custom_training_step(
+            model,
+            keras.losses.SparseCategoricalCrossentropy(),
+            keras.optimizers.Adam(1e-2),
+            metrics=[keras.metrics.SparseCategoricalAccuracy(name="acc")],
+        )
+        first = float(step(images, labels)["loss"])
+        for _ in range(30):
+            result = step(images, labels)
+        assert float(result["loss"]) < first and "acc" in result
 
-        train_step = TrainingUtilities.create_custom_training_step(model, loss_fn, optimizer)
-
-        # Test training step
-        x = tf.random.normal([4, 5])
-        y = tf.random.normal([4, 1])
-
-        result = train_step(x, y)
-
-        assert "loss" in result
-        assert "accuracy" in result
-        assert isinstance(result["loss"], tf.Tensor)
-
-    def test_custom_callback(self, sample_dataset):
-        """Test custom callback functionality."""
-        callback = TrainingUtilities.CustomCallback(validation_data=sample_dataset, log_freq=2)
-
-        assert isinstance(callback, tf.keras.callbacks.Callback)
-        assert callback.log_freq == 2
-        assert callback.validation_data is not None
-
-        # Test callback methods exist
-        assert hasattr(callback, "on_epoch_end")
+    def test_validation_monitor(self, cnn_model, image_dataset):
+        monitor = mu.TrainingUtilities.ValidationMonitor(image_dataset, log_freq=1)
+        cnn_model.fit(image_dataset, epochs=2, verbose=0, callbacks=[monitor])
+        assert len(monitor.history) == 2 and "val_loss" in monitor.history[0]
 
 
 class TestModelAnalysis:
-    """Test model analysis utilities."""
+    def test_analyze(self, cnn_model):
+        analysis = mu.ModelAnalysis.analyze_model_architecture(cnn_model)
+        assert analysis["total_parameters"] == cnn_model.count_params()
+        assert analysis["model_size_bytes"] == cnn_model.count_params() * 4
+        assert analysis["layer_details"][0]["type"] == "InputLayer"
 
-    def test_analyze_model_architecture(self):
-        """Test model architecture analysis."""
-        model = tf.keras.Sequential(
-            [
-                tf.keras.layers.Dense(64, input_shape=(10,)),
-                tf.keras.layers.Dense(32),
-                tf.keras.layers.Dense(1),
-            ]
+    def test_flops(self, cnn_model):
+        flops = mu.ModelAnalysis.compute_model_flops(cnn_model)
+        analytic = mu.ModelAnalysis._analytic_flops(cnn_model)
+        assert flops > 0 and analytic > 0
+        assert 0.5 < flops / analytic < 2.0
+        assert mu.ModelAnalysis.compute_model_flops(cnn_model, (16, 16, 3), batch_size=2) >= flops
+
+    def test_report(self, cnn_model, tmp_path):
+        report = mu.ModelAnalysis.create_model_summary_report(
+            cnn_model, save_path=tmp_path / "r.md"
         )
-
-        analysis = ModelAnalysis.analyze_model_architecture(model)
-
-        assert isinstance(analysis, dict)
-        required_keys = [
-            "total_parameters",
-            "trainable_parameters",
-            "non_trainable_parameters",
-            "total_layers",
-            "model_size_mb",
-            "layer_details",
-        ]
-
-        for key in required_keys:
-            assert key in analysis
-
-        assert analysis["total_parameters"] > 0
-        assert len(analysis["layer_details"]) == len(model.layers)
-
-    def test_compute_model_flops(self):
-        """Test FLOP computation."""
-        model = tf.keras.Sequential(
-            [
-                tf.keras.layers.Dense(32, input_shape=(10,)),
-                tf.keras.layers.Dense(16),
-                tf.keras.layers.Dense(1),
-            ]
-        )
-
-        flops = ModelAnalysis.compute_model_flops(model, (10,))
-
-        assert isinstance(flops, int)
-        assert flops > 0
-
-    def test_create_model_summary_report(self, temp_dir):
-        """Test model summary report creation."""
-        model = tf.keras.Sequential(
-            [
-                tf.keras.layers.Dense(64, input_shape=(20,)),
-                tf.keras.layers.Dense(32),
-                tf.keras.layers.Dense(10),
-            ]
-        )
-
-        report_path = os.path.join(temp_dir, "model_report.md")
-        report = ModelAnalysis.create_model_summary_report(model, (20,), save_path=report_path)
-
-        assert isinstance(report, str)
-        assert len(report) > 0
-        assert "Model Analysis Report" in report
-
-        # Check file was saved
-        assert os.path.exists(report_path)
-
-        with open(report_path, "r") as f:
-            saved_report = f.read()
-
-        assert saved_report == report
+        assert "Total Parameters" in report and (tmp_path / "r.md").exists()
+        assert "Total params" in mu.ModelAnalysis.model_summary_string(cnn_model)
 
 
-class TestConvenienceFunctions:
-    """Test convenience functions for model creation."""
+class TestConvenience:
+    def test_create_classification_model(self):
+        cnn = mu.create_classification_model((16, 16, 3), 3)
+        assert cnn.optimizer is not None
+        mlp = mu.create_classification_model((10,), 2, compile_model=False)
+        assert mlp.output_shape == (None, 2) and getattr(mlp, "optimizer", None) is None
+        text = mu.create_classification_model((8,), 2, architecture="gru", vocab_size=20)
+        assert text.predict(np.zeros((1, 8), np.int32), verbose=0).shape == (1, 2)
+        with pytest.raises(ValueError):
+            mu.create_classification_model((2, 2), 2)
 
-    def test_create_classification_model_cnn(self):
-        """Test CNN classification model creation."""
-        model = create_classification_model(
-            input_shape=TEST_CONFIG["image_shape"],
-            num_classes=TEST_CONFIG["num_classes"],
-            architecture="cnn",
-        )
-
-        assert isinstance(model, tf.keras.Model)
-        assert model.compiled_loss is not None  # Should be compiled
-        assert model.compiled_metrics is not None
-
-        # Test prediction
-        test_input = tf.random.normal([1] + list(TEST_CONFIG["image_shape"]))
-        output = model(test_input)
-        assert output.shape == (1, TEST_CONFIG["num_classes"])
-
-    def test_create_classification_model_text(self):
-        """Test text classification model creation."""
-        model = create_classification_model(
-            input_shape=(32,),  # Sequence length
-            num_classes=TEST_CONFIG["num_classes"],
-            architecture="lstm",
-        )
-
-        assert isinstance(model, tf.keras.Model)
-
-        # Test prediction
-        test_input = tf.random.uniform([2, 32], 0, 1000, dtype=tf.int32)
-        output = model(test_input)
-        assert output.shape == (2, TEST_CONFIG["num_classes"])
-
-    @patch("tensorflow.keras.applications.ResNet50")
-    def test_create_transfer_learning_model(self, mock_resnet):
-        """Test transfer learning model creation."""
-        # Mock the base model
-        mock_base_model = MagicMock()
-        mock_base_model.input_shape = (None, 224, 224, 3)
-        mock_base_model.trainable = True
-        mock_base_model.layers = [MagicMock() for _ in range(50)]  # Simulate 50 layers
-        mock_resnet.return_value = mock_base_model
-
-        # Mock the model call
-        def mock_call(inputs, training=False):
-            return tf.random.normal([tf.shape(inputs)[0], 7, 7, 2048])
-
-        mock_base_model.side_effect = mock_call
-
-        model = create_transfer_learning_model(
-            base_model_name="ResNet50",
-            input_shape=(224, 224, 3),
-            num_classes=TEST_CONFIG["num_classes"],
+    def test_transfer_learning(self):
+        model = mu.create_transfer_learning_model("MobileNetV2", (32, 32, 3), 3, weights=None)
+        assert model.output_shape == (None, 3)
+        assert model.predict(np.zeros((1, 32, 32, 3), np.float32), verbose=0).shape == (1, 3)
+        tuned = mu.create_transfer_learning_model(
+            "MobileNetV2",
+            (32, 32, 3),
+            3,
+            weights=None,
             fine_tune=True,
-            fine_tune_at=40,
+            fine_tune_at=10,
+            include_preprocessing=False,
         )
+        assert tuned.count_params() == model.count_params()
+        with pytest.raises(ValueError):
+            mu.create_transfer_learning_model("NotAModel", (32, 32, 3), 3)
 
-        assert isinstance(model, tf.keras.Model)
-        mock_resnet.assert_called_once()
-
-    def test_save_and_load_model_with_metadata(self, temp_dir):
-        """Test model saving and loading with metadata."""
-        # Create a simple model
-        model = tf.keras.Sequential(
-            [tf.keras.layers.Dense(32, input_shape=(10,)), tf.keras.layers.Dense(1)]
+    @pytest.mark.parametrize("name", ["model.keras", "saved"])
+    def test_save_load_with_metadata(self, cnn_model, images, tmp_path, name):
+        path = mu.save_model_with_metadata(cnn_model, tmp_path / name, {"owner": "tests"})
+        model, metadata = mu.load_model_with_metadata(path)
+        assert metadata["owner"] == "tests" and metadata["keras_version"] == compat.KERAS_VERSION
+        preds = (
+            model.predict(images[:2], verbose=0)
+            if isinstance(model, keras.Model)
+            else model.predict(images[:2])
         )
-
-        model.compile(optimizer="adam", loss="mse")
-
-        # Metadata
-        metadata = {
-            "model_version": "1.0",
-            "training_dataset": "synthetic",
-            "performance": {"accuracy": 0.95},
-        }
-
-        # Save model with metadata
-        save_path = os.path.join(temp_dir, "test_model")
-        save_model_with_metadata(model, save_path, metadata)
-
-        # Check files exist
-        assert os.path.exists(save_path)
-        assert os.path.exists(os.path.join(save_path, "metadata.json"))
-
-        # Load model with metadata
-        loaded_model, loaded_metadata = load_model_with_metadata(save_path)
-
-        assert isinstance(loaded_model, tf.keras.Model)
-        assert loaded_metadata["model_version"] == "1.0"
-        assert loaded_metadata["performance"]["accuracy"] == 0.95
-
-
-class TestModelIntegration:
-    """Integration tests for model utilities."""
-
-    def test_end_to_end_model_training(self, sample_dataset):
-        """Test complete model training pipeline."""
-        # Create model
-        model = ModelBuilders.create_cnn_classifier(
-            input_shape=TEST_CONFIG["image_shape"],
-            num_classes=TEST_CONFIG["num_classes"],
-            architecture="simple",
-        )
-
-        # Create callbacks
-        callbacks = TrainingUtilities.create_callbacks(
-            model_name="integration_test", patience=2, tensorboard=False  # Disable for testing
-        )
-
-        # Train model
-        history = model.fit(
-            sample_dataset, epochs=TEST_CONFIG["epochs"], callbacks=callbacks, verbose=0
-        )
-
-        assert hasattr(history, "history")
-        assert "loss" in history.history
-        assert len(history.history["loss"]) <= TEST_CONFIG["epochs"]
-
-        # Analyze trained model
-        analysis = ModelAnalysis.analyze_model_architecture(model)
-        assert analysis["total_parameters"] > 0
-
-    def test_model_compilation_variations(self):
-        """Test different model compilation options."""
-        model = ModelBuilders.create_cnn_classifier(
-            input_shape=TEST_CONFIG["image_shape"],
-            num_classes=TEST_CONFIG["num_classes"],
-            architecture="simple",
-        )
-
-        # Test different optimizers
-        optimizers = ["adam", "sgd", "rmsprop"]
-        losses = ["sparse_categorical_crossentropy", "categorical_crossentropy"]
-        metrics = [["accuracy"], ["accuracy", "top_k_categorical_accuracy"]]
-
-        for opt in optimizers[:1]:  # Test only first one for speed
-            for loss in losses[:1]:
-                for metric in metrics[:1]:
-                    model.compile(optimizer=opt, loss=loss, metrics=metric)
-
-                    # Verify compilation
-                    assert model.optimizer is not None
-                    assert model.compiled_loss is not None
-
-    def test_model_saving_formats(self, temp_dir):
-        """Test different model saving formats."""
-        model = tf.keras.Sequential(
-            [tf.keras.layers.Dense(16, input_shape=(8,)), tf.keras.layers.Dense(1)]
-        )
-
-        model.compile(optimizer="adam", loss="mse")
-
-        # Test SavedModel format
-        savedmodel_path = os.path.join(temp_dir, "test_savedmodel")
-        model.save(savedmodel_path, save_format="tf")
-        assert os.path.exists(savedmodel_path)
-
-        loaded_model = tf.keras.models.load_model(savedmodel_path)
-        assert isinstance(loaded_model, tf.keras.Model)
-
-        # Test H5 format
-        h5_path = os.path.join(temp_dir, "test_model.h5")
-        model.save(h5_path, save_format="h5")
-        assert os.path.exists(h5_path)
-
-        loaded_h5_model = tf.keras.models.load_model(h5_path)
-        assert isinstance(loaded_h5_model, tf.keras.Model)
-
-
-# Performance tests
-@pytest.mark.slow
-class TestModelPerformance:
-    """Performance tests for model operations."""
-
-    def test_large_model_creation(self):
-        """Test creation of larger models."""
-        # Create a larger model
-        model = ModelBuilders.create_cnn_classifier(
-            input_shape=(224, 224, 3), num_classes=1000, architecture="resnet"  # ImageNet-like
-        )
-
-        assert model.count_params() > 100000  # Should be substantial
-
-        # Test forward pass with larger input
-        test_input = tf.random.normal([4, 224, 224, 3])
-        output = model(test_input)
-        assert output.shape == (4, 1000)
-
-    def test_model_training_performance(self, sample_dataset):
-        """Test training performance with timing."""
-        model = ModelBuilders.create_cnn_classifier(
-            input_shape=TEST_CONFIG["image_shape"],
-            num_classes=TEST_CONFIG["num_classes"],
-            architecture="simple",
-        )
-
-        import time
-
-        start_time = time.time()
-
-        # Train for a few steps
-        history = model.fit(sample_dataset, epochs=2, verbose=0)
-
-        elapsed = time.time() - start_time
-
-        # Should complete reasonably quickly
-        assert elapsed < 30.0  # Adjust threshold as needed
-        assert len(history.history["loss"]) == 2
-
-        print(f"Training completed in {elapsed:.2f} seconds")
-
-
-if __name__ == "__main__":
-    pytest.main([__file__])
+        np.testing.assert_allclose(preds, cnn_model.predict(images[:2], verbose=0), atol=1e-4)
