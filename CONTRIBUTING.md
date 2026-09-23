@@ -103,3 +103,17 @@ docs: add TFLite deployment guide
 ## Questions?
 
 Open a Discussion on GitHub or file an issue — we're happy to help!
+
+---
+
+## Releasing
+
+1. Bump `version` in `pyproject.toml`, `__version__` in `tensorversehub/__init__.py` and
+   `CITATION.cff`; move the `[Unreleased]` notes in `docs/CHANGELOG.md` under the new version.
+2. Tag and push: `git tag -a vX.Y.Z -m "vX.Y.Z" && git push origin vX.Y.Z`.
+3. The **Publish** workflow builds the wheel/sdist (and checks the tag matches the version),
+   pushes `ghcr.io/satvikpraveen/tensorversehub:X.Y.Z`, and creates a GitHub release with the
+   changelog entry and artifacts.
+4. PyPI upload runs only when the repository variable `PYPI_PUBLISH` is `true` and a
+   [trusted publisher](https://docs.pypi.org/trusted-publishers/) for this repository /
+   the `pypi` environment is configured on PyPI.
