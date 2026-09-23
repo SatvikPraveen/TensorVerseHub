@@ -168,7 +168,6 @@ ehthumbs.db
 Thumbs.db
 
 # Docker
-.dockerignore
 docker-compose.override.yml
 
 # Weights & Biases
@@ -236,3 +235,11 @@ dist/
 *.log.*
 logs/*.log
 application.log
+# TensorVerseHub artifacts (CLI defaults)
+models/
+converted_models/
+eval_results/
+*.keras
+*.mlpackage
+*.mlmodel
+.ruff_cache/
