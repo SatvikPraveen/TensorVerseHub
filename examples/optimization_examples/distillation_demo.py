@@ -3,13 +3,16 @@
 """
 TensorFlow knowledge distillation demonstration.
 Shows teacher-student training, performance comparison, and analysis.
+
+Works with TensorFlow 2.16+ / Keras 3.  The distillation loss comes from
+``tensorversehub.optimization_utils.KnowledgeDistillation``; the training loop is
+written out explicitly here for teaching purposes (the library also offers
+``KnowledgeDistillation.train_student_model`` as a one-liner).
 """
 
 import argparse
-import json
-import os
 import time
-from typing import Any, Callable, Dict, List, Optional, Tuple
+from typing import Callable, Dict, Tuple
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -17,12 +20,8 @@ import seaborn as sns
 import tensorflow as tf
 
 # Import TensorVerseHub utilities
-try:
-    from src.model_utils import ModelBuilders
-    from src.optimization_utils import KnowledgeDistillation
-    from src.visualization import setup_plotting_style
-except ImportError:
-    print("Warning: TensorVerseHub modules not found. Using standalone implementation.")
+from tensorversehub.optimization_utils import KnowledgeDistillation
+from tensorversehub.visualization import setup_plotting_style
 
 
 class DistillationDemo:
@@ -46,7 +45,7 @@ class DistillationDemo:
         # Setup plotting
         try:
             setup_plotting_style()
-        except:
+        except Exception:
             plt.style.use("default")
             sns.set_palette("husl")
 
@@ -56,7 +55,7 @@ class DistillationDemo:
         """Create a large teacher model."""
         print("👨‍🏫 Creating teacher model (large ResNet-like architecture)...")
 
-        inputs = tf.keras.layers.Input(shape=input_shape)
+        inputs = tf.keras.Input(shape=input_shape)
 
         # Initial conv block
         x = tf.keras.layers.Conv2D(64, 7, strides=2, padding="same")(inputs)
@@ -127,7 +126,8 @@ class DistillationDemo:
         print("  📱 Creating small CNN student...")
         small_student = tf.keras.Sequential(
             [
-                tf.keras.layers.Conv2D(32, 3, activation="relu", input_shape=input_shape),
+                tf.keras.Input(shape=input_shape),
+                tf.keras.layers.Conv2D(32, 3, activation="relu"),
                 tf.keras.layers.MaxPooling2D(2),
                 tf.keras.layers.Conv2D(64, 3, activation="relu"),
                 tf.keras.layers.MaxPooling2D(2),
@@ -155,7 +155,7 @@ class DistillationDemo:
             x = tf.keras.layers.ReLU()(x)
             return x
 
-        inputs = tf.keras.layers.Input(shape=input_shape)
+        inputs = tf.keras.Input(shape=input_shape)
         x = tf.keras.layers.Conv2D(32, 3, strides=2, padding="same")(inputs)
         x = tf.keras.layers.BatchNormalization()(x)
         x = tf.keras.layers.ReLU()(x)
@@ -178,9 +178,8 @@ class DistillationDemo:
         print("  🐛 Creating tiny student...")
         tiny_student = tf.keras.Sequential(
             [
-                tf.keras.layers.Conv2D(
-                    16, 5, strides=2, activation="relu", input_shape=input_shape
-                ),
+                tf.keras.Input(shape=input_shape),
+                tf.keras.layers.Conv2D(16, 5, strides=2, activation="relu"),
                 tf.keras.layers.MaxPooling2D(2),
                 tf.keras.layers.Conv2D(32, 3, activation="relu"),
                 tf.keras.layers.GlobalAveragePooling2D(),
@@ -224,7 +223,8 @@ class DistillationDemo:
         test_ds = dataset.skip(train_size + val_size).batch(32).prefetch(tf.data.AUTOTUNE)
 
         print(
-            f"✅ Dataset created: {train_size} train, {val_size} val, {num_samples - train_size - val_size} test"
+            f"✅ Dataset created: {train_size} train, {val_size} val, "
+            f"{num_samples - train_size - val_size} test"
         )
         return train_ds, val_ds, test_ds
 
@@ -241,7 +241,7 @@ class DistillationDemo:
         callbacks = [
             tf.keras.callbacks.EarlyStopping(patience=3, restore_best_weights=True),
             tf.keras.callbacks.ReduceLROnPlateau(factor=0.2, patience=2),
-            tf.keras.callbacks.ModelCheckpoint("teacher_best.h5", save_best_only=True),
+            tf.keras.callbacks.ModelCheckpoint("teacher_best.keras", save_best_only=True),
         ]
 
         history = teacher_model.fit(
@@ -254,30 +254,24 @@ class DistillationDemo:
 
         return history
 
-    def create_distillation_loss(self) -> Callable:
-        """Create knowledge distillation loss function."""
+    def create_distillation_loss(self, teacher_model: tf.keras.Model) -> Callable:
+        """
+        Create the knowledge distillation loss function.
 
-        def distillation_loss(y_true, y_pred_student, y_pred_teacher):
-            # Convert labels to one-hot for soft loss calculation
-            y_true_onehot = tf.one_hot(tf.cast(y_true, tf.int32), depth=y_pred_student.shape[-1])
-
-            # Hard loss (standard cross-entropy)
-            hard_loss = tf.keras.losses.categorical_crossentropy(
-                y_true_onehot, tf.nn.softmax(y_pred_student)
-            )
-
-            # Soft loss (knowledge distillation)
-            teacher_soft = tf.nn.softmax(y_pred_teacher / self.temperature)
-            student_soft = tf.nn.softmax(y_pred_student / self.temperature)
-
-            soft_loss = tf.keras.losses.categorical_crossentropy(teacher_soft, student_soft)
-            soft_loss *= self.temperature**2
-
-            # Combined loss
-            total_loss = (1 - self.alpha) * hard_loss + self.alpha * soft_loss
-            return total_loss
-
-        return distillation_loss
+        The loss is ``(1 - alpha) * hard_ce(y_true, student) +
+        alpha * T**2 * soft_ce(softmax(teacher / T), softmax(student / T))``.
+        Our teacher ends with a softmax, so we tell the library its outputs are already
+        probabilities (it converts them back to logits before applying the temperature).
+        Students output raw logits.
+        """
+        distiller = KnowledgeDistillation(
+            teacher_model,
+            alpha=self.alpha,
+            temperature=self.temperature,
+            teacher_outputs_probabilities=True,
+        )
+        # Signature: loss_fn(y_true, student_logits, teacher_outputs) -> per-sample loss
+        return distiller.create_distillation_loss()
 
     def train_student_with_distillation(
         self,
@@ -299,7 +293,7 @@ class DistillationDemo:
         val_loss_tracker = tf.keras.metrics.Mean()
         val_accuracy_tracker = tf.keras.metrics.SparseCategoricalAccuracy()
 
-        distillation_loss_fn = self.create_distillation_loss()
+        distillation_loss_fn = self.create_distillation_loss(teacher_model)
 
         @tf.function
         def train_step(x_batch, y_batch):
@@ -342,13 +336,13 @@ class DistillationDemo:
         best_val_acc = 0
 
         for epoch in range(epochs):
-            print(f"Epoch {epoch+1}/{epochs}")
+            print(f"Epoch {epoch + 1}/{epochs}")
 
             # Reset metrics
-            train_loss_tracker.reset_states()
-            train_accuracy_tracker.reset_states()
-            val_loss_tracker.reset_states()
-            val_accuracy_tracker.reset_states()
+            train_loss_tracker.reset_state()
+            train_accuracy_tracker.reset_state()
+            val_loss_tracker.reset_state()
+            val_accuracy_tracker.reset_state()
 
             # Training
             for x_batch, y_batch in train_ds:
@@ -377,10 +371,11 @@ class DistillationDemo:
             # Save best model
             if val_acc > best_val_acc:
                 best_val_acc = val_acc
-                student_model.save_weights(f"{student_name}_student_best.h5")
+                student_model.save_weights(f"{student_name}_student_best.weights.h5")
 
         print(
-            f"✅ {student_name.capitalize()} student training completed - Best val acc: {best_val_acc:.4f}"
+            f"✅ {student_name.capitalize()} student training completed - "
+            f"Best val acc: {best_val_acc:.4f}"
         )
 
         # Create history object compatible with Keras
@@ -401,7 +396,8 @@ class DistillationDemo:
         """Train student model without distillation (baseline)."""
         print(f"📚 Training {student_name} student baseline (without distillation)...")
 
-        # Add softmax layer for baseline training
+        # Add a softmax head for baseline training.  The wrapper shares the student's
+        # layers, so training it trains ``student_model`` in place.
         student_with_softmax = tf.keras.Sequential([student_model, tf.keras.layers.Softmax()])
 
         student_with_softmax.compile(
@@ -416,9 +412,6 @@ class DistillationDemo:
         history = student_with_softmax.fit(
             train_ds, epochs=epochs, validation_data=val_ds, callbacks=callbacks, verbose=1
         )
-
-        # Copy weights back to original student model
-        student_model.set_weights(student_with_softmax.layers[0].get_weights())
 
         val_loss, val_acc = student_with_softmax.evaluate(val_ds, verbose=0)
         print(f"✅ {student_name.capitalize()} baseline completed - Val accuracy: {val_acc:.4f}")
@@ -720,7 +713,8 @@ class DistillationDemo:
         print("\n📋 Knowledge Distillation Results Summary")
         print("=" * 80)
         print(
-            f"{'Model':<20} {'Accuracy':<10} {'Parameters':<12} {'Size (MB)':<10} {'Compression':<12}"
+            f"{'Model':<20} {'Accuracy':<10} {'Parameters':<12} "
+            f"{'Size (MB)':<10} {'Compression':<12}"
         )
         print("-" * 80)
 

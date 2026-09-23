@@ -3,6 +3,12 @@
 """
 Comprehensive serving examples for TensorFlow models in production environments.
 Includes Flask, Streamlit, FastAPI, and Docker examples with best practices.
+
+This file is a *guide*: each numbered section is meant to be copied into its own
+module.  The SavedModel directories it serves are produced with
+``tensorversehub.compat.export_saved_model(model, "./model")`` (works for Keras 2 and 3).
+
+Extra dependencies: ``pip install flask flask-cors flask-limiter streamlit plotly``.
 """
 
 # ============================================================================
@@ -97,6 +103,7 @@ class ProductionModelServer:
         """Load model with error handling."""
         try:
             logger.info(f"Loading model from {self.model_path}")
+            # Inference-only SavedModel (see tensorversehub.compat.export_saved_model)
             self.model = tf.saved_model.load(self.model_path)
             logger.info("Model loaded successfully")
 
@@ -231,9 +238,8 @@ class ProductionModelServer:
 MODEL_SERVER = None
 
 
-@app.before_first_request
 def initialize():
-    """Initialize model server on first request."""
+    """Initialize the model server (Flask >= 2.3 removed ``before_first_request``)."""
     global MODEL_SERVER
     if MODEL_SERVER is None:
         model_path = os.getenv("MODEL_PATH", "./model")
@@ -339,10 +345,11 @@ def internal_error_handler(e):
 
 
 if __name__ == "__main__":
-    # Production: Use gunicorn
+    # Production: Use gunicorn (call initialize() at import time in the WSGI module)
     # gunicorn -w 4 -b 0.0.0.0:5000 app:app
 
     # Development
+    initialize()
     app.run(host="0.0.0.0", port=5000, debug=False, threaded=True)
 
 
@@ -354,15 +361,9 @@ if __name__ == "__main__":
 Advanced Streamlit dashboard with model visualization and monitoring.
 """
 
-from datetime import datetime, timedelta
-
-import matplotlib.pyplot as plt
-import numpy as np
 import pandas as pd
-import plotly.express as px
 import plotly.graph_objects as go
 import streamlit as st
-import tensorflow as tf
 
 st.set_page_config(
     page_title="TensorFlow Model Dashboard",
@@ -389,7 +390,7 @@ st.markdown(
 
 @st.cache_resource
 def load_model(model_path):
-    """Load model with caching."""
+    """Load an inference-only SavedModel with caching."""
     return tf.saved_model.load(model_path)
 
 
@@ -547,7 +548,7 @@ def main():
             st.metric("Avg Latency", "42ms")
 
         # Performance chart
-        dates = pd.date_range(start="today", periods=24, freq="H")
+        dates = pd.date_range(start="today", periods=24, freq="h")
         latencies = np.random.normal(42, 5, 24)
         throughput = np.random.normal(125, 20, 24)
 

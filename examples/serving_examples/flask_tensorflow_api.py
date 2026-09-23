@@ -3,6 +3,12 @@
 """
 Flask API for serving TensorFlow models with tf.keras integration.
 Provides REST endpoints for model inference, health checks, and metadata.
+
+Supported model formats (``--model-type``):
+
+* ``savedmodel`` - directory written by ``tensorversehub.compat.export_saved_model``
+* ``keras``      - ``.keras`` (or legacy ``.h5``) file written by ``model.save``
+* ``tflite``     - ``.tflite`` file from ``tensorversehub.export_utils.TFLiteExporter``
 """
 
 import base64
@@ -10,14 +16,20 @@ import io
 import json
 import logging
 import os
+import sys
 import time
 from functools import wraps
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, Optional, Tuple
 
 import numpy as np
 import tensorflow as tf
 from flask import Flask, jsonify, render_template_string, request
 from PIL import Image
+
+from tensorversehub.compat import load_model
+from tensorversehub.export_utils import make_interpreter
+
+MODEL_TYPES = ("savedmodel", "keras", "h5", "tflite")
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -33,10 +45,10 @@ class TensorFlowModelServer:
 
         Args:
             model_path: Path to the model
-            model_type: Type of model ('savedmodel', 'h5', 'tflite')
+            model_type: Type of model ('savedmodel', 'keras' (alias 'h5'), 'tflite')
         """
         self.model_path = model_path
-        self.model_type = model_type
+        self.model_type = "keras" if model_type == "h5" else model_type
         self.model = None
         self.model_metadata = {}
         self.load_model()
@@ -48,17 +60,14 @@ class TensorFlowModelServer:
     def load_model(self) -> None:
         """Load the TensorFlow model."""
         try:
-            if self.model_type == "savedmodel":
-                self.model = tf.saved_model.load(self.model_path)
-                logger.info(f"Loaded SavedModel from {self.model_path}")
-
-            elif self.model_type == "h5":
-                self.model = tf.keras.models.load_model(self.model_path)
-                logger.info(f"Loaded Keras model from {self.model_path}")
+            if self.model_type in ("savedmodel", "keras"):
+                # compat.load_model returns a keras.Model for .keras/.h5 files and a
+                # SavedModelPredictor (with .predict) for SavedModel directories.
+                self.model = load_model(self.model_path)
+                logger.info(f"Loaded {self.model_type} model from {self.model_path}")
 
             elif self.model_type == "tflite":
-                self.interpreter = tf.lite.Interpreter(model_path=self.model_path)
-                self.interpreter.allocate_tensors()
+                self.interpreter = make_interpreter(model_path=self.model_path)
                 self.input_details = self.interpreter.get_input_details()
                 self.output_details = self.interpreter.get_output_details()
                 logger.info(f"Loaded TFLite model from {self.model_path}")
@@ -79,7 +88,7 @@ class TensorFlowModelServer:
 
         if self.model_type == "savedmodel":
             metadata_path = os.path.join(self.model_path, "metadata.json")
-        elif self.model_type == "h5":
+        elif self.model_type == "keras":
             metadata_path = os.path.join(os.path.dirname(self.model_path), "metadata.json")
 
         if metadata_path and os.path.exists(metadata_path):
@@ -174,15 +183,8 @@ class TensorFlowModelServer:
                 predictions = self.interpreter.get_tensor(self.output_details[0]["index"])
 
             else:
-                # TensorFlow/Keras inference
-                if hasattr(self.model, "predict"):
-                    predictions = self.model.predict(input_data)
-                else:
-                    # For SavedModel
-                    predictions = self.model(input_data)
-                    if isinstance(predictions, dict):
-                        predictions = list(predictions.values())[0]
-                    predictions = predictions.numpy()
+                # Keras model or SavedModelPredictor: both expose ``predict``
+                predictions = np.asarray(self.model.predict(input_data))
 
             # Update performance metrics
             inference_time = time.time() - start_time
@@ -273,49 +275,49 @@ def home():
     <body>
         <h1>🤖 TensorFlow Model Server</h1>
         <p>RESTful API for TensorFlow model inference with tf.keras integration.</p>
-        
+
         <h2>Available Endpoints</h2>
-        
+
         <div class="endpoint">
             <div class="method">GET</div>
             <div class="path">/health</div>
             <p>Health check endpoint - returns server and model status.</p>
         </div>
-        
+
         <div class="endpoint">
             <div class="method">GET</div>
             <div class="path">/model/info</div>
             <p>Get detailed model information and performance statistics.</p>
         </div>
-        
+
         <div class="endpoint">
             <div class="method">POST</div>
             <div class="path">/predict/image</div>
             <p>Image classification inference. Send base64-encoded image in JSON body.</p>
             <pre>{"image": "data:image/jpeg;base64,..."}</pre>
         </div>
-        
+
         <div class="endpoint">
             <div class="method">POST</div>
             <div class="path">/predict/text</div>
             <p>Text classification inference. Send text in JSON body.</p>
             <pre>{"text": "Your input text here"}</pre>
         </div>
-        
+
         <div class="endpoint">
             <div class="method">POST</div>
             <div class="path">/predict/batch</div>
             <p>Batch inference for multiple inputs.</p>
             <pre>{"inputs": [input1, input2, ...]}</pre>
         </div>
-        
+
         <h2>Model Status</h2>
         {% if model_loaded %}
         <p>✅ Model loaded: {{ model_type }} from {{ model_path }}</p>
         {% else %}
         <p>❌ No model loaded</p>
         {% endif %}
-        
+
         <h2>Usage Examples</h2>
         <h3>cURL Example</h3>
         <pre>
@@ -323,7 +325,7 @@ curl -X POST http://localhost:5000/predict/image \
   -H "Content-Type: application/json" \
   -d '{"image": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQ..."}'
         </pre>
-        
+
         <h3>Python Example</h3>
         <pre>
 import requests
@@ -332,7 +334,7 @@ import base64
 with open('image.jpg', 'rb') as f:
     image_data = base64.b64encode(f.read()).decode()
 
-response = requests.post('http://localhost:5000/predict/image', 
+response = requests.post('http://localhost:5000/predict/image',
                         json={'image': f'data:image/jpeg;base64,{image_data}'})
 print(response.json())
         </pre>
@@ -586,8 +588,8 @@ def main():
     parser.add_argument(
         "--model-type",
         default="savedmodel",
-        choices=["savedmodel", "h5", "tflite"],
-        help="Model type",
+        choices=list(MODEL_TYPES),
+        help="Model type ('h5' is an alias for 'keras')",
     )
     parser.add_argument("--host", default="0.0.0.0", help="Host address")
     parser.add_argument("--port", type=int, default=5000, help="Port number")
@@ -598,7 +600,7 @@ def main():
     # Initialize server
     if not initialize_server(args.model_path, args.model_type):
         logger.error("Failed to initialize server")
-        exit(1)
+        sys.exit(1)
 
     # Start Flask app
     logger.info(f"Starting TensorFlow Model Server on {args.host}:{args.port}")

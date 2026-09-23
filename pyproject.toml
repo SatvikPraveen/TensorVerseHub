@@ -41,7 +41,10 @@ dependencies = [
 # Legacy Keras 2 stack required by tensorflow-model-optimization (pruning / QAT).
 optimization = ["tensorflow-model-optimization>=0.8.0", "tf-keras>=2.16"]
 export = ["tf2onnx>=1.16", "onnx>=1.15", "onnxruntime>=1.17"]
-serving = ["fastapi>=0.110", "uvicorn[standard]>=0.29", "flask>=3.0", "streamlit>=1.32"]
+serving = [
+  "fastapi>=0.110", "uvicorn[standard]>=0.29", "flask>=3.0", "flask-cors>=4.0",
+  "flask-limiter>=3.5", "pillow>=10.0", "streamlit>=1.32", "plotly>=5.20",
+]
 notebooks = [
   "jupyterlab>=4.0", "ipywidgets>=8.0", "pandas>=2.0", "seaborn>=0.13", "pillow>=10.0",
   "tqdm>=4.66", "tensorflow-datasets>=4.9", "tensorflow-hub>=0.16", "keras-tuner>=1.4",

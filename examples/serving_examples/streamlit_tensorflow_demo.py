@@ -3,12 +3,14 @@
 """
 Streamlit demo application for TensorFlow model inference.
 Interactive web interface for testing image and text classification models.
+
+Run with::
+
+    streamlit run streamlit_tensorflow_demo.py
 """
 
-import base64
-import io
 import time
-from typing import Dict, List, Optional, Tuple
+from typing import List, Optional, Tuple
 
 import numpy as np
 import pandas as pd
@@ -17,6 +19,11 @@ import plotly.graph_objects as go
 import streamlit as st
 import tensorflow as tf
 from PIL import Image
+
+from tensorversehub.compat import load_model as tvh_load_model
+from tensorversehub.export_utils import make_interpreter
+
+MODEL_TYPES = ["SavedModel", "Keras (.keras / .h5)", "TFLite"]
 
 # Page configuration
 st.set_page_config(
@@ -58,18 +65,13 @@ st.markdown(
 def load_model(model_path: str, model_type: str):
     """Load TensorFlow model with caching."""
     try:
-        if model_type == "SavedModel":
-            model = tf.saved_model.load(model_path)
-        elif model_type == "Keras H5":
-            model = tf.keras.models.load_model(model_path)
-        elif model_type == "TFLite":
-            interpreter = tf.lite.Interpreter(model_path=model_path)
-            interpreter.allocate_tensors()
-            return interpreter
-        else:
-            raise ValueError(f"Unsupported model type: {model_type}")
-
-        return model
+        if model_type in ("SavedModel", "Keras (.keras / .h5)"):
+            # keras.Model for .keras/.h5 files, SavedModelPredictor for SavedModel dirs;
+            # both expose ``predict``.
+            return tvh_load_model(model_path)
+        if model_type == "TFLite":
+            return make_interpreter(model_path=model_path)
+        raise ValueError(f"Unsupported model type: {model_type}")
     except Exception as e:
         st.error(f"Failed to load model: {str(e)}")
         return None
@@ -129,14 +131,8 @@ def run_inference(model, input_data: np.ndarray, model_type: str) -> np.ndarray:
         model.invoke()
         predictions = model.get_tensor(output_details[0]["index"])
     else:
-        # TensorFlow/Keras inference
-        if hasattr(model, "predict"):
-            predictions = model.predict(input_data)
-        else:
-            predictions = model(input_data)
-            if isinstance(predictions, dict):
-                predictions = list(predictions.values())[0]
-            predictions = predictions.numpy()
+        # Keras model or SavedModelPredictor
+        predictions = np.asarray(model.predict(input_data))
 
     inference_time = time.time() - start_time
 
@@ -215,7 +211,7 @@ def main():
 
     if not demo_mode:
         model_path = st.sidebar.text_input("Model Path", value="")
-        model_type = st.sidebar.selectbox("Model Type", ["SavedModel", "Keras H5", "TFLite"])
+        model_type = st.sidebar.selectbox("Model Type", MODEL_TYPES)
 
         if model_path:
             model = load_model(model_path, model_type)
@@ -252,7 +248,7 @@ def main():
             if uploaded_image is not None:
                 # Display image
                 image = Image.open(uploaded_image)
-                st.image(image, caption="Uploaded Image", use_column_width=True)
+                st.image(image, caption="Uploaded Image", use_container_width=True)
 
                 # Prediction button
                 if st.button("🔮 Predict", type="primary"):
@@ -425,7 +421,7 @@ def main():
                 "Model Size": "9.4 MB",
                 "Input Shape": "(224, 224, 3)",
                 "Output Classes": "10",
-                "Framework": "TensorFlow 2.15.0",
+                "Framework": f"TensorFlow {tf.__version__}",
             }
 
             col1, col2 = st.columns(2)

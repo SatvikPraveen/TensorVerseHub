@@ -3,26 +3,34 @@
 """
 TensorFlow model quantization demonstration.
 Shows post-training quantization, quantization-aware training, and performance comparison.
+
+Post-training quantization works with TensorFlow 2.16+ / Keras 3.  Quantization-aware
+training (QAT) relies on ``tensorflow-model-optimization`` which only supports the
+legacy Keras 2 API; the demo skips QAT with instructions when it is unavailable.
 """
 
 import argparse
 import json
 import os
 import time
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, Tuple
 
 import matplotlib.pyplot as plt
 import numpy as np
 import tensorflow as tf
 
-# Import TensorVerseHub utilities
-try:
-    from src.data_utils import create_image_classification_pipeline
-    from src.model_utils import ModelBuilders
-    from src.optimization_utils import ModelQuantization
-    from src.visualization import setup_plotting_style
-except ImportError:
-    print("Warning: TensorVerseHub modules not found. Using standalone implementation.")
+# Import TensorVerseHub utilities (import compat first so Keras detection is accurate)
+from tensorversehub.compat import IS_KERAS_3
+from tensorversehub.export_utils import TFLiteExporter, make_interpreter
+from tensorversehub.model_utils import ModelBuilders
+from tensorversehub.optimization_utils import ModelQuantization
+from tensorversehub.visualization import setup_plotting_style
+
+LEGACY_KERAS_HINT = (
+    "   QAT requires the legacy Keras 2 stack:\n"
+    "     pip install tf-keras tensorflow-model-optimization\n"
+    "     export TF_USE_LEGACY_KERAS=1"
+)
 
 
 class QuantizationDemo:
@@ -37,7 +45,7 @@ class QuantizationDemo:
         # Setup plotting
         try:
             setup_plotting_style()
-        except:
+        except Exception:
             plt.style.use("default")
 
     def create_demo_model(
@@ -46,18 +54,8 @@ class QuantizationDemo:
         """Create a demo CNN model for quantization."""
         print("🏗️ Creating demo CNN model...")
 
-        model = tf.keras.Sequential(
-            [
-                tf.keras.layers.Conv2D(32, 3, activation="relu", input_shape=input_shape),
-                tf.keras.layers.MaxPooling2D(),
-                tf.keras.layers.Conv2D(64, 3, activation="relu"),
-                tf.keras.layers.MaxPooling2D(),
-                tf.keras.layers.Conv2D(64, 3, activation="relu"),
-                tf.keras.layers.GlobalAveragePooling2D(),
-                tf.keras.layers.Dense(128, activation="relu"),
-                tf.keras.layers.Dropout(0.5),
-                tf.keras.layers.Dense(num_classes, activation="softmax"),
-            ]
+        model = ModelBuilders.create_cnn_classifier(
+            input_shape, num_classes, architecture="simple", dropout_rate=0.5
         )
 
         model.compile(
@@ -125,114 +123,59 @@ class QuantizationDemo:
 
         quantization_results = {}
 
-        # 1. Dynamic Range Quantization (FP32 -> FP16)
-        print("1️⃣ Dynamic Range Quantization (FP16)...")
-        try:
-            converter = tf.lite.TFLiteConverter.from_keras_model(model)
-            converter.optimizations = [tf.lite.Optimize.DEFAULT]
-            tflite_fp16 = converter.convert()
+        # Each entry: (result key, optimization_type, human label, needs representative data)
+        strategies = [
+            ("dynamic", "dynamic", "Dynamic range (int8 weights)", False),
+            ("fp16", "float16", "Float16 weights", False),
+            ("int8", "int8_fallback", "INT8 with float fallback", True),
+            ("full_int8", "int8", "Full INT8 (int8 I/O)", True),
+        ]
 
-            quantization_results["fp16"] = {
-                "model": tflite_fp16,
-                "size_bytes": len(tflite_fp16),
-                "size_mb": len(tflite_fp16) / (1024 * 1024),
-                "type": "FP16",
-            }
-            print(f"   ✅ FP16 model size: {quantization_results['fp16']['size_mb']:.2f} MB")
+        for number, (key, opt_type, label, needs_data) in enumerate(strategies, start=1):
+            print(f"{number}️⃣ {label}...")
+            try:
+                # int8 variants calibrate on samples drawn from ``representative_ds``;
+                # ``ModelQuantization`` raises ValueError if no dataset is given for int8.
+                tflite_bytes = ModelQuantization.quantize_model_post_training(
+                    model,
+                    representative_dataset=representative_ds if needs_data else None,
+                    optimization_type=opt_type,
+                )
 
-        except Exception as e:
-            print(f"   ❌ FP16 quantization failed: {e}")
-            quantization_results["fp16"] = {"error": str(e)}
+                quantization_results[key] = {
+                    "model": tflite_bytes,
+                    "size_bytes": len(tflite_bytes),
+                    "size_mb": len(tflite_bytes) / (1024 * 1024),
+                    "type": label,
+                }
+                print(f"   ✅ {label} model size: {quantization_results[key]['size_mb']:.2f} MB")
 
-        # 2. Integer Quantization (FP32 -> INT8)
-        print("2️⃣ Integer Quantization (INT8)...")
-        try:
-            converter = tf.lite.TFLiteConverter.from_keras_model(model)
-            converter.optimizations = [tf.lite.Optimize.DEFAULT]
-            converter.target_spec.supported_ops = [tf.lite.OpsSet.TFLITE_BUILTINS_INT8]
-
-            # Representative dataset for calibration
-            def representative_data_gen():
-                for input_value in representative_ds.take(100):
-                    if isinstance(input_value, tuple):
-                        yield [tf.cast(input_value[0], tf.float32)]
-                    else:
-                        yield [tf.cast(input_value, tf.float32)]
-
-            converter.representative_dataset = representative_data_gen
-            tflite_int8 = converter.convert()
-
-            quantization_results["int8"] = {
-                "model": tflite_int8,
-                "size_bytes": len(tflite_int8),
-                "size_mb": len(tflite_int8) / (1024 * 1024),
-                "type": "INT8",
-            }
-            print(f"   ✅ INT8 model size: {quantization_results['int8']['size_mb']:.2f} MB")
-
-        except Exception as e:
-            print(f"   ❌ INT8 quantization failed: {e}")
-            quantization_results["int8"] = {"error": str(e)}
-
-        # 3. Full Integer Quantization
-        print("3️⃣ Full Integer Quantization...")
-        try:
-            converter = tf.lite.TFLiteConverter.from_keras_model(model)
-            converter.optimizations = [tf.lite.Optimize.DEFAULT]
-            converter.target_spec.supported_ops = [tf.lite.OpsSet.TFLITE_BUILTINS_INT8]
-            converter.inference_input_type = tf.int8
-            converter.inference_output_type = tf.int8
-
-            def representative_data_gen():
-                for input_value in representative_ds.take(100):
-                    if isinstance(input_value, tuple):
-                        yield [tf.cast(input_value[0], tf.float32)]
-                    else:
-                        yield [tf.cast(input_value, tf.float32)]
-
-            converter.representative_dataset = representative_data_gen
-            tflite_full_int8 = converter.convert()
-
-            quantization_results["full_int8"] = {
-                "model": tflite_full_int8,
-                "size_bytes": len(tflite_full_int8),
-                "size_mb": len(tflite_full_int8) / (1024 * 1024),
-                "type": "Full INT8",
-            }
-            print(
-                f"   ✅ Full INT8 model size: {quantization_results['full_int8']['size_mb']:.2f} MB"
-            )
-
-        except Exception as e:
-            print(f"   ❌ Full INT8 quantization failed: {e}")
-            quantization_results["full_int8"] = {"error": str(e)}
+            except Exception as e:
+                print(f"   ❌ {label} quantization failed: {e}")
+                quantization_results[key] = {"error": str(e)}
 
         return quantization_results
 
     def demonstrate_qat(
         self, model: tf.keras.Model, train_ds: tf.data.Dataset, test_ds: tf.data.Dataset
     ) -> tf.keras.Model:
-        """Demonstrate Quantization-Aware Training."""
+        """Demonstrate Quantization-Aware Training (legacy Keras + tfmot only)."""
         print("\n🎓 Demonstrating Quantization-Aware Training")
         print("=" * 50)
 
-        try:
-            import tensorflow_model_optimization as tfmot
+        if IS_KERAS_3:
+            print("⚠️ Skipping QAT: tensorflow-model-optimization does not support Keras 3.")
+            print(LEGACY_KERAS_HINT)
+            return None
 
-            # Apply QAT
-            quantize_model = tfmot.quantization.keras.quantize_model
-            qat_model = quantize_model(model)
+        try:
+            print("🚀 Fine-tuning with QAT (2 epochs)...")
+            qat_model = ModelQuantization.quantize_model_qat(
+                model, train_ds, validation_dataset=test_ds, epochs=2, verbose=1
+            )
 
             print("📊 QAT Model Summary:")
             qat_model.summary()
-
-            # Compile QAT model
-            qat_model.compile(
-                optimizer="adam", loss="sparse_categorical_crossentropy", metrics=["accuracy"]
-            )
-
-            print("🚀 Fine-tuning with QAT (2 epochs)...")
-            qat_model.fit(train_ds, epochs=2, validation_data=test_ds, verbose=1)
 
             # Evaluate QAT model
             qat_loss, qat_acc = qat_model.evaluate(test_ds, verbose=0)
@@ -240,8 +183,8 @@ class QuantizationDemo:
 
             return qat_model
 
-        except ImportError:
-            print("❌ TensorFlow Model Optimization not available")
+        except ImportError as e:
+            print(f"❌ {e}")
             print("   Install with: pip install tensorflow-model-optimization")
             return None
         except Exception as e:
@@ -277,19 +220,14 @@ class QuantizationDemo:
 
             print(f"🔶 Benchmarking {name} model...")
             try:
-                # Load TFLite interpreter
-                interpreter = tf.lite.Interpreter(model_content=model_data["model"])
-                interpreter.allocate_tensors()
+                # Load TFLite interpreter (LiteRT when available, tf.lite otherwise)
+                interpreter = make_interpreter(model_content=model_data["model"])
 
-                input_details = interpreter.get_input_details()
-                output_details = interpreter.get_output_details()
-
-                # Benchmark inference
+                # Warm up once, then benchmark; run_tflite handles int8 input/output scaling
+                TFLiteExporter.run_tflite(interpreter, test_input)
                 start_time = time.time()
                 for _ in range(10):
-                    interpreter.set_tensor(input_details[0]["index"], test_input)
-                    interpreter.invoke()
-                    _ = interpreter.get_tensor(output_details[0]["index"])
+                    _ = TFLiteExporter.run_tflite(interpreter, test_input)
 
                 avg_time = (time.time() - start_time) / 10
 
@@ -451,6 +389,7 @@ class QuantizationDemo:
         input_shape: Tuple[int, int, int] = (224, 224, 3),
         num_classes: int = 10,
         training_epochs: int = 5,
+        output_dir: str = "quantization_output",
     ):
         """Run the complete quantization demonstration."""
         print("🎯 TensorFlow Model Quantization Demo")
@@ -471,9 +410,7 @@ class QuantizationDemo:
         if qat_model:
             # Convert QAT model to TFLite
             try:
-                converter = tf.lite.TFLiteConverter.from_keras_model(qat_model)
-                converter.optimizations = [tf.lite.Optimize.DEFAULT]
-                qat_tflite = converter.convert()
+                qat_tflite = ModelQuantization.convert_qat_to_tflite(qat_model)
 
                 quantization_results["qat"] = {
                     "model": qat_tflite,
@@ -493,7 +430,7 @@ class QuantizationDemo:
         self.visualize_results(quantization_results, benchmark_results)
 
         # Save results
-        self.save_results(quantization_results, benchmark_results)
+        self.save_results(quantization_results, benchmark_results, output_dir)
 
         print("\n🎉 Quantization demo completed successfully!")
         return quantization_results, benchmark_results
@@ -518,7 +455,7 @@ def main():
     input_shape = (args.input_height, args.input_width, args.input_channels)
 
     try:
-        demo.run_complete_demo(input_shape, args.num_classes, args.epochs)
+        demo.run_complete_demo(input_shape, args.num_classes, args.epochs, args.output_dir)
     except KeyboardInterrupt:
         print("\n⚠️ Demo interrupted by user")
     except Exception as e:

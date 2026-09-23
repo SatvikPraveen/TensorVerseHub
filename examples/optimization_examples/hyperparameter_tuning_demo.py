@@ -1,6 +1,8 @@
 """
 Hyperparameter tuning demonstration using Keras Tuner.
 Covers RandomSearch, Hyperband, and BayesianOptimization strategies.
+
+Works with TensorFlow 2.16+ / Keras 3 (``keras-tuner`` >= 1.4 supports Keras 3).
 """
 
 import argparse
@@ -12,21 +14,20 @@ import matplotlib.pyplot as plt
 import numpy as np
 import tensorflow as tf
 
-# Optional integration with TensorVerseHub utilities
-try:
-    from src.visualization import setup_plotting_style
+# TensorVerseHub utilities
+from tensorversehub.visualization import setup_plotting_style
 
-    _HAS_TVH = True
-except ImportError:
-    _HAS_TVH = False
+KERAS_TUNER_INSTALL_HINT = "Install with: pip install keras-tuner   (>= 1.4 for Keras 3)"
 
+# keras-tuner is an optional dependency; guard the import with a helpful message.
 try:
     import keras_tuner as kt
 
     _HAS_KERAS_TUNER = True
 except ImportError:
+    kt = None  # type: ignore[assignment]
     _HAS_KERAS_TUNER = False
-    print("Warning: keras-tuner not found. Install with: pip install keras-tuner>=1.3.5,<1.4.0")
+    print(f"Warning: keras-tuner not found. {KERAS_TUNER_INSTALL_HINT}")
 
 
 class HyperparameterTuningDemo:
@@ -39,11 +40,10 @@ class HyperparameterTuningDemo:
 
         os.makedirs(self.output_dir, exist_ok=True)
 
-        if _HAS_TVH:
-            try:
-                setup_plotting_style()
-            except Exception:
-                pass
+        try:
+            setup_plotting_style()
+        except Exception:
+            pass
 
     # ------------------------------------------------------------------
     # Dataset
@@ -487,9 +487,7 @@ def main() -> None:
     args = parse_args()
 
     if not _HAS_KERAS_TUNER:
-        print(
-            "ERROR: keras-tuner is required. Install it with:\n  pip install 'keras-tuner>=1.3.5,<1.4.0'"
-        )
+        print(f"ERROR: keras-tuner is required. {KERAS_TUNER_INSTALL_HINT}")
         return
 
     strategies = args.strategies

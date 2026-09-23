@@ -3,36 +3,50 @@
 """
 TensorFlow model pruning demonstration.
 Shows magnitude-based pruning, structured pruning, and performance analysis.
+
+Magnitude pruning uses ``tensorflow-model-optimization`` (tfmot), which only supports
+the legacy Keras 2 API.  Run this demo with::
+
+    pip install tf-keras tensorflow-model-optimization
+    export TF_USE_LEGACY_KERAS=1
+    python pruning_demo.py
 """
 
 import argparse
 import json
 import os
 import time
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, Tuple
 
 import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
 import tensorflow as tf
 
-# Import TensorFlow Model Optimization
-try:
-    import tensorflow_model_optimization as tfmot
+# Import TensorVerseHub utilities.  ``compat`` must be imported *before* tfmot, because
+# importing tfmot silently swaps ``tf.keras`` to the legacy implementation.
+from tensorversehub.compat import IS_KERAS_3, count_params, save_model
+from tensorversehub.optimization_utils import ModelPruning
+from tensorversehub.visualization import setup_plotting_style
 
-    TF_MOT_AVAILABLE = True
-except ImportError:
-    TF_MOT_AVAILABLE = False
-    print("⚠️ TensorFlow Model Optimization not available")
-    print("   Install with: pip install tensorflow-model-optimization")
+LEGACY_KERAS_INSTRUCTIONS = (
+    "Model pruning requires the legacy Keras 2 stack (tensorflow-model-optimization\n"
+    "does not support Keras 3). Run:\n"
+    "    pip install tf-keras tensorflow-model-optimization\n"
+    "    export TF_USE_LEGACY_KERAS=1\n"
+    "and then start this demo again."
+)
 
-# Import TensorVerseHub utilities
-try:
-    from src.model_utils import ModelBuilders
-    from src.optimization_utils import ModelPruning
-    from src.visualization import setup_plotting_style
-except ImportError:
-    print("Warning: TensorVerseHub modules not found. Using standalone implementation.")
+# Import TensorFlow Model Optimization (only meaningful under legacy Keras)
+TF_MOT_AVAILABLE = False
+if not IS_KERAS_3:
+    try:
+        import tensorflow_model_optimization as tfmot  # noqa: F401
+
+        TF_MOT_AVAILABLE = True
+    except ImportError:
+        print("⚠️ TensorFlow Model Optimization not available")
+        print("   Install with: pip install tensorflow-model-optimization")
 
 
 class PruningDemo:
@@ -48,7 +62,7 @@ class PruningDemo:
         # Setup plotting
         try:
             setup_plotting_style()
-        except:
+        except Exception:
             plt.style.use("default")
             sns.set_palette("husl")
 
@@ -60,9 +74,8 @@ class PruningDemo:
 
         model = tf.keras.Sequential(
             [
-                tf.keras.layers.Conv2D(
-                    64, 3, activation="relu", input_shape=input_shape, name="conv1"
-                ),
+                tf.keras.Input(shape=input_shape),
+                tf.keras.layers.Conv2D(64, 3, activation="relu", name="conv1"),
                 tf.keras.layers.BatchNormalization(),
                 tf.keras.layers.MaxPooling2D(name="pool1"),
                 tf.keras.layers.Conv2D(128, 3, activation="relu", name="conv2"),
@@ -84,9 +97,7 @@ class PruningDemo:
         )
 
         print(f"✅ Model created with {model.count_params():,} parameters")
-        print(
-            f"   Trainable parameters: {sum([tf.keras.backend.count_params(w) for w in model.trainable_weights]):,}"
-        )
+        print(f"   Trainable parameters: {count_params(model.trainable_weights):,}")
         return model
 
     def create_synthetic_data(
@@ -115,7 +126,8 @@ class PruningDemo:
         test_ds = dataset.skip(train_size + val_size).batch(32).prefetch(tf.data.AUTOTUNE)
 
         print(
-            f"✅ Dataset created: {train_size} train, {val_size} val, {num_samples - train_size - val_size} test samples"
+            f"✅ Dataset created: {train_size} train, {val_size} val, "
+            f"{num_samples - train_size - val_size} test samples"
         )
         return train_ds, val_ds, test_ds
 
@@ -155,7 +167,7 @@ class PruningDemo:
 
         for layer in model.layers:
             if hasattr(layer, "kernel") and layer.kernel is not None:
-                weights = layer.kernel.numpy().flatten()
+                weights = np.asarray(layer.kernel).flatten()
                 overall_stats.extend(weights.tolist())
 
                 layer_stats[layer.name] = {
@@ -181,10 +193,11 @@ class PruningDemo:
         }
 
         print(
-            f"   📈 Overall stats: mean={analysis['overall']['mean']:.4f}, std={analysis['overall']['std']:.4f}"
+            f"   📈 Overall stats: mean={analysis['overall']['mean']:.4f}, "
+            f"std={analysis['overall']['std']:.4f}"
         )
-        print(f"   🕳️ Zero weights: {analysis['overall']['zero_fraction']*100:.2f}%")
-        print(f"   📉 Near-zero weights: {analysis['overall']['near_zero_fraction']*100:.2f}%")
+        print(f"   🕳️ Zero weights: {analysis['overall']['zero_fraction'] * 100:.2f}%")
+        print(f"   📉 Near-zero weights: {analysis['overall']['near_zero_fraction'] * 100:.2f}%")
 
         return analysis
 
@@ -197,19 +210,21 @@ class PruningDemo:
     ) -> tf.keras.Model:
         """Demonstrate magnitude-based pruning."""
         print(
-            f"\n✂️ Demonstrating Magnitude-Based Pruning (target: {target_sparsity*100:.0f}% sparsity)"
+            f"\n✂️ Demonstrating Magnitude-Based Pruning "
+            f"(target: {target_sparsity * 100:.0f}% sparsity)"
         )
         print("=" * 70)
 
         if not TF_MOT_AVAILABLE:
             print("❌ TensorFlow Model Optimization not available")
+            print(LEGACY_KERAS_INSTRUCTIONS)
             return None
 
         try:
             # Create pruning schedule
             end_step = 5 * len(train_ds)  # Prune over 5 epochs
 
-            pruning_schedule = tfmot.sparsity.keras.PolynomialDecay(
+            pruning_schedule = ModelPruning.create_pruning_schedule(
                 initial_sparsity=0.0,
                 final_sparsity=target_sparsity,
                 begin_step=0,
@@ -217,42 +232,33 @@ class PruningDemo:
                 frequency=100,
             )
 
-            print(f"📅 Pruning schedule: 0% -> {target_sparsity*100:.0f}% over {end_step} steps")
+            print(f"📅 Pruning schedule: 0% -> {target_sparsity * 100:.0f}% over {end_step} steps")
 
-            # Apply pruning to model
-            def apply_pruning_to_layer(layer):
-                # Only prune dense and conv layers
-                if isinstance(layer, (tf.keras.layers.Dense, tf.keras.layers.Conv2D)):
-                    return tfmot.sparsity.keras.prune_low_magnitude(
-                        layer, pruning_schedule=pruning_schedule
-                    )
-                return layer
-
-            pruned_model = tf.keras.models.clone_model(model, clone_function=apply_pruning_to_layer)
-
-            # Copy weights
-            pruned_model.set_weights(model.get_weights())
-
-            # Compile pruned model
-            pruned_model.compile(
-                optimizer="adam", loss="sparse_categorical_crossentropy", metrics=["accuracy"]
+            # Apply pruning wrappers to dense and conv layers only
+            target_layers = [
+                layer.name
+                for layer in model.layers
+                if isinstance(layer, (tf.keras.layers.Dense, tf.keras.layers.Conv2D))
+            ]
+            # (the wrappers keep the trained weights of the original layers)
+            pruned_model = ModelPruning.create_pruned_model(
+                model, pruning_schedule, target_layers=target_layers
             )
 
             print("🏗️ Pruned model architecture:")
             pruned_model.summary()
 
-            # Create pruning callbacks
-            callbacks = [
-                tfmot.sparsity.keras.UpdatePruningStep(),
-                tfmot.sparsity.keras.PruningSummaries(log_dir="pruning_logs"),
-                tf.keras.callbacks.EarlyStopping(patience=3, restore_best_weights=True),
-            ]
-
-            # Fine-tune with pruning
+            # Fine-tune with pruning (compiles, adds UpdatePruningStep + EarlyStopping)
             print("🔧 Fine-tuning with pruning...")
-            pruning_history = pruned_model.fit(
-                train_ds, epochs=5, validation_data=val_ds, callbacks=callbacks, verbose=1
+            ModelPruning.train_pruned_model(
+                pruned_model,
+                train_ds,
+                validation_dataset=val_ds,
+                epochs=5,
+                log_dir="pruning_logs",
+                verbose=1,
             )
+            pruning_history = pruned_model.history
 
             # Evaluate pruned model
             pruned_loss, pruned_acc = pruned_model.evaluate(val_ds, verbose=0)
@@ -285,12 +291,14 @@ class PruningDemo:
             print("   In practice, you would use specialized tools or implement")
             print("   more sophisticated filter importance metrics.")
 
+            input_shape = tuple(model.inputs[0].shape[1:])
+            num_classes = int(model.output.shape[-1])
+
             # Create a new model with reduced filters
             reduced_model = tf.keras.Sequential(
                 [
-                    tf.keras.layers.Conv2D(
-                        32, 3, activation="relu", input_shape=model.input_shape[1:]
-                    ),  # 64->32
+                    tf.keras.Input(shape=input_shape),
+                    tf.keras.layers.Conv2D(32, 3, activation="relu"),  # 64->32
                     tf.keras.layers.BatchNormalization(),
                     tf.keras.layers.MaxPooling2D(),
                     tf.keras.layers.Conv2D(64, 3, activation="relu"),  # 128->64
@@ -303,7 +311,7 @@ class PruningDemo:
                     tf.keras.layers.Dropout(0.5),
                     tf.keras.layers.Dense(128, activation="relu"),  # 256->128
                     tf.keras.layers.Dropout(0.3),
-                    tf.keras.layers.Dense(model.output_shape[-1], activation="softmax"),
+                    tf.keras.layers.Dense(num_classes, activation="softmax"),
                 ]
             )
 
@@ -312,9 +320,8 @@ class PruningDemo:
             )
 
             print(f"📉 Reduced model parameters: {reduced_model.count_params():,}")
-            print(
-                f"📊 Parameter reduction: {(1 - reduced_model.count_params()/model.count_params())*100:.1f}%"
-            )
+            reduction = (1 - reduced_model.count_params() / model.count_params()) * 100
+            print(f"📊 Parameter reduction: {reduction:.1f}%")
 
             return reduced_model
 
@@ -332,7 +339,7 @@ class PruningDemo:
 
         for layer in model.layers:
             if hasattr(layer, "kernel") and layer.kernel is not None:
-                weights = layer.kernel.numpy()
+                weights = np.asarray(layer.kernel)
                 layer_params = weights.size
                 layer_zeros = np.sum(weights == 0)
                 layer_sparsity_ratio = layer_zeros / layer_params
@@ -357,7 +364,10 @@ class PruningDemo:
             "zero_parameters": int(total_zeros),
         }
 
-        print(f"   📊 Overall sparsity: {overall_sparsity*100:.2f}%")
+        # Cross-check with the library helper (works on any Keras model)
+        analysis["library_report"] = ModelPruning.compute_sparsity(model)
+
+        print(f"   📊 Overall sparsity: {overall_sparsity * 100:.2f}%")
         print(f"   🎯 Effective parameters: {total_params - total_zeros:,} / {total_params:,}")
 
         return analysis
@@ -486,7 +496,7 @@ class PruningDemo:
                 all_layers.update(analysis["layer_sparsity"].keys())
 
             sparsity_matrix = []
-            layer_names = sorted(list(all_layers))
+            layer_names = sorted(all_layers)
 
             for model in models:
                 model_sparsity = []
@@ -514,11 +524,11 @@ class PruningDemo:
                 cbar.set_label("Sparsity Ratio")
 
         # 5. Training history (if available)
-        if hasattr(self, "pruning_history") and self.pruning_history:
+        if self.pruning_history:
             ax5 = fig.add_subplot(gs[2, :])
 
             for name, history in self.pruning_history.items():
-                if "val_accuracy" in history.history:
+                if history is not None and "val_accuracy" in history.history:
                     epochs = range(1, len(history.history["val_accuracy"]) + 1)
                     ax5.plot(
                         epochs,
@@ -558,11 +568,11 @@ class PruningDemo:
         print(f"\n💾 Saving results to {output_dir}/")
         os.makedirs(output_dir, exist_ok=True)
 
-        # Save models
+        # Save models in the native Keras format
         for name, model in models.items():
             if model is not None:
-                model_path = os.path.join(output_dir, f"{name}_model")
-                model.save(model_path, save_format="tf")
+                model_path = os.path.join(output_dir, f"{name}_model.keras")
+                save_model(model, model_path)
                 print(f"   💾 {name} model saved: {model_path}")
 
         # Save analyses
@@ -587,6 +597,7 @@ class PruningDemo:
         num_classes: int = 10,
         training_epochs: int = 10,
         target_sparsity: float = 0.7,
+        output_dir: str = "pruning_output",
     ):
         """Run complete pruning demonstration."""
         print("🎯 TensorFlow Model Pruning Demo")
@@ -596,12 +607,10 @@ class PruningDemo:
         self.original_model = self.create_demo_model(input_shape, num_classes)
         train_ds, val_ds, test_ds = self.create_synthetic_data(input_shape, num_classes)
 
-        baseline_history = self.train_baseline_model(
-            self.original_model, train_ds, val_ds, training_epochs
-        )
+        self.train_baseline_model(self.original_model, train_ds, val_ds, training_epochs)
 
         # Analyze baseline model
-        baseline_analysis = self.analyze_weight_distribution(self.original_model)
+        self.analyze_weight_distribution(self.original_model)
 
         # Demonstrate pruning techniques
         models = {"original": self.original_model}
@@ -612,11 +621,7 @@ class PruningDemo:
         )
         if pruned_model is not None:
             # Strip pruning wrappers for final model
-            if TF_MOT_AVAILABLE:
-                final_pruned_model = tfmot.sparsity.keras.strip_pruning(pruned_model)
-                models["magnitude_pruned"] = final_pruned_model
-            else:
-                models["magnitude_pruned"] = pruned_model
+            models["magnitude_pruned"] = ModelPruning.finalize_pruned_model(pruned_model)
 
         # Structured pruning
         structured_model = self.demonstrate_structured_pruning(self.original_model)
@@ -636,7 +641,7 @@ class PruningDemo:
         self.visualize_pruning_results(sparsity_analyses, benchmark_results)
 
         # Save results
-        self.save_results(models, sparsity_analyses, benchmark_results)
+        self.save_results(models, sparsity_analyses, benchmark_results, output_dir)
 
         # Print summary
         print("\n📋 Pruning Demo Summary")
@@ -644,7 +649,7 @@ class PruningDemo:
         for name, analysis in sparsity_analyses.items():
             print(f"{name.replace('_', ' ').title()}:")
             print(f"  Parameters: {analysis['total_parameters']:,}")
-            print(f"  Sparsity: {analysis['overall_sparsity']*100:.1f}%")
+            print(f"  Sparsity: {analysis['overall_sparsity'] * 100:.1f}%")
             if name in benchmark_results:
                 print(f"  Inference: {benchmark_results[name]['avg_time_ms']:.1f} ms")
             print()
@@ -666,6 +671,12 @@ def main():
 
     args = parser.parse_args()
 
+    # tfmot pruning only works with the legacy Keras 2 API; fail early with clear guidance.
+    if IS_KERAS_3:
+        print("❌ Keras 3 detected - magnitude pruning is not available in this environment.")
+        print(LEGACY_KERAS_INSTRUCTIONS)
+        return
+
     if not TF_MOT_AVAILABLE:
         print("❌ TensorFlow Model Optimization required for full demo")
         print("   Install with: pip install tensorflow-model-optimization")
@@ -676,7 +687,9 @@ def main():
     input_shape = (args.input_height, args.input_width, args.input_channels)
 
     try:
-        demo.run_complete_demo(input_shape, args.num_classes, args.epochs, args.target_sparsity)
+        demo.run_complete_demo(
+            input_shape, args.num_classes, args.epochs, args.target_sparsity, args.output_dir
+        )
     except KeyboardInterrupt:
         print("\n⚠️ Demo interrupted by user")
     except Exception as e:

@@ -3,6 +3,11 @@
 """
 TensorFlow Lite inference example with performance benchmarking.
 Demonstrates efficient inference on mobile-optimized models.
+
+Create a ``.tflite`` file with ``tensorversehub.export_utils.TFLiteExporter.export_tflite``
+and run, e.g.::
+
+    python tflite_inference_example.py --model model.tflite --image cat.jpg --benchmark
 """
 
 import argparse
@@ -13,6 +18,28 @@ from typing import Any, Dict, List, Optional, Tuple
 import numpy as np
 import tensorflow as tf
 from PIL import Image
+
+from tensorversehub.compat import load_model
+from tensorversehub.export_utils import TFLiteExporter, make_interpreter
+
+
+def create_interpreter(model_path: str, num_threads: Optional[int] = None):
+    """
+    Create a TFLite interpreter.
+
+    Prefers the standalone LiteRT runtime (``ai_edge_litert``) when installed and falls
+    back to ``tf.lite.Interpreter`` otherwise (the same strategy as
+    ``tensorversehub.export_utils.make_interpreter``, plus thread control).
+    """
+    if num_threads is None:
+        return make_interpreter(model_path=model_path)
+    try:
+        from ai_edge_litert.interpreter import Interpreter
+    except ImportError:
+        Interpreter = tf.lite.Interpreter
+    interpreter = Interpreter(model_path=model_path, num_threads=num_threads)
+    interpreter.allocate_tensors()
+    return interpreter
 
 
 class TFLiteInference:
@@ -29,9 +56,8 @@ class TFLiteInference:
         self.model_path = model_path
         self.num_threads = num_threads
 
-        # Load interpreter
-        self.interpreter = tf.lite.Interpreter(model_path=model_path, num_threads=num_threads)
-        self.interpreter.allocate_tensors()
+        # Load interpreter (LiteRT when available, tf.lite otherwise)
+        self.interpreter = create_interpreter(model_path, num_threads)
 
         # Get input/output details
         self.input_details = self.interpreter.get_input_details()
@@ -42,14 +68,17 @@ class TFLiteInference:
         self.total_time = 0
 
         print(f"✅ TFLite model loaded: {model_path}")
-        print(f"📊 Model info:")
+        print("📊 Model info:")
         print(f"   Input shape: {self.input_details[0]['shape']}")
         print(f"   Input dtype: {self.input_details[0]['dtype']}")
         print(f"   Output shape: {self.output_details[0]['shape']}")
         print(f"   Output dtype: {self.output_details[0]['dtype']}")
 
     def preprocess_image(
-        self, image_path: str, target_size: Optional[Tuple[int, int]] = None
+        self,
+        image_path: str,
+        target_size: Optional[Tuple[int, int]] = None,
+        quantize: bool = True,
     ) -> np.ndarray:
         """
         Preprocess image for inference.
@@ -57,6 +86,8 @@ class TFLiteInference:
         Args:
             image_path: Path to image file
             target_size: Target size (height, width), if None uses model input size
+            quantize: Convert to the interpreter's input dtype (int8/uint8 models use the
+                tensor's quantization parameters).  ``False`` returns float32 in [0, 1].
 
         Returns:
             Preprocessed image array
@@ -74,20 +105,23 @@ class TFLiteInference:
         # Resize image
         image = image.resize((target_size[1], target_size[0]))  # PIL uses (width, height)
 
-        # Convert to numpy array
-        image_array = np.array(image, dtype=np.float32)
-
-        # Normalize to [0, 1] if model expects float32
-        if self.input_details[0]["dtype"] == np.float32:
-            image_array = image_array / 255.0
+        # Convert to numpy array and normalize to [0, 1]
+        image_array = np.array(image, dtype=np.float32) / 255.0
 
         # Add batch dimension
         image_array = np.expand_dims(image_array, axis=0)
 
-        # Ensure correct dtype
-        image_array = image_array.astype(self.input_details[0]["dtype"])
+        if not quantize:
+            return image_array
 
-        return image_array
+        # Convert to the interpreter's input dtype (int8/uint8 models are quantized
+        # with the input tensor's scale / zero point)
+        in_detail = self.input_details[0]
+        in_dtype = in_detail["dtype"]
+        scale, zero_point = in_detail.get("quantization", (0.0, 0))
+        if in_dtype in (np.int8, np.uint8) and scale:
+            image_array = np.round(image_array / scale + zero_point)
+        return image_array.astype(in_dtype)
 
     def predict(self, input_data: np.ndarray) -> np.ndarray:
         """
@@ -242,17 +276,17 @@ class TFLiteInference:
         print(f"   Model size: {info['model_size_mb']:.2f} MB")
         print(f"   Threads: {info['num_threads']}")
 
-        print(f"\n📥 Input Details:")
+        print("\n📥 Input Details:")
         print(f"   Shape: {info['input_details']['shape']}")
         print(f"   Data type: {info['input_details']['dtype']}")
         print(f"   Quantization: {info['input_details']['quantization']}")
 
-        print(f"\n📤 Output Details:")
+        print("\n📤 Output Details:")
         print(f"   Shape: {info['output_details']['shape']}")
         print(f"   Data type: {info['output_details']['dtype']}")
         print(f"   Quantization: {info['output_details']['quantization']}")
 
-        print(f"\n⚡ Performance Stats:")
+        print("\n⚡ Performance Stats:")
         print(f"   Total inferences: {info['inference_stats']['total_inferences']}")
         print(f"   Average time: {info['inference_stats']['avg_time_ms']:.2f} ms")
 
@@ -261,12 +295,10 @@ def compare_models(original_model_path: str, tflite_model_path: str, test_image_
     """Compare original model with TFLite version."""
     print("🔍 Comparing original model vs TFLite model")
 
-    # Load original model
+    # Load original model: a .keras/.h5 file gives a keras.Model, a SavedModel directory a
+    # SavedModelPredictor -- both expose ``predict``.
     try:
-        if original_model_path.endswith(".h5"):
-            original_model = tf.keras.models.load_model(original_model_path)
-        else:
-            original_model = tf.saved_model.load(original_model_path)
+        original_model = load_model(original_model_path)
         print(f"✅ Original model loaded: {original_model_path}")
     except Exception as e:
         print(f"❌ Failed to load original model: {e}")
@@ -275,27 +307,21 @@ def compare_models(original_model_path: str, tflite_model_path: str, test_image_
     # Load TFLite model
     tflite_inference = TFLiteInference(tflite_model_path)
 
-    # Prepare test input
-    test_input = tflite_inference.preprocess_image(test_image_path)
+    # Prepare test input as float32 in [0, 1]; run_tflite handles int8 I/O scaling
+    float_input = tflite_inference.preprocess_image(test_image_path, quantize=False)
 
     # Original model inference
     start_time = time.time()
-    if hasattr(original_model, "predict"):
-        original_pred = original_model.predict(test_input)
-    else:
-        original_pred = original_model(test_input)
-        if isinstance(original_pred, dict):
-            original_pred = list(original_pred.values())[0]
-        original_pred = original_pred.numpy()
+    original_pred = np.asarray(original_model.predict(float_input))
     original_time = time.time() - start_time
 
-    # TFLite inference
+    # TFLite inference (dequantized output for a fair comparison)
     start_time = time.time()
-    tflite_pred = tflite_inference.predict(test_input)
+    tflite_pred = TFLiteExporter.run_tflite(tflite_inference.interpreter, float_input)
     tflite_time = time.time() - start_time
 
     # Compare results
-    print(f"\n📊 Comparison Results:")
+    print("\n📊 Comparison Results:")
     print(f"   Original model time: {original_time * 1000:.2f} ms")
     print(f"   TFLite model time: {tflite_time * 1000:.2f} ms")
     print(f"   Speedup: {original_time / tflite_time:.2f}x")
@@ -323,7 +349,9 @@ def main():
     parser.add_argument("--model", required=True, help="Path to TFLite model")
     parser.add_argument("--image", help="Path to test image")
     parser.add_argument("--benchmark", action="store_true", help="Run performance benchmark")
-    parser.add_argument("--compare", help="Path to original model for comparison")
+    parser.add_argument(
+        "--compare", help="Path to the original model (.keras/.h5 file or SavedModel directory)"
+    )
     parser.add_argument("--threads", type=int, default=4, help="Number of CPU threads")
     parser.add_argument("--runs", type=int, default=100, help="Number of benchmark runs")
 
@@ -343,7 +371,7 @@ def main():
 
             print("🎯 Top predictions:")
             for i, pred in enumerate(predictions):
-                print(f"   {i+1}. Class {pred['class_id']}: {pred['confidence']:.4f}")
+                print(f"   {i + 1}. Class {pred['class_id']}: {pred['confidence']:.4f}")
         else:
             print(f"❌ Image file not found: {args.image}")
 
@@ -355,7 +383,7 @@ def main():
             tflite_inference.input_details[0]["dtype"]
         )
 
-        print(f"\n⚡ Running performance benchmark...")
+        print("\n⚡ Running performance benchmark...")
         metrics = tflite_inference.benchmark(dummy_input, args.runs)
 
         print("📈 Benchmark Results:")
