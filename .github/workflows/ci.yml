@@ -76,9 +76,14 @@ jobs:
       - name: Install
         run: |
           python -m pip install --upgrade pip
-          pip install "tensorflow-cpu==${{ matrix.tensorflow }}" || pip install "tensorflow==${{ matrix.tensorflow }}"
-          pip install -e ".[dev,export]" fastapi httpx
-          if [ "${{ matrix.legacy-keras }}" = "1" ]; then pip install -e ".[optimization]"; fi
+          # Pin TensorFlow through a constraints file so the package's
+          # 'tensorflow>=2.16' requirement cannot pull a second, newer wheel
+          # on top of the matrix version (mixed binaries -> undefined symbols).
+          echo "tensorflow==${{ matrix.tensorflow }}" > /tmp/constraints.txt
+          pip install -c /tmp/constraints.txt "tensorflow==${{ matrix.tensorflow }}"
+          pip install -c /tmp/constraints.txt -e ".[dev,export]" fastapi httpx
+          if [ "${{ matrix.legacy-keras }}" = "1" ]; then pip install -c /tmp/constraints.txt -e ".[optimization]"; fi
+          pip check || true
           python -c "import tensorversehub as tvh, json; print(json.dumps(tvh.about(), indent=1))"
       - name: Run tests
         run: |
