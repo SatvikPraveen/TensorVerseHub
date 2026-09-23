@@ -3,7 +3,7 @@
 [![CI](https://img.shields.io/github/actions/workflow/status/SatvikPraveen/TensorVerseHub/ci.yml?branch=main&label=CI&logo=github-actions)](https://github.com/SatvikPraveen/TensorVerseHub/actions/workflows/ci.yml)
 [![Docs](https://img.shields.io/github/actions/workflow/status/SatvikPraveen/TensorVerseHub/docs.yml?branch=main&label=docs&logo=materialformkdocs)](https://satvikpraveen.github.io/TensorVerseHub)
 ![Python](https://img.shields.io/badge/Python-3.10%20%7C%203.11%20%7C%203.12-blue?logo=python)
-![TensorFlow](https://img.shields.io/badge/TensorFlow-2.16%20→%202.21-orange?logo=tensorflow)
+![TensorFlow](https://img.shields.io/badge/TensorFlow-2.17%20→%202.21-orange?logo=tensorflow)
 ![Keras](https://img.shields.io/badge/Keras-3%20(%2B%20legacy%202)-red?logo=keras)
 [![Ruff](https://img.shields.io/badge/code%20style-ruff-261230?logo=ruff)](https://github.com/astral-sh/ruff)
 [![Checked with mypy](https://img.shields.io/badge/mypy-checked-blue)](https://mypy-lang.org/)
@@ -124,7 +124,7 @@ make test-legacy    # pytest with TF_USE_LEGACY_KERAS=1 (enables pruning/QAT tes
 make docs-serve     # live documentation preview
 ```
 
-CI runs ruff, mypy, the test-suite on Python 3.10/3.11/3.12 against TensorFlow 2.16, 2.18
+CI runs ruff, mypy, the test-suite on Python 3.10/3.11/3.12 against TensorFlow 2.17, 2.18
 and 2.21 (Keras 3 and legacy Keras), validates all notebooks, builds the docs in strict
 mode, builds the wheel and the Docker image. Tags matching `v*.*.*` publish to PyPI
 (trusted publishing) and GHCR.

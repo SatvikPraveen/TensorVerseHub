@@ -427,7 +427,7 @@ def create_tensorboard_callback():
 pip install tensorflow
 
 # Error: TF version compatibility
-pip install "tensorflow>=2.16,<2.22"  # supported range (Keras 3)
+pip install "tensorflow>=2.17,<2.22"  # supported range (Keras 3)
 
 # Check TF version
 python -c "import tensorflow as tf; print(tf.__version__)"

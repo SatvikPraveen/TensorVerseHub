@@ -21,7 +21,7 @@ TensorVerseHub is a **focused, zero-fluff reference** for TensorFlow practitione
 | Requirement | Supported |
 |-------------|-----------|
 | Python | 3.10, 3.11, 3.12 |
-| TensorFlow | 2.16 – 2.21 (Keras 3 by default) |
+| TensorFlow | 2.17 – 2.21 (Keras 3 by default) |
 | Legacy Keras 2 | Optional — `pip install -e ".[optimization]"` + `export TF_USE_LEGACY_KERAS=1`; only needed for pruning and quantisation-aware training |
 
 ---

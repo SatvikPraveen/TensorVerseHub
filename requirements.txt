@@ -4,7 +4,7 @@
 # This file pins a known-good notebook environment for `pip install -r requirements.txt`.
 
 # Core
-tensorflow>=2.16,<2.22
+tensorflow>=2.17,<2.22
 numpy>=1.26
 matplotlib>=3.7
 scikit-learn>=1.3

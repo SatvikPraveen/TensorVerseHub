@@ -81,7 +81,7 @@ KERAS_VERSION: str = _detect_keras_version()
 KERAS_VERSION_INFO: Tuple[int, ...] = _parse_version(KERAS_VERSION)
 IS_KERAS_3: bool = KERAS_VERSION_INFO[0] >= 3
 IS_LEGACY_KERAS: bool = not IS_KERAS_3
-MIN_TF_VERSION: Tuple[int, int] = (2, 16)
+MIN_TF_VERSION: Tuple[int, int] = (2, 17)
 
 NATIVE_MODEL_EXTENSION = ".keras"
 _KERAS_FILE_SUFFIXES = (".keras", ".h5", ".hdf5")
