@@ -43,8 +43,9 @@ targets TensorFlow 2.16–2.21 with Keras 3, while keeping legacy Keras 2 workin
 - **Breaking:** `src/` is now the installable package `tensorversehub/`
   (`from tensorversehub.model_utils import ModelBuilders`). CLI scripts moved to
   `tensorversehub.cli`; console scripts `tensorverse-*` remain.
-- **Breaking:** requires Python ≥ 3.10 and TensorFlow ≥ 2.16 (Keras 3). Python 3.9 and
-  TensorFlow 2.13 are no longer supported.
+- **Breaking:** requires Python ≥ 3.10 and TensorFlow ≥ 2.17 (Keras 3). Python 3.9 and
+  TensorFlow ≤ 2.16 are no longer supported (2.16's TFLite converter aborts the process on
+  int8 conversion of Keras 3 models).
 - Importing the package has no side effects (no printing, GPU configuration or global plot
   style). Use `tensorversehub.configure_tensorflow()` explicitly.
 - `MultiHeadAttention` call signature is `(query, key=None, value=None, attention_mask=None)`

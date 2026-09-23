@@ -4,7 +4,7 @@
 TensorFlow knowledge distillation demonstration.
 Shows teacher-student training, performance comparison, and analysis.
 
-Works with TensorFlow 2.16+ / Keras 3.  The distillation loss comes from
+Works with TensorFlow 2.17+ / Keras 3.  The distillation loss comes from
 ``tensorversehub.optimization_utils.KnowledgeDistillation``; the training loop is
 written out explicitly here for teaching purposes (the library also offers
 ``KnowledgeDistillation.train_student_model`` as a one-liner).

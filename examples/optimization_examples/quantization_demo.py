@@ -4,7 +4,7 @@
 TensorFlow model quantization demonstration.
 Shows post-training quantization, quantization-aware training, and performance comparison.
 
-Post-training quantization works with TensorFlow 2.16+ / Keras 3.  Quantization-aware
+Post-training quantization works with TensorFlow 2.17+ / Keras 3.  Quantization-aware
 training (QAT) relies on ``tensorflow-model-optimization`` which only supports the
 legacy Keras 2 API; the demo skips QAT with instructions when it is unavailable.
 """

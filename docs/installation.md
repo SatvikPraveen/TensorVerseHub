@@ -5,7 +5,7 @@
 | Requirement | Minimum | Recommended |
 |-------------|---------|-------------|
 | Python | 3.10 | 3.12 |
-| TensorFlow | 2.16 | 2.21 |
+| TensorFlow | 2.17 | 2.21 |
 | RAM | 8 GB | 32 GB |
 | VRAM (GPU) | — | 8 GB |
 | Storage | 10 GB | 50 GB |
@@ -131,7 +131,7 @@ On Linux, `pip install "tensorflow[and-cuda]"` pulls in matching CUDA/cuDNN whee
 
 | Package | Version | Purpose |
 |---------|---------|---------|
-| `tensorflow` | ≥ 2.16, < 2.22 | Core framework (Keras 3) |
+| `tensorflow` | ≥ 2.17, < 2.22 | Core framework (Keras 3) |
 | `numpy` | ≥ 1.26 | Arrays |
 | `tensorflow-model-optimization` | ≥ 0.8 (optional, `optimization` extra) | Pruning, QAT — needs `tf-keras` + `TF_USE_LEGACY_KERAS=1` |
 | `tf2onnx` / `onnxruntime` | ≥ 1.16 / ≥ 1.17 (`export` extra) | ONNX export and validation |

@@ -1,5 +1,5 @@
 """
-TensorVerseHub — production utilities for TensorFlow 2.16+ / Keras.
+TensorVerseHub — production utilities for TensorFlow 2.17+ / Keras.
 
 The package is import-cheap: submodules are loaded lazily on first attribute
 access and importing it has **no side effects** (no GPU configuration, no

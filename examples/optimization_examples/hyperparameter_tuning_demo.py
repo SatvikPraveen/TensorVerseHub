@@ -2,7 +2,7 @@
 Hyperparameter tuning demonstration using Keras Tuner.
 Covers RandomSearch, Hyperband, and BayesianOptimization strategies.
 
-Works with TensorFlow 2.16+ / Keras 3 (``keras-tuner`` >= 1.4 supports Keras 3).
+Works with TensorFlow 2.17+ / Keras 3 (``keras-tuner`` >= 1.4 supports Keras 3).
 """
 
 import argparse
