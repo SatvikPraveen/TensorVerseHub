@@ -1,210 +1,196 @@
-# Location: /src/__init__.py
-
 """
-TensorVerseHub - Comprehensive TensorFlow learning hub with tf.keras integration.
+TensorVerseHub — production utilities for TensorFlow 2.16+ / Keras.
 
-This package provides utilities, models, and tools for TensorFlow 2.15+ development
-with a focus on practical machine learning implementation and deployment.
+The package is import-cheap: submodules are loaded lazily on first attribute
+access and importing it has **no side effects** (no GPU configuration, no
+printing, no global plotting style).  Call :func:`configure_tensorflow` explicitly
+when you want memory growth, mixed precision or XLA enabled.
+
+Example::
+
+    import tensorversehub as tvh
+
+    tvh.configure_tensorflow(mixed_precision=True)
+    model = tvh.model_utils.ModelBuilders.create_cnn_classifier((32, 32, 3), 10)
 """
 
-import tensorflow as tf
+from __future__ import annotations
 
-# Version information
-__version__ = "1.0.0"
-__author__ = "TensorVerseHub Contributors"
-__email__ = "contact@tensorversehub.com"
+import importlib
+import logging
+from typing import TYPE_CHECKING, Any, Dict, List
 
-# Ensure minimum TensorFlow version
-MIN_TF_VERSION = "2.15.0"
-if tf.__version__ < MIN_TF_VERSION:
-    raise ImportError(
-        f"TensorVerseHub requires TensorFlow >= {MIN_TF_VERSION}, "
-        f"but found version {tf.__version__}. Please upgrade TensorFlow."
-    )
+__version__ = "2.0.0"
+__author__ = "Satvik Praveen"
+__license__ = "MIT"
 
-# Import main modules
-from . import (
-    data_utils,
-    export_utils,
-    model_utils,
-    optimization_utils,
-    training_utils,
-    visualization,
+logger = logging.getLogger(__name__)
+logger.addHandler(logging.NullHandler())
+
+_SUBMODULES = (
+    "compat",
+    "data_utils",
+    "export_utils",
+    "model_utils",
+    "optimization_utils",
+    "training_utils",
+    "visualization",
 )
 
-# Import key classes and functions for convenient access
-from .data_utils import (
-    DataAugmentation,
-    DataPipeline,
-    TFRecordHandler,
-    create_image_classification_pipeline,
-    create_text_classification_pipeline,
-)
-from .export_utils import (
-    MultiFormatExporter,
-    ONNXExporter,
-    SavedModelExporter,
-    TensorFlowJSExporter,
-    TFLiteExporter,
-    create_deployment_package,
-    quick_export,
-)
-from .model_utils import (
-    CustomLayers,
-    ModelAnalysis,
-    ModelBuilders,
-    TrainingUtilities,
-    create_classification_model,
-    create_transfer_learning_model,
-)
-from .optimization_utils import (
-    KnowledgeDistillation,
-    MixedPrecisionOptimization,
-    ModelPruning,
-    ModelQuantization,
-    create_inference_optimized_model,
-    optimize_for_mobile,
-)
-from .training_utils import (
-    CustomTrainingLoop,
-    EarlyStoppingHandler,
-    GradientClipping,
-    LearningRateFinder,
-    MetricsTracker,
-    WarmupCosineSchedule,
-)
-from .visualization import (
-    AdvancedVisualization,
-    DataVisualization,
-    ModelVisualization,
-    TrainingVisualization,
-    quick_model_analysis,
-    setup_plotting_style,
-)
+# Public symbols re-exported from submodules (resolved lazily).
+_LAZY_ATTRS: Dict[str, str] = {
+    # data_utils
+    "DataAugmentation": "data_utils",
+    "DataPipeline": "data_utils",
+    "TFRecordHandler": "data_utils",
+    "create_image_classification_pipeline": "data_utils",
+    "create_text_classification_pipeline": "data_utils",
+    "create_tfrecord_dataset": "data_utils",
+    # model_utils
+    "CustomLayers": "model_utils",
+    "ModelAnalysis": "model_utils",
+    "ModelBuilders": "model_utils",
+    "TrainingUtilities": "model_utils",
+    "create_classification_model": "model_utils",
+    "create_transfer_learning_model": "model_utils",
+    "load_model_with_metadata": "model_utils",
+    "save_model_with_metadata": "model_utils",
+    # training_utils
+    "CustomTrainingLoop": "training_utils",
+    "EarlyStoppingHandler": "training_utils",
+    "GradientClipping": "training_utils",
+    "LearningRateFinder": "training_utils",
+    "MetricsTracker": "training_utils",
+    "WarmupCosineSchedule": "training_utils",
+    # optimization_utils
+    "KnowledgeDistillation": "optimization_utils",
+    "MixedPrecisionOptimization": "optimization_utils",
+    "ModelCompression": "optimization_utils",
+    "ModelPruning": "optimization_utils",
+    "ModelQuantization": "optimization_utils",
+    "create_inference_optimized_model": "optimization_utils",
+    "optimize_for_mobile": "optimization_utils",
+    # export_utils
+    "MultiFormatExporter": "export_utils",
+    "ONNXExporter": "export_utils",
+    "SavedModelExporter": "export_utils",
+    "SavedModelPredictor": "compat",
+    "TFLiteExporter": "export_utils",
+    "TensorFlowJSExporter": "export_utils",
+    "create_deployment_package": "export_utils",
+    "quick_export": "export_utils",
+    # visualization
+    "AdvancedVisualization": "visualization",
+    "DataVisualization": "visualization",
+    "ModelVisualization": "visualization",
+    "TrainingVisualization": "visualization",
+    "quick_model_analysis": "visualization",
+    "setup_plotting_style": "visualization",
+}
 
-
-# Configure TensorFlow settings for optimal performance
-def configure_tensorflow(
-    memory_growth: bool = True, mixed_precision: bool = False, xla: bool = False
-) -> None:
-    """
-    Configure TensorFlow settings for optimal performance.
-
-    Args:
-        memory_growth: Enable GPU memory growth
-        mixed_precision: Enable mixed precision training
-        xla: Enable XLA compilation
-    """
-    # GPU configuration
-    gpus = tf.config.experimental.list_physical_devices("GPU")
-    if gpus:
-        try:
-            for gpu in gpus:
-                if memory_growth:
-                    tf.config.experimental.set_memory_growth(gpu, True)
-            print(f"Configured {len(gpus)} GPU(s) with memory growth: {memory_growth}")
-        except RuntimeError as e:
-            print(f"GPU configuration error: {e}")
-
-    # Mixed precision
-    if mixed_precision:
-        policy = tf.keras.mixed_precision.Policy("mixed_float16")
-        tf.keras.mixed_precision.set_global_policy(policy)
-        print("Mixed precision enabled")
-
-    # XLA compilation
-    if xla:
-        tf.config.optimizer.set_jit(True)
-        print("XLA compilation enabled")
-
-
-# Auto-configure TensorFlow on import
-configure_tensorflow()
-
-# Set up plotting style
-try:
-    setup_plotting_style()
-except Exception:
-    pass  # Ignore if matplotlib not available
-
-# Package information
-__all__ = [
-    # Version info
+__all__: List[str] = [
     "__version__",
-    "__author__",
-    "__email__",
-    # Configuration
     "configure_tensorflow",
-    # Data utilities
-    "DataPipeline",
-    "TFRecordHandler",
-    "DataAugmentation",
-    "create_image_classification_pipeline",
-    "create_text_classification_pipeline",
-    # Model utilities
-    "ModelBuilders",
-    "CustomLayers",
-    "TrainingUtilities",
-    "ModelAnalysis",
-    "create_classification_model",
-    "create_transfer_learning_model",
-    # Visualization
-    "ModelVisualization",
-    "TrainingVisualization",
-    "DataVisualization",
-    "AdvancedVisualization",
-    "quick_model_analysis",
-    "setup_plotting_style",
-    # Optimization
-    "ModelQuantization",
-    "ModelPruning",
-    "KnowledgeDistillation",
-    "MixedPrecisionOptimization",
-    "optimize_for_mobile",
-    "create_inference_optimized_model",
-    # Export utilities
-    "SavedModelExporter",
-    "TFLiteExporter",
-    "ONNXExporter",
-    "TensorFlowJSExporter",
-    "MultiFormatExporter",
-    "quick_export",
-    "create_deployment_package",
+    "about",
+    *_SUBMODULES,
+    *sorted(_LAZY_ATTRS),
 ]
 
-print(f"TensorVerseHub v{__version__} loaded successfully!")
-print(f"TensorFlow version: {tf.__version__}")
-print(f"Keras version: {tf.keras.__version__}")
+if TYPE_CHECKING:  # pragma: no cover - static analysis only
+    from . import (  # noqa: F401
+        compat,
+        data_utils,
+        export_utils,
+        model_utils,
+        optimization_utils,
+        training_utils,
+        visualization,
+    )
 
-# Display GPU information
-gpus = tf.config.experimental.list_physical_devices("GPU")
-if gpus:
-    print(f"GPUs available: {len(gpus)}")
-    for i, gpu in enumerate(gpus):
-        print(f"  GPU {i}: {gpu.name}")
-else:
-    print("No GPUs detected - using CPU")
 
-# Check for additional TensorFlow components
-try:
-    import tensorflow_hub
+def __getattr__(name: str) -> Any:
+    if name in _SUBMODULES:
+        module = importlib.import_module(f"{__name__}.{name}")
+        globals()[name] = module
+        return module
+    if name in _LAZY_ATTRS:
+        module = importlib.import_module(f"{__name__}.{_LAZY_ATTRS[name]}")
+        value = getattr(module, name)
+        globals()[name] = value
+        return value
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
-    print(f"TensorFlow Hub available: {tensorflow_hub.__version__}")
-except ImportError:
-    pass
 
-try:
-    import tensorflow_model_optimization
+def __dir__() -> List[str]:
+    return sorted(set(globals()) | set(__all__))
 
-    print(f"TensorFlow Model Optimization available: {tensorflow_model_optimization.__version__}")
-except ImportError:
-    pass
 
-try:
-    import tensorflowjs
+def configure_tensorflow(
+    memory_growth: bool = True,
+    mixed_precision: bool = False,
+    xla: bool = False,
+    deterministic: bool = False,
+    seed: int | None = None,
+    log_level: int = logging.INFO,
+) -> Dict[str, Any]:
+    """
+    Configure the TensorFlow runtime in one call.
 
-    print(f"TensorFlow.js available: {tensorflowjs.__version__}")
-except ImportError:
-    pass
+    Args:
+        memory_growth:  Allocate GPU memory on demand instead of grabbing it all.
+        mixed_precision: Enable the ``mixed_float16`` global dtype policy.
+        xla:             Turn on XLA JIT compilation for eligible ops.
+        deterministic:   Enable op determinism (slower, reproducible).
+        seed:            Seed Python, NumPy and TensorFlow RNGs.
+        log_level:       Level for the ``tensorversehub`` logger.
 
-print("Ready for TensorFlow development! 🚀")
+    Returns:
+        The runtime summary from :func:`tensorversehub.compat.version_info`.
+    """
+    import tensorflow as tf
+
+    from . import compat
+
+    logging.getLogger(__name__).setLevel(log_level)
+    compat.check_tensorflow_version()
+
+    gpus = tf.config.list_physical_devices("GPU")
+    if gpus and memory_growth:
+        for gpu in gpus:
+            try:
+                tf.config.experimental.set_memory_growth(gpu, True)
+            except RuntimeError as exc:  # already initialised
+                logger.warning("Could not set memory growth on %s: %s", gpu.name, exc)
+        logger.info("Configured %d GPU(s) with memory growth", len(gpus))
+
+    if mixed_precision:
+        compat.set_mixed_precision_policy("mixed_float16")
+        logger.info("Mixed precision policy enabled: mixed_float16")
+
+    if xla:
+        tf.config.optimizer.set_jit(True)
+        logger.info("XLA JIT compilation enabled")
+
+    if deterministic:
+        tf.config.experimental.enable_op_determinism()
+        logger.info("Op determinism enabled")
+
+    if seed is not None:
+        tf.keras.utils.set_random_seed(seed)
+        logger.info("Global random seed set to %d", seed)
+
+    info = compat.version_info()
+    logger.info(
+        "TensorVerseHub %s | TensorFlow %s | Keras %s",
+        __version__,
+        info["tensorflow"],
+        info["keras"],
+    )
+    return info
+
+
+def about() -> Dict[str, Any]:
+    """Return version and runtime information (safe to call without a GPU)."""
+    from . import compat
+
+    return {"tensorversehub": __version__, **compat.version_info()}
