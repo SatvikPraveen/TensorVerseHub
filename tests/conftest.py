@@ -32,7 +32,7 @@ def _has(module: str) -> bool:
     try:
         __import__(module)
         return True
-    except ImportError:
+    except Exception:  # missing, or installed but broken against this TensorFlow
         return False
 
 

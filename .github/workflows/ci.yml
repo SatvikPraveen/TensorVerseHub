@@ -55,8 +55,8 @@ jobs:
           - python: "3.10"
             tensorflow: "2.16.2"
             legacy-keras: "0"
-            # TF 2.16 pins ml_dtypes 0.3.x, which newer Keras releases cannot import
-            constraints: "keras>=3.0,<3.4"
+            # TF 2.16 pins ml_dtypes 0.3.x; newer Keras and onnx need ml_dtypes >= 0.5
+            constraints: "keras>=3.0,<3.4 onnx<1.18"
           - python: "3.11"
             tensorflow: "2.18.1"
             legacy-keras: "0"
@@ -82,7 +82,7 @@ jobs:
           # 'tensorflow>=2.16' requirement cannot pull a second, newer wheel
           # on top of the matrix version (mixed binaries -> undefined symbols).
           echo "tensorflow==${{ matrix.tensorflow }}" > /tmp/constraints.txt
-          echo "${{ matrix.constraints }}" >> /tmp/constraints.txt
+          for c in ${{ matrix.constraints }}; do echo "$c" >> /tmp/constraints.txt; done
           pip install -c /tmp/constraints.txt "tensorflow==${{ matrix.tensorflow }}"
           pip install -c /tmp/constraints.txt -e ".[dev,export]" fastapi httpx
           if [ "${{ matrix.legacy-keras }}" = "1" ]; then pip install -c /tmp/constraints.txt -e ".[optimization]"; fi
