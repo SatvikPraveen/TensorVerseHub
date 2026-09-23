@@ -1,347 +1,171 @@
-#!/usr/bin/env python3
-"""
-tensorverse-train  — CLI for training TensorFlow models.
+"""Train a model on an image folder (or synthetic data) and save it as .keras."""
 
-Usage
------
-    tensorverse-train --task classification --data ./data/images --epochs 20
-    tensorverse-train --task text_classification --data ./data/texts --epochs 10
-    tensorverse-train --config config.json
-"""
+from __future__ import annotations
 
 import argparse
+import importlib.util
 import json
-import os
+import logging
 import sys
 from pathlib import Path
+from typing import Any
 
-# Ensure src/ is importable when running as a script
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
+from ._common import add_data_arguments, has_class_folders, synthetic_arrays, to_dataset
 
+logger = logging.getLogger("tensorverse.train")
 
-def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(
-        description="TensorVerseHub — Model Training CLI",
-        formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog=__doc__,
-    )
-
-    # Task selection
-    parser.add_argument(
-        "--task",
-        type=str,
-        choices=["classification", "text_classification", "autoencoder", "gan"],
-        default="classification",
-        help="Training task type (default: classification)",
-    )
-
-    # Data arguments
-    data_group = parser.add_argument_group("Data")
-    data_group.add_argument(
-        "--data",
-        type=str,
-        default="./data",
-        help="Path to dataset directory (default: ./data)",
-    )
-    data_group.add_argument(
-        "--image-size",
-        type=int,
-        nargs=2,
-        default=[224, 224],
-        metavar=("H", "W"),
-        help="Input image size (default: 224 224)",
-    )
-    data_group.add_argument(
-        "--num-classes",
-        type=int,
-        default=10,
-        help="Number of output classes (default: 10)",
-    )
-    data_group.add_argument(
-        "--batch-size",
-        type=int,
-        default=32,
-        help="Training batch size (default: 32)",
-    )
-    data_group.add_argument(
-        "--val-split",
-        type=float,
-        default=0.2,
-        help="Validation split ratio (default: 0.2)",
-    )
-
-    # Model arguments
-    model_group = parser.add_argument_group("Model")
-    model_group.add_argument(
-        "--architecture",
-        type=str,
-        choices=["simple", "vgg", "resnet", "lstm", "gru", "transformer"],
-        default="resnet",
-        help="Model architecture (default: resnet)",
-    )
-    model_group.add_argument(
-        "--pretrained",
-        action="store_true",
-        help="Use ImageNet-pretrained weights (for vision models)",
-    )
-
-    # Training arguments
-    train_group = parser.add_argument_group("Training")
-    train_group.add_argument(
-        "--epochs",
-        type=int,
-        default=10,
-        help="Number of training epochs (default: 10)",
-    )
-    train_group.add_argument(
-        "--learning-rate",
-        type=float,
-        default=1e-3,
-        help="Initial learning rate (default: 0.001)",
-    )
-    train_group.add_argument(
-        "--optimizer",
-        type=str,
-        choices=["adam", "sgd", "adamw", "rmsprop"],
-        default="adam",
-        help="Optimizer (default: adam)",
-    )
-    train_group.add_argument(
-        "--early-stopping",
-        action="store_true",
-        default=True,
-        help="Enable early stopping (default: True)",
-    )
-    train_group.add_argument(
-        "--patience",
-        type=int,
-        default=5,
-        help="Early stopping patience (default: 5)",
-    )
-    train_group.add_argument(
-        "--mixed-precision",
-        action="store_true",
-        help="Enable mixed-precision (float16) training",
-    )
-
-    # Output arguments
-    output_group = parser.add_argument_group("Output")
-    output_group.add_argument(
-        "--output-dir",
-        type=str,
-        default="./models",
-        help="Directory to save trained model (default: ./models)",
-    )
-    output_group.add_argument(
-        "--log-dir",
-        type=str,
-        default="./logs",
-        help="TensorBoard log directory (default: ./logs)",
-    )
-    output_group.add_argument(
-        "--save-format",
-        type=str,
-        choices=["saved_model", "h5", "both"],
-        default="saved_model",
-        help="Model save format (default: saved_model)",
-    )
-
-    # Config file (overrides CLI args if provided)
-    parser.add_argument(
-        "--config",
-        type=str,
-        default=None,
-        help="Path to JSON config file (overrides other CLI arguments)",
-    )
-    parser.add_argument(
-        "--quiet",
-        "-q",
-        action="store_true",
-        help="Suppress verbose output",
-    )
-
-    return parser.parse_args()
+TASKS = ("classification", "text_classification", "autoencoder")
+ARCHITECTURES = ("simple", "vgg", "resnet", "lstm", "gru", "transformer", "mlp")
 
 
-def load_config(config_path: str) -> dict:
-    """Load and validate a JSON training config file."""
-    if not os.path.isfile(config_path):
-        raise FileNotFoundError(f"Config file not found: {config_path}")
-    with open(config_path) as f:
-        return json.load(f)
+def add_arguments(parser: argparse.ArgumentParser) -> None:
+    parser.add_argument("--task", choices=TASKS, default="classification")
+    add_data_arguments(parser, "./data")
+    parser.add_argument("--val-split", type=float, default=0.2, help="Validation fraction")
+
+    model = parser.add_argument_group("model")
+    model.add_argument("--architecture", choices=ARCHITECTURES, default="simple")
+    model.add_argument("--vocab-size", type=int, default=10000)
+    model.add_argument("--latent-dim", type=int, default=64, help="Autoencoder latent size")
+
+    train = parser.add_argument_group("training")
+    train.add_argument("--epochs", type=int, default=5)
+    train.add_argument("--learning-rate", type=float, default=1e-3)
+    train.add_argument("--optimizer", choices=["adam", "adamw", "sgd", "rmsprop"], default="adam")
+    train.add_argument("--patience", type=int, default=5, help="Early-stopping patience")
+    train.add_argument("--no-early-stopping", action="store_true")
+    train.add_argument("--mixed-precision", action="store_true")
+    train.add_argument("--seed", type=int, default=42)
+
+    out = parser.add_argument_group("output")
+    out.add_argument("--output-dir", default="./models")
+    out.add_argument("--log-dir", default="./logs")
+    out.add_argument("--model-name", default="final_model")
+    out.add_argument("--export-savedmodel", action="store_true", help="Also export a SavedModel")
+    out.add_argument("--config", type=str, default=None, help="JSON file overriding arguments")
+    out.add_argument("--quiet", "-q", action="store_true")
 
 
-def build_model(args):
-    """Build a tf.keras model according to the parsed arguments."""
-    import tensorflow as tf
+def apply_config(args: argparse.Namespace) -> argparse.Namespace:
+    if args.config:
+        with open(args.config, encoding="utf-8") as fh:
+            for key, value in json.load(fh).items():
+                setattr(args, key.replace("-", "_"), value)
+    return args
 
-    from model_utils import ModelBuilders
 
-    image_size = tuple(args.image_size)
+def build_model(args: argparse.Namespace) -> Any:
+    from ..model_utils import ModelBuilders
 
+    h, w = args.image_size
     if args.task == "classification":
-        model = ModelBuilders.create_cnn_classifier(
-            input_shape=(*image_size, 3),
-            num_classes=args.num_classes,
-            architecture=(
-                args.architecture if args.architecture in ("simple", "vgg", "resnet") else "resnet"
-            ),
-        )
-    elif args.task == "text_classification":
-        model = ModelBuilders.create_text_classifier(
-            vocab_size=10000,
+        arch = args.architecture if args.architecture in ("simple", "vgg", "resnet") else "simple"
+        return ModelBuilders.create_cnn_classifier((h, w, 3), args.num_classes, arch)
+    if args.task == "text_classification":
+        arch = args.architecture if args.architecture in ("lstm", "gru", "transformer") else "lstm"
+        return ModelBuilders.create_text_classifier(
+            vocab_size=args.vocab_size,
             max_length=128,
             num_classes=args.num_classes,
-            architecture=(
-                args.architecture if args.architecture in ("lstm", "gru", "transformer") else "lstm"
-            ),
+            architecture=arch,
         )
-    elif args.task == "autoencoder":
-        model, _, _ = ModelBuilders.create_autoencoder(
-            input_shape=(*image_size, 3),
-            latent_dim=128,
-        )
-    else:
-        raise ValueError(f"Unsupported task: {args.task}")
-
-    return model
+    autoencoder, _, _ = ModelBuilders.create_autoencoder(
+        (h, w, 3),
+        encoding_dim=args.latent_dim,
+        architecture="conv" if h % 4 == 0 and w % 4 == 0 else "dense",
+    )
+    return autoencoder
 
 
-def get_optimizer(args):
-    """Construct the optimizer from parsed arguments."""
-    import tensorflow as tf
+def build_optimizer(args: argparse.Namespace) -> Any:
+    from ..compat import keras
 
     lr = args.learning_rate
-    optimizers = {
-        "adam": tf.keras.optimizers.Adam(lr),
-        "sgd": tf.keras.optimizers.SGD(lr, momentum=0.9, nesterov=True),
-        "adamw": tf.keras.optimizers.AdamW(lr),
-        "rmsprop": tf.keras.optimizers.RMSprop(lr),
-    }
-    return optimizers[args.optimizer]
+    return {
+        "adam": lambda: keras.optimizers.Adam(lr),
+        "adamw": lambda: keras.optimizers.AdamW(lr),
+        "sgd": lambda: keras.optimizers.SGD(lr, momentum=0.9, nesterov=True),
+        "rmsprop": lambda: keras.optimizers.RMSprop(lr),
+    }[args.optimizer]()
 
 
-def build_callbacks(args):
-    """Build training callbacks."""
-    import tensorflow as tf
+def build_callbacks(args: argparse.Namespace) -> list:
+    from .. import compat
+    from ..compat import keras
 
     callbacks = [
-        tf.keras.callbacks.TensorBoard(log_dir=args.log_dir, histogram_freq=1),
-        tf.keras.callbacks.ModelCheckpoint(
-            filepath=os.path.join(args.output_dir, "checkpoint_epoch{epoch:02d}.weights.h5"),
-            save_best_only=True,
+        keras.callbacks.ModelCheckpoint(
+            filepath=compat.checkpoint_filepath(args.output_dir, "best_model"),
             monitor="val_loss",
+            save_best_only=True,
             verbose=0,
         ),
+        keras.callbacks.ReduceLROnPlateau(
+            monitor="val_loss", factor=0.5, patience=max(1, args.patience // 2), verbose=0
+        ),
     ]
-    if args.early_stopping:
+    if importlib.util.find_spec("tensorboard") is not None:
+        callbacks.append(keras.callbacks.TensorBoard(log_dir=args.log_dir))
+    else:
+        logger.warning("tensorboard not installed; skipping TensorBoard logging")
+    if not args.no_early_stopping:
         callbacks.append(
-            tf.keras.callbacks.EarlyStopping(
-                monitor="val_loss",
-                patience=args.patience,
-                restore_best_weights=True,
-                verbose=1,
+            keras.callbacks.EarlyStopping(
+                monitor="val_loss", patience=args.patience, restore_best_weights=True
             )
         )
-    callbacks.append(
-        tf.keras.callbacks.ReduceLROnPlateau(
-            monitor="val_loss",
-            factor=0.5,
-            patience=max(2, args.patience // 2),
-            verbose=1,
-        )
-    )
     return callbacks
 
 
-def create_synthetic_dataset(args):
-    """
-    Create a small synthetic dataset for demonstration when no data directory
-    is found. In production, replace this with a real data loader.
-    """
-    import numpy as np
-    import tensorflow as tf
+def load_data(args: argparse.Namespace):
+    if args.task == "classification" and has_class_folders(args.data):
+        from ..data_utils import create_image_classification_pipeline
 
-    if args.task == "classification":
-        h, w = args.image_size
-        x = np.random.rand(200, h, w, 3).astype("float32")
-        y = np.random.randint(0, args.num_classes, 200)
-    elif args.task == "text_classification":
-        x = np.random.randint(0, 10000, (200, 128))
-        y = np.random.randint(0, args.num_classes, 200)
-    else:  # autoencoder
-        h, w = args.image_size
-        x = np.random.rand(200, h, w, 3).astype("float32")
-        y = x  # reconstruction target
-
-    dataset = tf.data.Dataset.from_tensor_slices((x, y))
-    n_val = int(len(x) * args.val_split)
-    val_ds = dataset.take(n_val).batch(args.batch_size)
-    train_ds = dataset.skip(n_val).batch(args.batch_size)
-    return train_ds, val_ds
-
-
-def main():
-    args = parse_args()
-
-    # Allow JSON config to override CLI args
-    if args.config:
-        config = load_config(args.config)
-        for key, value in config.items():
-            setattr(args, key.replace("-", "_"), value)
-
-    # Lazy TensorFlow import (avoids slow startup for --help)
-    import tensorflow as tf
-
-    if not args.quiet:
-        print(f"TensorVerseHub Training CLI  |  TensorFlow {tf.__version__}")
-        print(f"  Task        : {args.task}")
-        print(f"  Architecture: {args.architecture}")
-        print(f"  Epochs      : {args.epochs}")
-        print(f"  Batch size  : {args.batch_size}")
-        print(f"  Output dir  : {args.output_dir}")
-
-    # Mixed precision
-    if args.mixed_precision:
-        tf.keras.mixed_precision.set_global_policy("mixed_float16")
-        if not args.quiet:
-            print("  Mixed precision: ON (float16)")
-
-    # Prepare output directories
-    os.makedirs(args.output_dir, exist_ok=True)
-    os.makedirs(args.log_dir, exist_ok=True)
-
-    # Build model
-    model = build_model(args)
-
-    loss = "sparse_categorical_crossentropy"
-    if args.task == "autoencoder":
-        loss = "mse"
-
-    model.compile(
-        optimizer=get_optimizer(args),
-        loss=loss,
-        metrics=["accuracy"] if args.task != "autoencoder" else ["mae"],
+        logger.info("Loading images from %s", args.data)
+        return create_image_classification_pipeline(
+            args.data,
+            batch_size=args.batch_size,
+            image_size=tuple(args.image_size),
+            validation_split=args.val_split,
+            seed=args.seed,
+        )
+    logger.info("No dataset at '%s' — using synthetic data", args.data)
+    x, y = synthetic_arrays(
+        args.task, tuple(args.image_size), args.num_classes, args.num_samples, args.seed
+    )
+    n_val = max(1, int(len(x) * args.val_split))
+    return (
+        to_dataset(x[n_val:], y[n_val:], args.batch_size, shuffle=True),
+        to_dataset(x[:n_val], y[:n_val], args.batch_size),
     )
 
+
+def run(args: argparse.Namespace) -> int:
+    args = apply_config(args)
+    import tensorflow as tf
+
+    from .. import compat, configure_tensorflow
+    from ..model_utils import save_model_with_metadata
+
+    configure_tensorflow(
+        mixed_precision=args.mixed_precision,
+        seed=args.seed,
+        log_level=logging.WARNING if args.quiet else logging.INFO,
+    )
+    Path(args.output_dir).mkdir(parents=True, exist_ok=True)
+    Path(args.log_dir).mkdir(parents=True, exist_ok=True)
+
+    model = build_model(args)
+    is_ae = args.task == "autoencoder"
+    model.compile(
+        optimizer=build_optimizer(args),
+        loss="mse" if is_ae else "sparse_categorical_crossentropy",
+        metrics=["mae"] if is_ae else ["accuracy"],
+    )
     if not args.quiet:
         model.summary()
 
-    # Load or synthesise dataset
-    data_path = Path(args.data)
-    if data_path.exists() and any(data_path.iterdir()):
-        if not args.quiet:
-            print(f"\nLoading data from {data_path} …")
-        # TODO: plug in DataPipeline.create_image_dataset for real data
-        train_ds, val_ds = create_synthetic_dataset(args)
-    else:
-        if not args.quiet:
-            print(
-                f"\nData directory '{args.data}' not found — using synthetic data for demonstration."
-            )
-        train_ds, val_ds = create_synthetic_dataset(args)
-
-    # Train
+    train_ds, val_ds = load_data(args)
     history = model.fit(
         train_ds,
         validation_data=val_ds,
@@ -350,29 +174,41 @@ def main():
         verbose=0 if args.quiet else 1,
     )
 
-    # Save
-    final_path = os.path.join(args.output_dir, "final_model")
-    if args.save_format in ("saved_model", "both"):
-        model.save(final_path)
-        if not args.quiet:
-            print(f"\nSaved model → {final_path}")
-    if args.save_format in ("h5", "both"):
-        h5_path = final_path + ".h5"
-        model.save(h5_path)
-        if not args.quiet:
-            print(f"Saved model → {h5_path}")
+    hist = {k: [float(v) for v in vals] for k, vals in history.history.items()}
+    metadata = {
+        "task": args.task,
+        "architecture": args.architecture,
+        "epochs_run": len(hist.get("loss", [])),
+        "image_size": list(args.image_size),
+        "num_classes": args.num_classes,
+        "final_metrics": {k: v[-1] for k, v in hist.items() if v},
+    }
+    keras_path = save_model_with_metadata(
+        model, Path(args.output_dir) / f"{args.model_name}{compat.NATIVE_MODEL_EXTENSION}", metadata
+    )
+    logger.info("Saved model → %s", keras_path)
+    if args.export_savedmodel:
+        sm_path = compat.export_saved_model(
+            model, Path(args.output_dir) / f"{args.model_name}_savedmodel"
+        )
+        logger.info("Exported SavedModel → %s", sm_path)
 
-    # Save training history
-    history_path = os.path.join(args.output_dir, "training_history.json")
-    with open(history_path, "w") as f:
-        json.dump({k: [float(v) for v in vals] for k, vals in history.history.items()}, f, indent=2)
+    history_path = Path(args.output_dir) / "training_history.json"
+    history_path.write_text(json.dumps(hist, indent=2), encoding="utf-8")
+    logger.info("History saved → %s", history_path)
 
-    if not args.quiet:
-        val_key = "val_accuracy" if "val_accuracy" in history.history else "val_mae"
-        best = max(history.history.get(val_key, [0]))
-        print(f"\nTraining complete. Best {val_key}: {best:.4f}")
-        print(f"History saved → {history_path}")
+    key = next((k for k in ("val_accuracy", "val_mae", "val_loss") if k in hist), None)
+    if key and not args.quiet:
+        best = min(hist[key]) if key != "val_accuracy" else max(hist[key])
+        logger.info("Best %s: %.4f  (TensorFlow %s)", key, best, tf.__version__)
+    return 0
 
 
-if __name__ == "__main__":
+def main() -> None:
+    from . import main as cli_main
+
+    sys.exit(cli_main(["train", *sys.argv[1:]]))
+
+
+if __name__ == "__main__":  # pragma: no cover
     main()

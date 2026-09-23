@@ -1,294 +1,161 @@
-#!/usr/bin/env python3
-"""
-tensorverse-evaluate  — CLI for evaluating trained TensorFlow models.
+"""Evaluate a .keras / SavedModel / TFLite model and write metrics and plots."""
 
-Usage
------
-    tensorverse-evaluate --model ./models/final_model --data ./data/test
-    tensorverse-evaluate --model ./models/model.h5 --task classification --num-classes 10
-    tensorverse-evaluate --model ./models/final_model --report --confusion-matrix
-"""
+from __future__ import annotations
 
 import argparse
 import json
-import os
+import logging
 import sys
 from pathlib import Path
+from typing import Any, Dict, Tuple
 
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
+import numpy as np
+
+from ._common import add_data_arguments, has_class_folders, synthetic_arrays, to_dataset
+
+logger = logging.getLogger("tensorverse.evaluate")
 
 
-def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(
-        description="TensorVerseHub — Model Evaluation CLI",
-        formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog=__doc__,
-    )
-
+def add_arguments(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
-        "--model",
-        type=str,
-        required=True,
-        help="Path to the saved model (SavedModel directory or .h5 file)",
+        "--model", required=True, help="Path to .keras/.h5 file, SavedModel dir or .tflite"
     )
-    parser.add_argument(
-        "--tflite",
-        type=str,
-        default=None,
-        help="Path to a TFLite model (.tflite) to evaluate instead",
-    )
-
-    # Data
-    data_group = parser.add_argument_group("Data")
-    data_group.add_argument(
-        "--data",
-        type=str,
-        default="./data/test",
-        help="Path to test dataset (default: ./data/test)",
-    )
-    data_group.add_argument(
-        "--image-size",
-        type=int,
-        nargs=2,
-        default=[224, 224],
-        metavar=("H", "W"),
-        help="Input image size (default: 224 224)",
-    )
-    data_group.add_argument(
-        "--num-classes",
-        type=int,
-        default=10,
-        help="Number of output classes (default: 10)",
-    )
-    data_group.add_argument(
-        "--batch-size",
-        type=int,
-        default=32,
-        help="Evaluation batch size (default: 32)",
-    )
-
-    # Reports
-    report_group = parser.add_argument_group("Reports")
-    report_group.add_argument(
-        "--report",
-        action="store_true",
-        help="Print a detailed classification report",
-    )
-    report_group.add_argument(
-        "--confusion-matrix",
-        action="store_true",
-        help="Plot and save the confusion matrix",
-    )
-    report_group.add_argument(
-        "--roc-curves",
-        action="store_true",
-        help="Plot ROC curves (binary / multi-class)",
-    )
-    report_group.add_argument(
-        "--output-dir",
-        type=str,
-        default="./eval_results",
-        help="Directory to save evaluation artifacts (default: ./eval_results)",
-    )
-
-    # Task context
     parser.add_argument(
         "--task",
-        type=str,
-        choices=["classification", "text_classification", "regression"],
+        choices=["classification", "text_classification", "autoencoder"],
         default="classification",
-        help="Evaluation task type (default: classification)",
     )
-    parser.add_argument(
-        "--class-names",
-        type=str,
-        nargs="+",
-        default=None,
-        help="Optional list of class names for reports",
+    add_data_arguments(parser, "./data/test")
+    reports = parser.add_argument_group("reports")
+    reports.add_argument("--report", action="store_true", help="Print a classification report")
+    reports.add_argument("--confusion-matrix", action="store_true")
+    reports.add_argument("--roc-curves", action="store_true")
+    reports.add_argument("--class-names", nargs="+", default=None)
+    reports.add_argument("--output-dir", default="./eval_results")
+    parser.add_argument("--seed", type=int, default=123)
+    parser.add_argument("--quiet", "-q", action="store_true")
+
+
+def load_any_model(path: str) -> Tuple[Any, str]:
+    from .. import compat
+
+    if path.endswith(".tflite"):
+        from ..export_utils import make_interpreter
+
+        return make_interpreter(path), "tflite"
+    model = compat.load_model(path)
+    return model, ("keras" if isinstance(model, compat.keras.Model) else "savedmodel")
+
+
+def load_data(args: argparse.Namespace):
+    if args.task == "classification" and has_class_folders(args.data):
+        from ..data_utils import create_image_classification_pipeline
+
+        _, val_ds = create_image_classification_pipeline(
+            args.data,
+            batch_size=args.batch_size,
+            image_size=tuple(args.image_size),
+            validation_split=0.999,
+            seed=args.seed,
+        )
+        return val_ds
+    logger.info("No dataset at '%s' — using synthetic data", args.data)
+    x, y = synthetic_arrays(
+        args.task, tuple(args.image_size), args.num_classes, args.num_samples, args.seed
     )
-    parser.add_argument(
-        "--quiet",
-        "-q",
-        action="store_true",
-        help="Suppress verbose output",
-    )
-
-    return parser.parse_args()
+    return to_dataset(x, y, args.batch_size)
 
 
-def load_model(args):
-    """Load a Keras SavedModel, .h5, or TFLite model."""
-    import tensorflow as tf
+def predict_all(model: Any, kind: str, dataset: Any) -> Tuple[np.ndarray, np.ndarray]:
+    from ..export_utils import TFLiteExporter
 
-    if args.tflite:
-        interpreter = tf.lite.Interpreter(model_path=args.tflite)
-        interpreter.allocate_tensors()
-        return interpreter, "tflite"
-
-    model = tf.keras.models.load_model(args.model)
-    return model, "keras"
-
-
-def create_synthetic_test_data(args):
-    """Generate synthetic test samples for demonstration."""
-    import numpy as np
-    import tensorflow as tf
-
-    if args.task == "classification":
-        h, w = args.image_size
-        x = np.random.rand(100, h, w, 3).astype("float32")
-        y = np.random.randint(0, args.num_classes, 100)
-    elif args.task == "text_classification":
-        x = np.random.randint(0, 10000, (100, 128))
-        y = np.random.randint(0, args.num_classes, 100)
-    else:
-        h, w = args.image_size
-        x = np.random.rand(100, h, w, 3).astype("float32")
-        y = np.random.rand(100, args.num_classes).astype("float32")
-
-    dataset = tf.data.Dataset.from_tensor_slices((x, y)).batch(args.batch_size)
-    return dataset, y
+    preds, trues = [], []
+    for x, y in dataset:
+        x_np = x.numpy()
+        if kind == "tflite":
+            preds.append(TFLiteExporter.run_tflite(model, x_np))
+        elif kind == "keras":
+            preds.append(model.predict(x_np, verbose=0))
+        else:
+            preds.append(model.predict(x_np))
+        trues.append(y.numpy())
+    return np.concatenate(preds), np.concatenate(trues)
 
 
-def evaluate_keras(model, dataset, args):
-    """Evaluate a Keras model and return (loss, metrics, y_pred, y_true)."""
-    import numpy as np
-
-    results = model.evaluate(dataset, verbose=0 if args.quiet else 1, return_dict=True)
-
-    y_pred_list, y_true_list = [], []
-    for x_batch, y_batch in dataset:
-        preds = model.predict(x_batch, verbose=0)
-        y_pred_list.append(preds)
-        y_true_list.append(y_batch.numpy())
-
-    y_pred = np.concatenate(y_pred_list, axis=0)
-    y_true = np.concatenate(y_true_list, axis=0)
-    return results, y_pred, y_true
+def compute_metrics(y_pred: np.ndarray, y_true: np.ndarray, task: str) -> Dict[str, float]:
+    if task == "autoencoder":
+        return {
+            "mse": float(np.mean((y_pred - y_true) ** 2)),
+            "mae": float(np.mean(np.abs(y_pred - y_true))),
+        }
+    labels = y_pred.argmax(axis=1)
+    eps = 1e-7
+    nll = -np.log(np.clip(y_pred[np.arange(len(labels)), y_true.astype(int)], eps, 1.0))
+    return {"accuracy": float(np.mean(labels == y_true)), "loss": float(np.mean(nll))}
 
 
-def evaluate_tflite(interpreter, dataset, args):
-    """Evaluate a TFLite model."""
-    import numpy as np
+def run(args: argparse.Namespace) -> int:
+    from .. import configure_tensorflow
 
-    input_details = interpreter.get_input_details()
-    output_details = interpreter.get_output_details()
+    configure_tensorflow(log_level=logging.WARNING if args.quiet else logging.INFO)
+    out_dir = Path(args.output_dir)
+    out_dir.mkdir(parents=True, exist_ok=True)
 
-    y_pred_list, y_true_list = [], []
-    for x_batch, y_batch in dataset:
-        for i in range(len(x_batch)):
-            sample = np.expand_dims(x_batch[i].numpy(), axis=0).astype(input_details[0]["dtype"])
-            interpreter.set_tensor(input_details[0]["index"], sample)
-            interpreter.invoke()
-            output = interpreter.get_tensor(output_details[0]["index"])
-            y_pred_list.append(output[0])
-            y_true_list.append(y_batch[i].numpy())
+    model, kind = load_any_model(args.model)
+    logger.info("Loaded %s model from %s", kind, args.model)
+    dataset = load_data(args)
+    y_pred, y_true = predict_all(model, kind, dataset)
+    metrics = compute_metrics(y_pred, y_true, args.task)
+    if kind == "keras" and args.task != "autoencoder" and getattr(model, "compiled", True):
+        try:
+            compiled = model.evaluate(dataset, verbose=0, return_dict=True)
+            metrics.update({f"compiled_{k}": float(v) for k, v in compiled.items()})
+        except Exception as exc:  # uncompiled model
+            logger.debug("model.evaluate skipped: %s", exc)
 
-    y_pred = np.array(y_pred_list)
-    y_true = np.array(y_true_list)
-    return {}, y_pred, y_true
+    (out_dir / "metrics.json").write_text(json.dumps(metrics, indent=2), encoding="utf-8")
+    for k, v in metrics.items():
+        logger.info("%-20s %.4f", k, v)
 
-
-def save_results(results, y_pred, y_true, args):
-    """Save evaluation metrics and optional plots."""
-    import numpy as np
-
-    os.makedirs(args.output_dir, exist_ok=True)
-
-    if args.task in ("classification", "text_classification"):
-        y_pred_labels = y_pred.argmax(axis=1) if y_pred.ndim > 1 else y_pred.round().astype(int)
-        y_true_labels = y_true.astype(int)
-
-        accuracy = float(np.mean(y_pred_labels == y_true_labels))
-        results.setdefault("accuracy", accuracy)
-
+    if args.task != "autoencoder":
+        labels = y_pred.argmax(axis=1)
         if args.report:
-            try:
-                from sklearn.metrics import classification_report
+            from sklearn.metrics import classification_report
 
-                report = classification_report(
-                    y_true_labels,
-                    y_pred_labels,
-                    target_names=args.class_names,
-                    zero_division=0,
+            report = classification_report(
+                y_true.astype(int), labels, target_names=args.class_names, zero_division=0
+            )
+            print(report)
+            (out_dir / "classification_report.txt").write_text(report, encoding="utf-8")
+        if args.confusion_matrix or args.roc_curves:
+            from ..visualization import TrainingVisualization, use_headless_backend
+
+            use_headless_backend()
+            if args.confusion_matrix:
+                TrainingVisualization.plot_confusion_matrix(
+                    y_true.astype(int),
+                    labels,
+                    class_names=args.class_names,
+                    save_path=out_dir / "confusion_matrix.png",
+                    show=False,
                 )
-                print("\nClassification Report:\n")
-                print(report)
-
-                report_path = os.path.join(args.output_dir, "classification_report.txt")
-                with open(report_path, "w") as f:
-                    f.write(report)
-            except ImportError:
-                print("scikit-learn not installed — skipping classification report.")
-
-        if args.confusion_matrix:
-            try:
-                import matplotlib
-
-                matplotlib.use("Agg")
-                import matplotlib.pyplot as plt
-                import seaborn as sns
-                from sklearn.metrics import confusion_matrix
-
-                cm = confusion_matrix(y_true_labels, y_pred_labels)
-                fig, ax = plt.subplots(figsize=(8, 6))
-                sns.heatmap(cm, annot=True, fmt="d", cmap="Blues", ax=ax)
-                ax.set_xlabel("Predicted")
-                ax.set_ylabel("True")
-                ax.set_title("Confusion Matrix")
-                cm_path = os.path.join(args.output_dir, "confusion_matrix.png")
-                plt.savefig(cm_path, dpi=150, bbox_inches="tight")
-                plt.close()
-                print(f"Confusion matrix saved → {cm_path}")
-            except ImportError:
-                print("matplotlib / seaborn / sklearn not installed — skipping confusion matrix.")
-
-    # Always save metrics JSON
-    metrics_path = os.path.join(args.output_dir, "metrics.json")
-    with open(metrics_path, "w") as f:
-        json.dump({k: float(v) for k, v in results.items()}, f, indent=2)
-    print(f"Metrics saved → {metrics_path}")
+            if args.roc_curves:
+                TrainingVisualization.plot_roc_curves(
+                    y_true.astype(int),
+                    y_pred,
+                    class_names=args.class_names,
+                    save_path=out_dir / "roc_curves.png",
+                    show=False,
+                )
+    logger.info("Evaluation artifacts saved to %s", out_dir)
+    return 0
 
 
-def main():
-    args = parse_args()
+def main() -> None:
+    from . import main as cli_main
 
-    import tensorflow as tf
-
-    if not args.quiet:
-        print(f"TensorVerseHub Evaluation CLI  |  TensorFlow {tf.__version__}")
-        print(f"  Model : {args.tflite or args.model}")
-        print(f"  Task  : {args.task}")
-
-    model, model_type = load_model(args)
-
-    # Load or synthesise test data
-    data_path = Path(args.data)
-    if data_path.exists() and any(data_path.iterdir()):
-        if not args.quiet:
-            print(f"Loading test data from {data_path} …")
-        # TODO: replace with DataPipeline.create_image_dataset for real data
-        dataset, y_true_raw = create_synthetic_test_data(args)
-    else:
-        if not args.quiet:
-            print(f"Test data directory '{args.data}' not found — using synthetic data.")
-        dataset, y_true_raw = create_synthetic_test_data(args)
-
-    if model_type == "keras":
-        results, y_pred, y_true = evaluate_keras(model, dataset, args)
-    else:
-        results, y_pred, y_true = evaluate_tflite(model, dataset, args)
-
-    if not args.quiet:
-        print("\n── Evaluation Results ──────────────────────────────")
-        for k, v in results.items():
-            print(f"  {k:20s}: {v:.4f}")
-
-    save_results(results, y_pred, y_true, args)
-
-    if not args.quiet:
-        print(f"\nAll evaluation artifacts saved to: {args.output_dir}")
+    sys.exit(cli_main(["evaluate", *sys.argv[1:]]))
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover
     main()
