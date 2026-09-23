@@ -15,7 +15,7 @@ body:
       label: Feature Area
       options:
         - New Notebook
-        - Utility Enhancement (src/)
+        - Utility Enhancement (tensorversehub/)
         - New Example
         - Documentation
         - Docker / Deployment

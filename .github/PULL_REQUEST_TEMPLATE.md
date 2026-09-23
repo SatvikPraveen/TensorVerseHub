@@ -34,7 +34,7 @@ Closes #<!-- issue number -->
 
 ## Checklist
 
-- [ ] Code follows the project style guidelines (`black`, `flake8`)
+- [ ] Code follows the project style guidelines (`make lint` — ruff + mypy)
 - [ ] Self-review of code completed
 - [ ] Comments added for complex logic
 - [ ] Documentation updated (if applicable)
