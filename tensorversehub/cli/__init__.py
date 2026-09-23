@@ -16,7 +16,7 @@ import argparse
 import json
 import logging
 import sys
-from typing import Callable, Dict, List, Optional, Sequence
+from typing import Callable, Dict, Optional, Sequence
 
 from .. import __version__
 

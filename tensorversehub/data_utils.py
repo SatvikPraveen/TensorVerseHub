@@ -744,7 +744,7 @@ def split_dataset(
     splits: List[tf.data.Dataset] = []
     start = 0
     for i, frac in enumerate(fractions):
-        size = total - start if i == len(fractions) - 1 else int(math.floor(total * frac))
+        size = total - start if i == len(fractions) - 1 else math.floor(total * frac)
         splits.append(dataset.skip(start).take(size))
         start += size
     return splits
