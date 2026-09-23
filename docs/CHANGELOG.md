@@ -12,7 +12,7 @@ this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ## [2.0.0] — 2026-09-23
 
 A ground-up modernisation. The utilities are now a real, tested, typed package that
-targets TensorFlow 2.16–2.21 with Keras 3, while keeping legacy Keras 2 working for
+targets TensorFlow 2.17–2.21 with Keras 3, while keeping legacy Keras 2 working for
 `tensorflow-model-optimization`.
 
 ### Added
