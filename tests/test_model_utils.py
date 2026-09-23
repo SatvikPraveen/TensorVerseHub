@@ -1,3 +1,5 @@
+import importlib.util
+
 import numpy as np
 import pytest
 import tensorflow as tf
@@ -122,7 +124,9 @@ class TestTrainingUtilities:
             "unit", patience=2, checkpoint_dir=tmp_path / "ck", log_dir=tmp_path / "logs"
         )
         types = {type(c).__name__ for c in callbacks}
-        assert {"ModelCheckpoint", "EarlyStopping", "ReduceLROnPlateau", "TensorBoard"} <= types
+        assert {"ModelCheckpoint", "EarlyStopping", "ReduceLROnPlateau"} <= types
+        if importlib.util.find_spec("tensorboard") is not None:
+            assert "TensorBoard" in types  # skipped automatically when tensorboard is absent
         ckpt = next(c for c in callbacks if type(c).__name__ == "ModelCheckpoint")
         assert str(ckpt.filepath).endswith("best_model.keras")
         minimal = mu.TrainingUtilities.create_callbacks(
