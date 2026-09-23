@@ -1,678 +1,585 @@
-# Location: /src/export_utils.py
+"""
+Multi-format model export: SavedModel, TFLite, ONNX, TensorFlow.js and Core ML.
 
+Every exporter returns a statistics dictionary and never prints; optional
+back-ends (``tf2onnx``, ``tensorflowjs``, ``coremltools``) raise ``ImportError``
+with the install hint when missing.
 """
-TensorFlow model export utilities for various deployment formats.
-Supports SavedModel, TFLite, ONNX, TensorFlow.js, and other deployment formats.
-"""
+
+from __future__ import annotations
 
 import json
+import logging
 import os
 import tempfile
+import time
 import zipfile
-from typing import Any, Dict, List, Optional, Tuple, Union
+from datetime import datetime, timezone
+from pathlib import Path
+from typing import Any, Dict, Optional, Sequence, Tuple, Union
 
 import numpy as np
 import tensorflow as tf
 
+from . import compat
+from .compat import SavedModelPredictor, keras
+
+logger = logging.getLogger(__name__)
+PathLike = Union[str, "os.PathLike[str]"]
+
+EXPORT_FORMATS = ("savedmodel", "keras", "tflite", "onnx", "tfjs", "coreml")
+
+
+def _model_bytes(model: keras.Model) -> int:
+    return sum(compat.count_params([w]) * tf.as_dtype(w.dtype).size for w in model.weights)
+
+
+def _dir_size(path: PathLike) -> int:
+    return sum(p.stat().st_size for p in Path(path).rglob("*") if p.is_file())
+
+
+def _now() -> str:
+    return datetime.now(timezone.utc).isoformat()
+
+
+def make_interpreter(
+    model_path: Optional[PathLike] = None, model_content: Optional[bytes] = None
+) -> Any:
+    """Create a TFLite interpreter, preferring the standalone LiteRT runtime when installed."""
+    kwargs = {"model_path": str(model_path)} if model_path else {"model_content": model_content}
+    try:
+        from ai_edge_litert.interpreter import Interpreter  # type: ignore[import-not-found]
+    except ImportError:
+        Interpreter = tf.lite.Interpreter  # type: ignore[assignment]
+    interpreter = Interpreter(**kwargs)
+    interpreter.allocate_tensors()
+    return interpreter
+
+
+def _model_config(model: keras.Model, include_optimizer: bool = False) -> Dict[str, Any]:
+    optimizer = getattr(model, "optimizer", None)
+    return {
+        "name": model.name,
+        "input_shape": list(compat.model_input_shape(model)),
+        "output_shape": list(model.output_shape),
+        "num_parameters": int(model.count_params()),
+        "num_layers": len(model.layers),
+        "optimizer": (
+            optimizer.get_config() if include_optimizer and optimizer is not None else None
+        ),
+        "loss": str(getattr(model, "loss", None)),
+        "metrics": compat.metric_names(model),
+        "tensorflow_version": compat.TF_VERSION,
+        "keras_version": compat.KERAS_VERSION,
+    }
+
+
+# ---------------------------------------------------------------------------
+# SavedModel
+# ---------------------------------------------------------------------------
+
 
 class SavedModelExporter:
-    """Utilities for exporting to TensorFlow SavedModel format."""
+    """Inference SavedModel with ``metadata.json`` / ``model_config.json`` sidecars."""
 
     @staticmethod
     def export_savedmodel(
-        model: tf.keras.Model,
-        export_path: str,
-        signature_name: str = "serving_default",
+        model: keras.Model,
+        export_path: PathLike,
         include_optimizer: bool = False,
         metadata: Optional[Dict[str, Any]] = None,
-    ) -> None:
-        """
-        Export model to SavedModel format with metadata.
-
-        Args:
-            model: tf.keras model to export
-            export_path: Path to save the model
-            signature_name: Name for the serving signature
-            include_optimizer: Whether to include optimizer state
-            metadata: Additional metadata to save
-        """
-        # Ensure directory exists
-        os.makedirs(export_path, exist_ok=True)
-
-        # Save model in SavedModel format
-        tf.saved_model.save(
-            model,
-            export_path,
-            signatures={
-                signature_name: model.call.get_concrete_function(
-                    tf.TensorSpec(shape=model.input_shape, dtype=tf.float32)
-                )
-            },
+    ) -> Dict[str, Any]:
+        export_path = str(export_path)
+        compat.export_saved_model(model, export_path)
+        config = _model_config(model, include_optimizer)
+        Path(export_path, "model_config.json").write_text(
+            json.dumps(config, indent=2, default=str), encoding="utf-8"
         )
-
-        # Save metadata
         if metadata is not None:
-            metadata_path = os.path.join(export_path, "metadata.json")
-            with open(metadata_path, "w") as f:
-                json.dump(metadata, f, indent=2, default=str)
-
-        # Save model configuration
-        config_path = os.path.join(export_path, "model_config.json")
-        model_config = {
-            "input_shape": list(model.input_shape),
-            "output_shape": list(model.output_shape),
-            "num_parameters": model.count_params(),
-            "num_layers": len(model.layers),
-            "optimizer": (
-                model.optimizer.get_config() if include_optimizer and model.optimizer else None
-            ),
-            "loss": model.loss,
-            "metrics": (
-                [m.name if hasattr(m, "name") else str(m) for m in model.metrics]
-                if model.metrics
-                else []
-            ),
+            Path(export_path, "metadata.json").write_text(
+                json.dumps(metadata, indent=2, default=str), encoding="utf-8"
+            )
+        stats: Dict[str, Any] = {
+            "export_path": export_path,
+            "size_bytes": _dir_size(export_path),
+            "original_size_bytes": _model_bytes(model),
         }
-
-        with open(config_path, "w") as f:
-            json.dump(model_config, f, indent=2, default=str)
-
-        print(f"Model exported to SavedModel format at: {export_path}")
+        logger.info("SavedModel exported to %s (%.2f MB)", export_path, stats["size_bytes"] / 2**20)
+        return stats
 
     @staticmethod
-    def load_savedmodel_with_metadata(model_path: str) -> Tuple[tf.keras.Model, Dict[str, Any]]:
-        """
-        Load SavedModel with metadata.
+    def load_savedmodel_with_metadata(
+        model_path: PathLike,
+    ) -> Tuple[SavedModelPredictor, Dict[str, Any]]:
+        predictor = SavedModelPredictor(model_path)
+        metadata: Dict[str, Any] = {}
+        meta_file = Path(model_path, "metadata.json")
+        if meta_file.exists():
+            metadata = json.loads(meta_file.read_text(encoding="utf-8"))
+        config_file = Path(model_path, "model_config.json")
+        metadata["model_config"] = (
+            json.loads(config_file.read_text(encoding="utf-8")) if config_file.exists() else {}
+        )
+        return predictor, metadata
 
-        Args:
-            model_path: Path to SavedModel
 
-        Returns:
-            Tuple of (loaded_model, metadata)
-        """
-        # Load model
-        model = tf.saved_model.load(model_path)
-
-        # Load metadata
-        metadata = {}
-        metadata_path = os.path.join(model_path, "metadata.json")
-        if os.path.exists(metadata_path):
-            with open(metadata_path, "r") as f:
-                metadata = json.load(f)
-
-        # Load model config
-        config = {}
-        config_path = os.path.join(model_path, "model_config.json")
-        if os.path.exists(config_path):
-            with open(config_path, "r") as f:
-                config = json.load(f)
-
-        metadata["model_config"] = config
-
-        return model, metadata
+# ---------------------------------------------------------------------------
+# TFLite
+# ---------------------------------------------------------------------------
 
 
 class TFLiteExporter:
-    """Utilities for exporting to TensorFlow Lite format."""
+    """TFLite conversion, benchmarking and numerical validation."""
+
+    QUANTIZATION_TYPES = ("float32", "dynamic", "float16", "int8")
 
     @staticmethod
     def export_tflite(
-        model: tf.keras.Model,
-        export_path: str,
+        model: keras.Model,
+        export_path: PathLike,
         quantization_type: str = "float32",
-        representative_dataset: Optional[tf.data.Dataset] = None,
-        target_ops: Optional[List[str]] = None,
+        representative_dataset: Optional[Union[tf.data.Dataset, np.ndarray]] = None,
+        target_ops: Optional[Sequence[str]] = None,
+        num_calibration_samples: int = 100,
     ) -> Dict[str, Any]:
         """
-        Export model to TFLite format with various optimizations.
+        Convert and write a ``.tflite`` file.
 
-        Args:
-            model: tf.keras model to export
-            export_path: Path to save TFLite model
-            quantization_type: Type of quantization ('float32', 'float16', 'int8')
-            representative_dataset: Dataset for calibration (needed for int8)
-            target_ops: Target operations for optimization
-
-        Returns:
-            Dictionary with export statistics
+        ``quantization_type``: ``float32`` (no quantisation), ``dynamic`` (int8 weights),
+        ``float16`` or ``int8`` (full integer, needs ``representative_dataset``).
         """
+        if quantization_type not in TFLiteExporter.QUANTIZATION_TYPES:
+            raise ValueError(
+                f"quantization_type must be one of {TFLiteExporter.QUANTIZATION_TYPES}"
+            )
+        from .optimization_utils import _representative_generator
+
         converter = tf.lite.TFLiteConverter.from_keras_model(model)
-
-        # Configure quantization
+        if quantization_type != "float32":
+            converter.optimizations = [tf.lite.Optimize.DEFAULT]
         if quantization_type == "float16":
-            converter.optimizations = [tf.lite.Optimize.DEFAULT]
             converter.target_spec.supported_types = [tf.float16]
-
         elif quantization_type == "int8":
-            converter.optimizations = [tf.lite.Optimize.DEFAULT]
+            if representative_dataset is None:
+                raise ValueError("int8 quantization requires a representative_dataset")
+            converter.representative_dataset = _representative_generator(
+                representative_dataset, num_calibration_samples
+            )
             converter.target_spec.supported_ops = [tf.lite.OpsSet.TFLITE_BUILTINS_INT8]
+            converter.inference_input_type = tf.int8
+            converter.inference_output_type = tf.int8
 
-            if representative_dataset is not None:
-
-                def representative_data_gen():
-                    for input_value in representative_dataset.take(100):
-                        if isinstance(input_value, tuple):
-                            yield [tf.cast(input_value[0], tf.float32)]
-                        else:
-                            yield [tf.cast(input_value, tf.float32)]
-
-                converter.representative_dataset = representative_data_gen
-            else:
-                print("Warning: int8 quantization requested but no representative dataset provided")
-
-        elif quantization_type == "float32":
-            converter.optimizations = [tf.lite.Optimize.DEFAULT]
-
-        # Set target operations if specified
         if target_ops:
-            op_sets = []
-            for op in target_ops:
-                if op == "TFLITE_BUILTINS":
-                    op_sets.append(tf.lite.OpsSet.TFLITE_BUILTINS)
-                elif op == "SELECT_TF_OPS":
-                    op_sets.append(tf.lite.OpsSet.SELECT_TF_OPS)
-            converter.target_spec.supported_ops = op_sets
+            op_map = {
+                "TFLITE_BUILTINS": tf.lite.OpsSet.TFLITE_BUILTINS,
+                "TFLITE_BUILTINS_INT8": tf.lite.OpsSet.TFLITE_BUILTINS_INT8,
+                "SELECT_TF_OPS": tf.lite.OpsSet.SELECT_TF_OPS,
+            }
+            unknown = set(target_ops) - set(op_map)
+            if unknown:
+                raise ValueError(f"Unknown target ops: {sorted(unknown)}")
+            converter.target_spec.supported_ops = [op_map[o] for o in target_ops]
 
-        # Convert model
         try:
             tflite_model = converter.convert()
+        except Exception as exc:
+            raise RuntimeError(f"TFLite conversion failed: {exc}") from exc
 
-            # Save to file
-            with open(export_path, "wb") as f:
-                f.write(tflite_model)
+        export_path = str(export_path)
+        Path(export_path).parent.mkdir(parents=True, exist_ok=True)
+        Path(export_path).write_bytes(tflite_model)
 
-            # Calculate statistics
-            original_size = model.count_params() * 4  # Assuming float32
-            tflite_size = len(tflite_model)
-            compression_ratio = original_size / tflite_size if tflite_size > 0 else 0
+        original = _model_bytes(model)
+        stats = {
+            "export_path": export_path,
+            "quantization_type": quantization_type,
+            "original_size_bytes": original,
+            "tflite_size_bytes": len(tflite_model),
+            "original_size_mb": original / 2**20,
+            "tflite_size_mb": len(tflite_model) / 2**20,
+            "compression_ratio": original / len(tflite_model) if tflite_model else 0.0,
+        }
+        logger.info(
+            "TFLite (%s) exported to %s: %.3f MB (%.2fx smaller)",
+            quantization_type,
+            export_path,
+            stats["tflite_size_mb"],
+            stats["compression_ratio"],
+        )
+        return stats
 
-            stats = {
-                "original_size_bytes": original_size,
-                "tflite_size_bytes": tflite_size,
-                "original_size_mb": original_size / (1024 * 1024),
-                "tflite_size_mb": tflite_size / (1024 * 1024),
-                "compression_ratio": compression_ratio,
-                "quantization_type": quantization_type,
-                "export_path": export_path,
-            }
-
-            print(f"TFLite model exported to: {export_path}")
-            print(f"Original size: {stats['original_size_mb']:.2f} MB")
-            print(f"TFLite size: {stats['tflite_size_mb']:.2f} MB")
-            print(f"Compression ratio: {compression_ratio:.2f}x")
-
-            return stats
-
-        except Exception as e:
-            raise RuntimeError(f"TFLite conversion failed: {str(e)}")
+    @staticmethod
+    def run_tflite(interpreter: Any, inputs: np.ndarray) -> np.ndarray:
+        """Run a batch through an interpreter one sample at a time (handles int8 I/O)."""
+        in_detail = interpreter.get_input_details()[0]
+        out_detail = interpreter.get_output_details()[0]
+        in_scale, in_zero = in_detail.get("quantization", (0.0, 0))
+        out_scale, out_zero = out_detail.get("quantization", (0.0, 0))
+        outputs = []
+        for sample in np.asarray(inputs):
+            x = sample[np.newaxis].astype(np.float32)
+            if in_detail["dtype"] in (np.int8, np.uint8) and in_scale:
+                x = np.round(x / in_scale + in_zero).astype(in_detail["dtype"])
+            else:
+                x = x.astype(in_detail["dtype"])
+            interpreter.set_tensor(in_detail["index"], x)
+            interpreter.invoke()
+            y = interpreter.get_tensor(out_detail["index"])[0]
+            if out_detail["dtype"] in (np.int8, np.uint8) and out_scale:
+                y = (y.astype(np.float32) - out_zero) * out_scale
+            outputs.append(y)
+        return np.stack(outputs)
 
     @staticmethod
     def benchmark_tflite_model(
-        tflite_path: str, test_input: np.ndarray, num_runs: int = 100
+        tflite_path: PathLike, test_input: np.ndarray, num_runs: int = 100, warmup: int = 5
     ) -> Dict[str, float]:
-        """
-        Benchmark TFLite model performance.
-
-        Args:
-            tflite_path: Path to TFLite model
-            test_input: Test input array
-            num_runs: Number of benchmark runs
-
-        Returns:
-            Performance metrics
-        """
-        import time
-
-        # Load TFLite model
-        interpreter = tf.lite.Interpreter(model_path=tflite_path)
-        interpreter.allocate_tensors()
-
-        # Get input/output details
-        input_details = interpreter.get_input_details()
-        output_details = interpreter.get_output_details()
-
-        # Warm up
-        interpreter.set_tensor(input_details[0]["index"], test_input)
-        interpreter.invoke()
-
-        # Benchmark
-        start_time = time.time()
-        for _ in range(num_runs):
-            interpreter.set_tensor(input_details[0]["index"], test_input)
+        interpreter = make_interpreter(tflite_path)
+        in_detail = interpreter.get_input_details()[0]
+        out_detail = interpreter.get_output_details()[0]
+        sample = np.asarray(test_input)
+        if sample.ndim == len(in_detail["shape"]) - 1:
+            sample = sample[np.newaxis]
+        sample = sample.astype(in_detail["dtype"])
+        for _ in range(warmup):
+            interpreter.set_tensor(in_detail["index"], sample)
             interpreter.invoke()
-            _ = interpreter.get_tensor(output_details[0]["index"])
-
-        total_time = time.time() - start_time
-        avg_time_ms = (total_time / num_runs) * 1000
-
+        start = time.perf_counter()
+        for _ in range(num_runs):
+            interpreter.set_tensor(in_detail["index"], sample)
+            interpreter.invoke()
+            interpreter.get_tensor(out_detail["index"])
+        total = time.perf_counter() - start
         return {
-            "avg_inference_time_ms": avg_time_ms,
-            "total_time_s": total_time,
-            "throughput_fps": num_runs / total_time if total_time > 0 else 0,
+            "avg_inference_time_ms": total / num_runs * 1000,
+            "total_time_s": total,
+            "throughput_fps": num_runs / total if total > 0 else 0.0,
+        }
+
+    @staticmethod
+    def validate_tflite(
+        model: keras.Model, tflite_path: PathLike, sample_inputs: np.ndarray, atol: float = 1e-2
+    ) -> Dict[str, Any]:
+        """Compare Keras vs TFLite predictions on ``sample_inputs``."""
+        keras_out = np.asarray(model.predict(sample_inputs, verbose=0))
+        tflite_out = TFLiteExporter.run_tflite(make_interpreter(tflite_path), sample_inputs)
+        max_abs = float(np.max(np.abs(keras_out - tflite_out)))
+        agree = float(np.mean(np.argmax(keras_out, -1) == np.argmax(tflite_out, -1)))
+        return {
+            "max_abs_diff": max_abs,
+            "argmax_agreement": agree,
+            "within_tolerance": max_abs <= atol,
         }
 
 
+# ---------------------------------------------------------------------------
+# ONNX
+# ---------------------------------------------------------------------------
+
+
 class ONNXExporter:
-    """Utilities for exporting to ONNX format."""
+    """ONNX export through ``tf2onnx`` (``pip install tensorversehub[export]``)."""
 
     @staticmethod
     def export_onnx(
-        model: tf.keras.Model,
-        export_path: str,
-        input_signature: Optional[List[tf.TensorSpec]] = None,
-        opset_version: int = 13,
+        model: keras.Model,
+        export_path: PathLike,
+        input_signature: Optional[Sequence[tf.TensorSpec]] = None,
+        opset_version: int = 17,
     ) -> Dict[str, Any]:
-        """
-        Export model to ONNX format.
-
-        Args:
-            model: tf.keras model to export
-            export_path: Path to save ONNX model
-            input_signature: Input signature specification
-            opset_version: ONNX opset version
-
-        Returns:
-            Export statistics
-        """
         try:
-            import tf2onnx
-
-            # Create input signature if not provided
-            if input_signature is None:
-                input_signature = [tf.TensorSpec(shape=model.input_shape, dtype=tf.float32)]
-
-            # Convert to ONNX
-            with tempfile.TemporaryDirectory() as temp_dir:
-                # First save as SavedModel
-                saved_model_path = os.path.join(temp_dir, "saved_model")
-                model.save(saved_model_path, save_format="tf")
-
-                # Convert SavedModel to ONNX
-                onnx_model, _ = tf2onnx.convert.from_saved_model(
-                    saved_model_path, input_names=None, output_names=None, opset=opset_version
-                )
-
-                # Save ONNX model
-                with open(export_path, "wb") as f:
-                    f.write(onnx_model.SerializeToString())
-
-            # Calculate file sizes
-            original_size = model.count_params() * 4  # Assuming float32
-            onnx_size = os.path.getsize(export_path)
-
-            stats = {
-                "original_size_bytes": original_size,
-                "onnx_size_bytes": onnx_size,
-                "original_size_mb": original_size / (1024 * 1024),
-                "onnx_size_mb": onnx_size / (1024 * 1024),
-                "size_ratio": onnx_size / original_size if original_size > 0 else 0,
-                "opset_version": opset_version,
-                "export_path": export_path,
-            }
-
-            print(f"ONNX model exported to: {export_path}")
-            print(f"ONNX size: {stats['onnx_size_mb']:.2f} MB")
-
-            return stats
-
-        except ImportError:
+            import tf2onnx  # type: ignore[import-not-found]
+        except ImportError as exc:
             raise ImportError(
-                "tf2onnx package required for ONNX export. Install with: pip install tf2onnx"
+                "tf2onnx is required for ONNX export: pip install 'tensorversehub[export]'"
+            ) from exc
+
+        export_path = str(export_path)
+        Path(export_path).parent.mkdir(parents=True, exist_ok=True)
+        signature = list(input_signature or compat.input_signature(model))
+        try:
+            tf2onnx.convert.from_keras(
+                model, input_signature=signature, opset=opset_version, output_path=export_path
             )
-        except Exception as e:
-            raise RuntimeError(f"ONNX conversion failed: {str(e)}")
+        except Exception as exc:
+            raise RuntimeError(f"ONNX conversion failed: {exc}") from exc
+
+        original = _model_bytes(model)
+        onnx_size = os.path.getsize(export_path)
+        stats = {
+            "export_path": export_path,
+            "opset_version": opset_version,
+            "original_size_bytes": original,
+            "onnx_size_bytes": onnx_size,
+            "original_size_mb": original / 2**20,
+            "onnx_size_mb": onnx_size / 2**20,
+            "size_ratio": onnx_size / original if original else 0.0,
+            "input_names": [s.name for s in signature],
+        }
+        logger.info("ONNX exported to %s (%.2f MB)", export_path, stats["onnx_size_mb"])
+        return stats
+
+    @staticmethod
+    def validate_onnx(
+        model: keras.Model, onnx_path: PathLike, sample_inputs: np.ndarray, atol: float = 1e-4
+    ) -> Dict[str, Any]:
+        """Compare Keras vs ONNX Runtime predictions."""
+        try:
+            import onnxruntime as ort  # type: ignore[import-not-found]
+        except ImportError as exc:
+            raise ImportError("onnxruntime is required: pip install onnxruntime") from exc
+        session = ort.InferenceSession(str(onnx_path), providers=["CPUExecutionProvider"])
+        name = session.get_inputs()[0].name
+        onnx_out = session.run(None, {name: np.asarray(sample_inputs, np.float32)})[0]
+        keras_out = np.asarray(model.predict(sample_inputs, verbose=0))
+        max_abs = float(np.max(np.abs(keras_out - onnx_out)))
+        return {"max_abs_diff": max_abs, "within_tolerance": max_abs <= atol}
+
+
+# ---------------------------------------------------------------------------
+# TensorFlow.js / Core ML
+# ---------------------------------------------------------------------------
 
 
 class TensorFlowJSExporter:
-    """Utilities for exporting to TensorFlow.js format."""
+    """TensorFlow.js export (``pip install tensorflowjs``)."""
 
     @staticmethod
     def export_tfjs(
-        model: tf.keras.Model,
-        export_path: str,
+        model: keras.Model,
+        export_path: PathLike,
         quantization_bytes: Optional[int] = None,
         skip_op_check: bool = False,
         strip_debug_ops: bool = True,
     ) -> Dict[str, Any]:
-        """
-        Export model to TensorFlow.js format.
-
-        Args:
-            model: tf.keras model to export
-            export_path: Directory to save TensorFlow.js model
-            quantization_bytes: Quantization precision (1 or 2 bytes)
-            skip_op_check: Skip operation compatibility check
-            strip_debug_ops: Remove debug operations
-
-        Returns:
-            Export statistics
-        """
         try:
-            import tensorflowjs as tfjs
+            import tensorflowjs as tfjs  # type: ignore[import-not-found]
+        except ImportError as exc:
+            raise ImportError("tensorflowjs is required: pip install tensorflowjs") from exc
 
-            # Ensure export directory exists
-            os.makedirs(export_path, exist_ok=True)
+        export_path = str(export_path)
+        Path(export_path).mkdir(parents=True, exist_ok=True)
+        options: Dict[str, Any] = {
+            "skip_op_check": skip_op_check,
+            "strip_debug_ops": strip_debug_ops,
+        }
+        if quantization_bytes:
+            options["quantization_dtype_map"] = {{1: "uint8", 2: "uint16"}[quantization_bytes]: "*"}
+        with tempfile.TemporaryDirectory() as tmp:
+            saved = os.path.join(tmp, "saved_model")
+            compat.export_saved_model(model, saved)
+            try:
+                tfjs.converters.convert_tf_saved_model(saved, export_path, **options)
+            except Exception as exc:
+                raise RuntimeError(f"TensorFlow.js conversion failed: {exc}") from exc
 
-            # Configure conversion options
-            conversion_options = {}
-            if quantization_bytes:
-                conversion_options["quantization_bytes"] = quantization_bytes
-            if skip_op_check:
-                conversion_options["skip_op_check"] = skip_op_check
-            if strip_debug_ops:
-                conversion_options["strip_debug_ops"] = strip_debug_ops
-
-            # Convert model
-            with tempfile.TemporaryDirectory() as temp_dir:
-                # Save as SavedModel first
-                saved_model_path = os.path.join(temp_dir, "saved_model")
-                model.save(saved_model_path, save_format="tf")
-
-                # Convert to TensorFlow.js
-                tfjs.converters.convert_tf_saved_model(
-                    saved_model_path, export_path, **conversion_options
-                )
-
-            # Calculate directory size
-            total_size = 0
-            for dirpath, dirnames, filenames in os.walk(export_path):
-                for filename in filenames:
-                    filepath = os.path.join(dirpath, filename)
-                    total_size += os.path.getsize(filepath)
-
-            original_size = model.count_params() * 4  # Assuming float32
-
-            stats = {
-                "original_size_bytes": original_size,
-                "tfjs_size_bytes": total_size,
-                "original_size_mb": original_size / (1024 * 1024),
-                "tfjs_size_mb": total_size / (1024 * 1024),
-                "size_ratio": total_size / original_size if original_size > 0 else 0,
-                "quantization_bytes": quantization_bytes,
-                "export_path": export_path,
-            }
-
-            print(f"TensorFlow.js model exported to: {export_path}")
-            print(f"TensorFlow.js size: {stats['tfjs_size_mb']:.2f} MB")
-
-            return stats
-
-        except ImportError:
-            raise ImportError(
-                "tensorflowjs package required. Install with: pip install tensorflowjs"
-            )
-        except Exception as e:
-            raise RuntimeError(f"TensorFlow.js conversion failed: {str(e)}")
+        original = _model_bytes(model)
+        size = _dir_size(export_path)
+        return {
+            "export_path": export_path,
+            "original_size_bytes": original,
+            "tfjs_size_bytes": size,
+            "original_size_mb": original / 2**20,
+            "tfjs_size_mb": size / 2**20,
+            "size_ratio": size / original if original else 0.0,
+            "quantization_bytes": quantization_bytes,
+        }
 
 
 class CoreMLExporter:
-    """Utilities for exporting to Core ML format (Apple platforms)."""
+    """Core ML export (``pip install coremltools``; macOS recommended)."""
 
     @staticmethod
     def export_coreml(
-        model: tf.keras.Model,
-        export_path: str,
-        input_names: Optional[List[str]] = None,
-        output_names: Optional[List[str]] = None,
-        class_labels: Optional[List[str]] = None,
+        model: keras.Model,
+        export_path: PathLike,
+        class_labels: Optional[Sequence[str]] = None,
+        minimum_deployment_target: Optional[Any] = None,
     ) -> Dict[str, Any]:
-        """
-        Export model to Core ML format.
-
-        Args:
-            model: tf.keras model to export
-            export_path: Path to save Core ML model
-            input_names: Names for input tensors
-            output_names: Names for output tensors
-            class_labels: Class labels for classification models
-
-        Returns:
-            Export statistics
-        """
         try:
-            import coremltools as ct
-            import tf2onnx
+            import coremltools as ct  # type: ignore[import-not-found]
+        except ImportError as exc:
+            raise ImportError("coremltools is required: pip install coremltools") from exc
 
-            # First convert to ONNX
-            with tempfile.TemporaryDirectory() as temp_dir:
-                onnx_path = os.path.join(temp_dir, "model.onnx")
+        export_path = str(export_path)
+        kwargs: Dict[str, Any] = {"source": "tensorflow"}
+        if class_labels:
+            kwargs["classifier_config"] = ct.ClassifierConfig(list(class_labels))
+        if minimum_deployment_target is not None:
+            kwargs["minimum_deployment_target"] = minimum_deployment_target
+        try:
+            mlmodel = ct.convert(model, **kwargs)
+            mlmodel.save(export_path)
+        except Exception as exc:
+            raise RuntimeError(f"Core ML conversion failed: {exc}") from exc
+        size = (
+            _dir_size(export_path) if os.path.isdir(export_path) else os.path.getsize(export_path)
+        )
+        original = _model_bytes(model)
+        return {
+            "export_path": export_path,
+            "original_size_bytes": original,
+            "coreml_size_bytes": size,
+            "original_size_mb": original / 2**20,
+            "coreml_size_mb": size / 2**20,
+            "size_ratio": size / original if original else 0.0,
+        }
 
-                # Save as SavedModel first
-                saved_model_path = os.path.join(temp_dir, "saved_model")
-                model.save(saved_model_path, save_format="tf")
 
-                # Convert to ONNX
-                onnx_model, _ = tf2onnx.convert.from_saved_model(saved_model_path)
-                with open(onnx_path, "wb") as f:
-                    f.write(onnx_model.SerializeToString())
-
-                # Convert ONNX to Core ML
-                coreml_model = ct.convert(
-                    onnx_path,
-                    source="onnx",
-                    inputs=[ct.TensorType(shape=model.input_shape[1:])],  # Remove batch dimension
-                    classifier_config=ct.ClassifierConfig(class_labels) if class_labels else None,
-                )
-
-                # Save Core ML model
-                coreml_model.save(export_path)
-
-            # Calculate file size
-            coreml_size = os.path.getsize(export_path)
-            original_size = model.count_params() * 4  # Assuming float32
-
-            stats = {
-                "original_size_bytes": original_size,
-                "coreml_size_bytes": coreml_size,
-                "original_size_mb": original_size / (1024 * 1024),
-                "coreml_size_mb": coreml_size / (1024 * 1024),
-                "size_ratio": coreml_size / original_size if original_size > 0 else 0,
-                "export_path": export_path,
-            }
-
-            print(f"Core ML model exported to: {export_path}")
-            print(f"Core ML size: {stats['coreml_size_mb']:.2f} MB")
-
-            return stats
-
-        except ImportError:
-            raise ImportError(
-                "coremltools required for Core ML export. Install with: pip install coremltools"
-            )
-        except Exception as e:
-            raise RuntimeError(f"Core ML conversion failed: {str(e)}")
+# ---------------------------------------------------------------------------
+# Multi-format
+# ---------------------------------------------------------------------------
 
 
 class MultiFormatExporter:
-    """Unified exporter for multiple formats."""
+    """Export one model to several formats and write ``export_summary.json``."""
 
-    def __init__(self, model: tf.keras.Model, model_name: str = "model"):
-        """
-        Initialize multi-format exporter.
-
-        Args:
-            model: tf.keras model to export
-            model_name: Base name for exported models
-        """
+    def __init__(self, model: keras.Model, model_name: str = "model") -> None:
         self.model = model
         self.model_name = model_name
-        self.export_stats = {}
+        self.export_stats: Dict[str, Dict[str, Any]] = {}
 
     def export_all_formats(
         self,
-        export_dir: str,
-        formats: List[str] = None,
-        representative_dataset: Optional[tf.data.Dataset] = None,
-        **kwargs,
+        export_dir: PathLike,
+        formats: Optional[Sequence[str]] = None,
+        representative_dataset: Optional[Union[tf.data.Dataset, np.ndarray]] = None,
+        raise_on_error: bool = False,
+        **kwargs: Any,
     ) -> Dict[str, Dict[str, Any]]:
         """
-        Export model to multiple formats.
+        Export to ``formats`` (default: ``savedmodel``, ``keras``, ``tflite``).
 
-        Args:
-            export_dir: Base directory for exports
-            formats: List of formats to export ('savedmodel', 'tflite', 'onnx', 'tfjs')
-            representative_dataset: Dataset for calibration
-            **kwargs: Additional arguments for specific exporters
-
-        Returns:
-            Dictionary with export statistics for each format
+        Extra keyword arguments: ``metadata``, ``tflite_quantization``, ``onnx_opset``,
+        ``tfjs_quantization``, ``class_labels``.
         """
-        if formats is None:
-            formats = ["savedmodel", "tflite", "onnx", "tfjs"]
+        formats = list(formats or ("savedmodel", "keras", "tflite"))
+        unknown = set(formats) - set(EXPORT_FORMATS)
+        if unknown:
+            raise ValueError(f"Unknown export formats: {sorted(unknown)}")
+        export_dir = Path(export_dir)
+        export_dir.mkdir(parents=True, exist_ok=True)
 
-        os.makedirs(export_dir, exist_ok=True)
-
-        for format_type in formats:
+        for fmt in formats:
             try:
-                format_dir = os.path.join(export_dir, format_type)
-
-                if format_type == "savedmodel":
-                    SavedModelExporter.export_savedmodel(
-                        self.model, format_dir, metadata=kwargs.get("metadata", {})
+                if fmt == "savedmodel":
+                    stats = SavedModelExporter.export_savedmodel(
+                        self.model, export_dir / "savedmodel", metadata=kwargs.get("metadata")
                     )
-                    self.export_stats["savedmodel"] = {"export_path": format_dir}
-
-                elif format_type == "tflite":
-                    tflite_path = os.path.join(export_dir, f"{self.model_name}.tflite")
+                elif fmt == "keras":
+                    path = export_dir / f"{self.model_name}.keras"
+                    compat.save_model(self.model, path)
+                    stats = {"export_path": str(path), "size_bytes": path.stat().st_size}
+                elif fmt == "tflite":
                     stats = TFLiteExporter.export_tflite(
                         self.model,
-                        tflite_path,
+                        export_dir / f"{self.model_name}.tflite",
                         quantization_type=kwargs.get("tflite_quantization", "float32"),
                         representative_dataset=representative_dataset,
                     )
-                    self.export_stats["tflite"] = stats
-
-                elif format_type == "onnx":
-                    onnx_path = os.path.join(export_dir, f"{self.model_name}.onnx")
+                elif fmt == "onnx":
                     stats = ONNXExporter.export_onnx(
-                        self.model, onnx_path, opset_version=kwargs.get("onnx_opset", 13)
+                        self.model,
+                        export_dir / f"{self.model_name}.onnx",
+                        opset_version=kwargs.get("onnx_opset", 17),
                     )
-                    self.export_stats["onnx"] = stats
-
-                elif format_type == "tfjs":
-                    tfjs_dir = os.path.join(export_dir, "tfjs")
+                elif fmt == "tfjs":
                     stats = TensorFlowJSExporter.export_tfjs(
                         self.model,
-                        tfjs_dir,
-                        quantization_bytes=kwargs.get("tfjs_quantization", None),
+                        export_dir / "tfjs",
+                        quantization_bytes=kwargs.get("tfjs_quantization"),
                     )
-                    self.export_stats["tfjs"] = stats
-
-                elif format_type == "coreml":
-                    coreml_path = os.path.join(export_dir, f"{self.model_name}.mlmodel")
+                else:  # coreml
                     stats = CoreMLExporter.export_coreml(
-                        self.model, coreml_path, class_labels=kwargs.get("class_labels", None)
+                        self.model,
+                        export_dir / f"{self.model_name}.mlpackage",
+                        class_labels=kwargs.get("class_labels"),
                     )
-                    self.export_stats["coreml"] = stats
+                self.export_stats[fmt] = stats
+            except Exception as exc:
+                if raise_on_error:
+                    raise
+                logger.warning("Failed to export %s: %s", fmt, exc)
+                self.export_stats[fmt] = {"error": str(exc)}
 
-            except Exception as e:
-                print(f"Failed to export {format_type}: {str(e)}")
-                self.export_stats[format_type] = {"error": str(e)}
-
-        # Create summary report
-        self._create_export_summary(export_dir)
-
+        self._write_summary(export_dir)
         return self.export_stats
 
-    def _create_export_summary(self, export_dir: str) -> None:
-        """Create export summary report."""
-        summary_path = os.path.join(export_dir, "export_summary.json")
-
+    def _write_summary(self, export_dir: Path) -> None:
         summary = {
             "model_name": self.model_name,
-            "original_model": {
-                "parameters": self.model.count_params(),
-                "layers": len(self.model.layers),
-                "input_shape": list(self.model.input_shape),
-                "output_shape": list(self.model.output_shape),
-            },
+            "timestamp": _now(),
+            "original_model": _model_config(self.model),
             "export_stats": self.export_stats,
-            "timestamp": tf.timestamp().numpy().item(),
         }
-
-        with open(summary_path, "w") as f:
-            json.dump(summary, f, indent=2, default=str)
-
-        print(f"Export summary saved to: {summary_path}")
+        (export_dir / "export_summary.json").write_text(
+            json.dumps(summary, indent=2, default=str), encoding="utf-8"
+        )
 
 
-# Convenience functions
 def quick_export(
-    model: tf.keras.Model, export_dir: str, model_name: str = "model", formats: List[str] = None
+    model: keras.Model,
+    export_dir: PathLike,
+    model_name: str = "model",
+    formats: Optional[Sequence[str]] = None,
+    **kwargs: Any,
 ) -> Dict[str, Dict[str, Any]]:
-    """
-    Quick export of model to multiple formats.
-
-    Args:
-        model: tf.keras model to export
-        export_dir: Directory to save exports
-        model_name: Base name for exported files
-        formats: List of formats to export
-
-    Returns:
-        Export statistics for each format
-    """
-    exporter = MultiFormatExporter(model, model_name)
-    return exporter.export_all_formats(export_dir, formats)
+    """One-liner around :class:`MultiFormatExporter`."""
+    return MultiFormatExporter(model, model_name).export_all_formats(export_dir, formats, **kwargs)
 
 
 def create_deployment_package(
-    model: tf.keras.Model,
-    package_path: str,
+    model: keras.Model,
+    package_path: PathLike,
     model_name: str = "model",
+    formats: Optional[Sequence[str]] = None,
     include_metadata: bool = True,
+    model_version: str = "1.0.0",
 ) -> str:
-    """
-    Create a deployment package with model and metadata.
-
-    Args:
-        model: tf.keras model to package
-        package_path: Path for the deployment package
-        model_name: Name of the model
-        include_metadata: Whether to include metadata
-
-    Returns:
-        Path to created package
-    """
-    with tempfile.TemporaryDirectory() as temp_dir:
-        # Export model in multiple formats
-        export_dir = os.path.join(temp_dir, "exports")
-        exporter = MultiFormatExporter(model, model_name)
-        export_stats = exporter.export_all_formats(export_dir)
-
-        # Create package metadata
+    """Zip exported formats plus ``package_metadata.json`` into ``package_path``."""
+    package_path = str(package_path)
+    with tempfile.TemporaryDirectory() as tmp:
+        exports = os.path.join(tmp, "exports")
+        stats = MultiFormatExporter(model, model_name).export_all_formats(exports, formats)
         if include_metadata:
-            package_metadata = {
+            metadata = {
                 "model_name": model_name,
-                "model_version": "1.0.0",
-                "tensorflow_version": tf.__version__,
-                "export_timestamp": tf.timestamp().numpy().item(),
-                "model_architecture": {
-                    "layers": len(model.layers),
-                    "parameters": model.count_params(),
-                    "input_shape": list(model.input_shape),
-                    "output_shape": list(model.output_shape),
-                },
-                "export_formats": list(export_stats.keys()),
+                "model_version": model_version,
+                "tensorflow_version": compat.TF_VERSION,
+                "keras_version": compat.KERAS_VERSION,
+                "export_timestamp": _now(),
+                "model_architecture": _model_config(model),
+                "export_formats": [k for k, v in stats.items() if "error" not in v],
                 "deployment_instructions": {
-                    "savedmodel": "Use tf.saved_model.load() to load the model",
-                    "tflite": "Use tf.lite.Interpreter() for mobile deployment",
-                    "onnx": "Use ONNX Runtime for cross-platform inference",
-                    "tfjs": "Load in browser using tf.loadLayersModel()",
+                    "savedmodel": "tf.saved_model.load(path).signatures['serving_default']",
+                    "keras": "keras.models.load_model('model.keras')",
+                    "tflite": "tf.lite.Interpreter / ai_edge_litert Interpreter",
+                    "onnx": "onnxruntime.InferenceSession('model.onnx')",
+                    "tfjs": "tf.loadGraphModel('tfjs/model.json') in the browser",
                 },
             }
-
-            metadata_path = os.path.join(temp_dir, "package_metadata.json")
-            with open(metadata_path, "w") as f:
-                json.dump(package_metadata, f, indent=2, default=str)
-
-        # Create deployment package (zip file)
-        with zipfile.ZipFile(package_path, "w", zipfile.ZIP_DEFLATED) as zipf:
-            for root, dirs, files in os.walk(temp_dir):
-                for file in files:
-                    file_path = os.path.join(root, file)
-                    arc_name = os.path.relpath(file_path, temp_dir)
-                    zipf.write(file_path, arc_name)
-
-    print(f"Deployment package created: {package_path}")
+            Path(tmp, "package_metadata.json").write_text(
+                json.dumps(metadata, indent=2, default=str), encoding="utf-8"
+            )
+        Path(package_path).parent.mkdir(parents=True, exist_ok=True)
+        with zipfile.ZipFile(package_path, "w", zipfile.ZIP_DEFLATED) as zf:
+            for file in Path(tmp).rglob("*"):
+                if file.is_file():
+                    zf.write(file, file.relative_to(tmp))
+    logger.info("Deployment package created: %s", package_path)
     return package_path
+
+
+__all__ = [
+    "CoreMLExporter",
+    "EXPORT_FORMATS",
+    "MultiFormatExporter",
+    "ONNXExporter",
+    "SavedModelExporter",
+    "SavedModelPredictor",
+    "TFLiteExporter",
+    "TensorFlowJSExporter",
+    "create_deployment_package",
+    "make_interpreter",
+    "quick_export",
+]
