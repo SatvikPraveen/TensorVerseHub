@@ -7,7 +7,16 @@ import pytest
 
 NOTEBOOKS_DIR = Path(__file__).resolve().parent.parent / "notebooks"
 NOTEBOOKS = sorted(NOTEBOOKS_DIR.rglob("*.ipynb"))
-FORBIDDEN = ("tf.contrib.", "tf.random.beta(", "from src.", "import src.")
+FORBIDDEN = (
+    "tf.contrib.",
+    "tf.random.beta(",
+    "from src.",
+    "import src.",
+    "compiled_loss(",  # removed in Keras 3 (use model.compute_loss)
+    "backend.set_value(",  # use variable.assign()
+    "backend.get_value(",  # use float(variable)
+    "best_model.h5",  # ModelCheckpoint needs .keras for full models in Keras 3
+)
 
 
 def test_notebook_count():
